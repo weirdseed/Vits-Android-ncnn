@@ -27,15 +27,6 @@ Java_com_example_moereng_MainActivity_InitOpenJtalk(JNIEnv *env, jobject thiz,
     openJInit.init_openjtalk(env, thiz, asset_manager);
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_example_moereng_MainActivity_stringFromJNI(
-        JNIEnv* env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-
-    return env->NewStringUTF(hello.c_str());
-}
-
 
 // 生成label并转换为java列表
 extern "C"
