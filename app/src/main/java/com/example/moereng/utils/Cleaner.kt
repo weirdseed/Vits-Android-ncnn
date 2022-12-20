@@ -1,6 +1,7 @@
 package com.example.moereng.utils
 
 import android.content.res.AssetManager
+import java.text.Normalizer
 
 class Cleaner {
     private val _symbols_to_japanese : Map<String, String> = mapOf(
@@ -23,7 +24,10 @@ class Cleaner {
     private fun japanese_to_romaji_with_accent(_text: String): String{
         var text = symbols_to_japanese(_text)
         val sentences = text.split(_japanese_marks)
-        val marks = _japanese_marks.findAll(text).toMutableList()
+        val marks = ArrayList<String>()
+        _japanese_marks.findAll(text).forEach {
+            marks.add(it.value)
+        }
         text = ""
         for (i in 0..sentences.size-1){
             val sentence = sentences[i]
@@ -61,7 +65,8 @@ class Cleaner {
                 }
             }
             if (i < marks.count()){
-                text += marks[i].value.replace(" ","")
+                val normalized = Normalizer.normalize(marks[i], Normalizer.Form.NFD)
+                text += normalized.replace(" ","")
             }
         }
         return text
@@ -70,8 +75,10 @@ class Cleaner {
     private fun clean_text(text: String): String{
         val _text = japanese_to_romaji_with_accent(text)
         val cleaned1 = _text.replace(Regex("([A-Za-z])\$"),"$1.")
-        var cleaned2 = cleaned1.replace("ts", "ʦ").replace("...","…")
-        val brackets = listOf<String>(
+        var cleaned2 = cleaned1.replace("ts", "ʦ")
+            .replace("...","…")
+            .replace("、",",")
+        val brackets = listOf(
             "(",")","{","}","[","]","<",">","*"
         )
         for (b in brackets){
