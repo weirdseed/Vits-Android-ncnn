@@ -13,6 +13,6 @@ vits日语模型Android部署
 
 字典链接:https://pan.baidu.com/s/1H33WODqiRvtaWPsjWE0XVw?pwd=uqo3 
 
-模型链接:https://pan.baidu.com/s/1L988yDt4gGeB7cZyDv8FeQ?pwd=vd24 
+模型链接:https://pan.baidu.com/s/1OTqH_gE_IcjMAAw0GuRAAQ?pwd=84lu
 
 **模型禁止商用，后果自付！！！**
