@@ -9,10 +9,10 @@
 日语分词和声调基于https://github.com/r9y9/open_jtalk 进行移植部署
 
 # 注意
-字典下载解压到项目assets的同名文件夹下，模型则直接放在assets文件夹即可
+字典下载解压到项目assets的同名文件夹下，模型和配置文件下载到本地后手动导入
 
 字典链接:https://pan.baidu.com/s/1H33WODqiRvtaWPsjWE0XVw?pwd=uqo3 
 
-模型链接:https://pan.baidu.com/s/1OTqH_gE_IcjMAAw0GuRAAQ?pwd=84lu
+模型链接:https://pan.baidu.com/s/1kBlWTQSKPn2TetUfCpA8kw?pwd=584k
 
 **模型禁止商用，后果自付！！！**
