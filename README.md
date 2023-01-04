@@ -21,7 +21,9 @@
 
 1、确保安装好ndk并配置好相关环境
 
-2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，ncnn下载地址https://github.com/Tencent/ncnn/releases/tag/20221128
+2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，ncnn下载地址https://github.com/Tencent/ncnn/releases/tag/20221128，
+
+**请下载Vulkan版本**
 
 3、将模型文件（.bin）和配置文件（.json）下载之后解压放在Download文件夹下，点击模型文件加载模型(仅需加载任意一个.bin文件即可），点击加载配置加载以.json为后缀的配置文件
 
