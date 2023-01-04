@@ -5,9 +5,6 @@ import android.media.AudioFormat
 
 import android.media.AudioTrack
 
-
-
-
 object Player {
     fun buildTracker(sr: Int = 22050): AudioTrack {
         val channelConfig: Int = AudioFormat.CHANNEL_OUT_MONO

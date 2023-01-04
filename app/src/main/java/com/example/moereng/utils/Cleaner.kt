@@ -10,9 +10,6 @@ class Cleaner {
     )
     private val _japanese_marks = Regex("[^A-Za-z\\d\\u3005\\u3040-\\u30ff\\u4e00-\\u9fff\\uff11-\\uff19\\uff21-\\uff3a\\uff41-\\uff5a\\uff66-\\uff9d]")
     private val _japanese_characters = Regex("[A-Za-z\\d\\u3005\\u3040-\\u30ff\\u4e00-\\u9fff\\uff11-\\uff19\\uff21-\\uff3a\\uff41-\\uff5a\\uff66-\\uff9d]")
-    private val reng_symbols = listOf(
-        "_", ",", ".", "!", "?", "-", "~", "\u2026", "A", "E", "I", "N", "O", "Q", "U", "a", "b", "d", "e", "f", "g", "h", "i", "j", "k", "m", "n", "o", "p", "r", "s", "t", "u", "v", "w", "y", "z", "\u0283", "\u02a7", "\u02a6", "\u2193", "\u2191", " "
-    )
     private fun symbols_to_japanese(text: String): String{
         var result = text
         for (s in _symbols_to_japanese){
@@ -72,35 +69,45 @@ class Cleaner {
         return text
     }
 
-    private fun clean_text(text: String): String{
+    private fun japanese_clean_text1(text: String): String{
         val _text = japanese_to_romaji_with_accent(text)
-        val cleaned1 = _text.replace(Regex("([A-Za-z])\$"),"$1.")
-        var cleaned2 = cleaned1.replace("ts", "ʦ")
+        val cleaned = _text.replace(Regex("([A-Za-z])\$"),"$1.")
+        return cleaned
+    }
+
+    private fun japanese_clean_text2(text: String):String{
+        val _text = japanese_clean_text1(text)
+        var cleaned = _text.replace("ts", "ʦ")
             .replace("...","…")
             .replace("、",",")
         val brackets = listOf(
             "(",")","{","}","[","]","<",">","*"
         )
         for (b in brackets){
-            if (cleaned2.contains(b)){
-                cleaned2 = cleaned2.replace(b,"")
+            if (cleaned.contains(b)){
+                cleaned = cleaned.replace(b,"")
             }
         }
-        return cleaned2
+        return cleaned
     }
 
-    fun text_to_sequence(text: String, addblank: Boolean = true): List<Long>{
-        val sequence = ArrayList<Long>()
+    fun text_to_sequence(text: String, addblank: Boolean = true, symbols: List<String>, cleaner: String = "japanese2"): List<Int>{
+        val sequence = ArrayList<Int>()
         if (addblank){
-            sequence.add(0L)
+            sequence.add(0)
         }
-        val _symbol_to_id = HashMap<String, Long>()
-        for (i in 0..reng_symbols.size-1){
-            _symbol_to_id[reng_symbols[i]] = i.toLong()
+        val _symbol_to_id = HashMap<String, Int>()
+        for (i in 0..symbols.size-1){
+            _symbol_to_id[symbols[i]] = i
         }
-        val cleaned_text = clean_text(text)
+        var cleaned_text = ""
+        if (cleaner == "japanese_cleaners"){
+            cleaned_text = japanese_clean_text1(text)
+        }else if (cleaner == "japanese_cleaners2"){
+            cleaned_text = japanese_clean_text2(text)
+        }
         for(symbol in cleaned_text){
-            if (!reng_symbols.contains(symbol.toString())){
+            if (!symbols.contains(symbol.toString())){
                 continue
             }
             val symbol_id = _symbol_to_id[symbol.toString()]
