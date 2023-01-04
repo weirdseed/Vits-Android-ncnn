@@ -21,7 +21,7 @@
 
 1、确保安装好ndk并配置好相关环境
 
-2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，ncnn下载地址https://github.com/Tencent/ncnn/releases/tag/20221128，
+2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，ncnn下载地址https://github.com/Tencent/ncnn/releases/tag/20221128
 
 **请下载Vulkan版本**
 
