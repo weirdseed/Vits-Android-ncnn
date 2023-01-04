@@ -1,0 +1,4 @@
+7767517
+2 2
+Input                    in0                      0 1 in0
+Embedding                    embed_0                  1 1 in0 out0 0=256 1=7 2=0 3=1792

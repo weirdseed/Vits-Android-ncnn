@@ -1,0 +1,280 @@
+7767517
+278 343
+Input                    in0                      0 1 in0
+Input                    in1                      0 1 in1
+Split                    splitncnn_0              1 12 in1 2 3 4 5 6 7 8 9 10 11 12 13
+Input                    in2                      0 1 in2
+Input                    in3                      0 1 in3
+Convolution1D            conv1d_28                1 1 in3 16 0=192 1=1 2=1 3=1 4=0 5=1 6=49152
+Convolution1D            conv1d_27                1 1 in0 17 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Split                    splitncnn_1              1 2 17 18 19
+Tensor.expand_as         Tensor.expand_as_51      2 1 16 18 20
+BinaryOp                 add_0                    2 1 19 20 21 0=0
+Split                    splitncnn_2              1 3 21 22 23 24
+Tensor.expand_as         Tensor.expand_as_52      2 1 13 22 25
+Split                    splitncnn_3              1 4 25 26 27 28 29
+BinaryOp                 mul_1                    2 1 23 26 30 0=2
+ConvolutionDepthWise1D   convdw1d_83              1 1 30 31 0=192 1=3 2=1 3=1 4=1 5=1 6=576 7=192
+modules.Transpose        transpose                1 1 31 32
+LayerNorm                ln_48                    1 1 32 33 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_1            1 1 33 34
+GELU                     gelu_0                   1 1 34 35
+Convolution1D            conv1d_29                1 1 35 36 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_3            1 1 36 37
+LayerNorm                ln_49                    1 1 37 38 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_4            1 1 38 39
+GELU                     gelu_1                   1 1 39 40
+modules.ReduceDims       reducedims               1 1 40 41
+BinaryOp                 add_2                    2 1 24 41 42 0=0
+Split                    splitncnn_4              1 2 42 43 44
+BinaryOp                 mul_3                    2 1 43 27 45 0=2
+ConvolutionDepthWise1D   convdw1d_84              1 1 45 46 0=192 1=3 2=3 3=1 4=3 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_6            1 1 46 47
+LayerNorm                ln_50                    1 1 47 48 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_7            1 1 48 49
+GELU                     gelu_2                   1 1 49 50
+Convolution1D            conv1d_30                1 1 50 51 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_9            1 1 51 52
+LayerNorm                ln_51                    1 1 52 53 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_10           1 1 53 54
+GELU                     gelu_3                   1 1 54 55
+modules.ReduceDims       pnnx_unique_11           1 1 55 56
+BinaryOp                 add_4                    2 1 44 56 57 0=0
+Split                    splitncnn_5              1 2 57 58 59
+BinaryOp                 mul_5                    2 1 58 28 60 0=2
+ConvolutionDepthWise1D   convdw1d_85              1 1 60 61 0=192 1=3 2=9 3=1 4=9 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_13           1 1 61 62
+LayerNorm                ln_52                    1 1 62 63 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_14           1 1 63 64
+GELU                     gelu_4                   1 1 64 65
+Convolution1D            conv1d_31                1 1 65 66 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_16           1 1 66 67
+LayerNorm                ln_53                    1 1 67 68 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_17           1 1 68 69
+GELU                     gelu_5                   1 1 69 70
+modules.ReduceDims       pnnx_unique_18           1 1 70 71
+BinaryOp                 add_6                    2 1 59 71 72 0=0
+BinaryOp                 mul_7                    2 1 72 29 73 0=2
+Convolution1D            conv1d_32                1 1 73 74 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Split                    splitncnn_6              1 2 74 75 76
+Tensor.expand_as         Tensor.expand_as_53      2 1 12 75 77
+BinaryOp                 mul_8                    2 1 76 77 78 0=2
+Split                    splitncnn_7              1 3 78 79 80 81
+BinaryOp                 mul_9                    1 1 in2 82 0=2 1=1 2=8.000000e-01
+Slice                    split_0                  1 2 82 83 84 -23300=2,1,1 1=0
+Split                    splitncnn_8              1 2 83 85 86
+Convolution1D            conv1d_33                1 1 86 87 0=192 1=1 2=1 3=1 4=0 5=1 6=192
+Split                    splitncnn_9              1 2 87 88 89
+BinaryOp                 add_10                   2 1 89 79 90 0=0
+Split                    splitncnn_10             1 2 90 91 92
+Tensor.expand_as         Tensor.expand_as_54      2 1 11 88 93
+Split                    splitncnn_11             1 4 93 94 95 96 97
+BinaryOp                 mul_11                   2 1 91 94 98 0=2
+ConvolutionDepthWise1D   convdw1d_86              1 1 98 99 0=192 1=3 2=1 3=1 4=1 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_20           1 1 99 100
+LayerNorm                ln_54                    1 1 100 101 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_21           1 1 101 102
+GELU                     gelu_6                   1 1 102 103
+Convolution1D            conv1d_34                1 1 103 104 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_23           1 1 104 105
+LayerNorm                ln_55                    1 1 105 106 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_24           1 1 106 107
+GELU                     gelu_7                   1 1 107 108
+modules.ReduceDims       pnnx_unique_25           1 1 108 109
+BinaryOp                 add_12                   2 1 92 109 110 0=0
+Split                    splitncnn_12             1 2 110 111 112
+BinaryOp                 mul_13                   2 1 111 95 113 0=2
+ConvolutionDepthWise1D   convdw1d_87              1 1 113 114 0=192 1=3 2=3 3=1 4=3 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_27           1 1 114 115
+LayerNorm                ln_56                    1 1 115 116 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_28           1 1 116 117
+GELU                     gelu_8                   1 1 117 118
+Convolution1D            conv1d_35                1 1 118 119 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_30           1 1 119 120
+LayerNorm                ln_57                    1 1 120 121 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_31           1 1 121 122
+GELU                     gelu_9                   1 1 122 123
+modules.ReduceDims       pnnx_unique_32           1 1 123 124
+BinaryOp                 add_14                   2 1 112 124 125 0=0
+Split                    splitncnn_13             1 2 125 126 127
+BinaryOp                 mul_15                   2 1 126 96 128 0=2
+ConvolutionDepthWise1D   convdw1d_88              1 1 128 129 0=192 1=3 2=9 3=1 4=9 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_34           1 1 129 130
+LayerNorm                ln_58                    1 1 130 131 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_35           1 1 131 132
+GELU                     gelu_10                  1 1 132 133
+Convolution1D            conv1d_36                1 1 133 134 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_37           1 1 134 135
+LayerNorm                ln_59                    1 1 135 136 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_38           1 1 136 137
+GELU                     gelu_11                  1 1 137 138
+modules.ReduceDims       pnnx_unique_39           1 1 138 139
+BinaryOp                 add_16                   2 1 127 139 140 0=0
+BinaryOp                 mul_17                   2 1 140 97 141 0=2
+Convolution1D            conv1d_37                1 1 141 142 0=29 1=1 2=1 3=1 4=0 5=1 6=5568
+Split                    splitncnn_14             1 2 142 143 144
+Tensor.expand_as         Tensor.expand_as_55      2 1 10 143 145
+BinaryOp                 mul_18                   2 1 144 145 146 0=2
+Squeeze                  squeeze_72               1 1 146 147 0=1 1=1 11=1 2=1
+modules.Transpose        pnnx_unique_40           1 1 147 148
+ExpandDims               unsqueeze_75             1 1 148 149
+ExpandDims               unsqueeze_76             1 1 149 150
+Slice                    tensor_split_0           1 3 150 151 152 153 -23300=3,10,10,-233 1=2
+BinaryOp                 div_19                   1 1 151 154 0=3 1=1 2=1.385641e+01
+BinaryOp                 div_20                   1 1 152 155 0=3 1=1 2=1.385641e+01
+Padding                  pad_24                   1 1 153 156 0=0 1=0 2=1 3=1 4=0 5=0.000000e+00 6=0
+modules.PRQTransform     transform                4 1 156 84 154 155 157
+Concat                   cat_0                    2 1 85 157 158 0=0
+Split                    splitncnn_15             1 2 158 159 160
+Tensor.expand_as         Tensor.expand_as_56      2 1 9 159 161
+BinaryOp                 mul_21                   2 1 160 161 162 0=2
+torch.flip               torch.flip_78            1 1 162 163
+Slice                    split_1                  1 2 163 164 165 -23300=2,1,1 1=0
+Split                    splitncnn_16             1 2 164 166 167
+Convolution1D            conv1d_38                1 1 167 168 0=192 1=1 2=1 3=1 4=0 5=1 6=192
+Split                    splitncnn_17             1 2 168 169 170
+BinaryOp                 add_22                   2 1 170 80 171 0=0
+Split                    splitncnn_18             1 2 171 172 173
+Tensor.expand_as         Tensor.expand_as_57      2 1 8 169 174
+Split                    splitncnn_19             1 4 174 175 176 177 178
+BinaryOp                 mul_23                   2 1 172 175 179 0=2
+ConvolutionDepthWise1D   convdw1d_89              1 1 179 180 0=192 1=3 2=1 3=1 4=1 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_42           1 1 180 181
+LayerNorm                ln_60                    1 1 181 182 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_43           1 1 182 183
+GELU                     gelu_12                  1 1 183 184
+Convolution1D            conv1d_39                1 1 184 185 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_45           1 1 185 186
+LayerNorm                ln_61                    1 1 186 187 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_46           1 1 187 188
+GELU                     gelu_13                  1 1 188 189
+modules.ReduceDims       pnnx_unique_47           1 1 189 190
+BinaryOp                 add_24                   2 1 173 190 191 0=0
+Split                    splitncnn_20             1 2 191 192 193
+BinaryOp                 mul_25                   2 1 192 176 194 0=2
+ConvolutionDepthWise1D   convdw1d_90              1 1 194 195 0=192 1=3 2=3 3=1 4=3 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_49           1 1 195 196
+LayerNorm                ln_62                    1 1 196 197 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_50           1 1 197 198
+GELU                     gelu_14                  1 1 198 199
+Convolution1D            conv1d_40                1 1 199 200 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_52           1 1 200 201
+LayerNorm                ln_63                    1 1 201 202 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_53           1 1 202 203
+GELU                     gelu_15                  1 1 203 204
+modules.ReduceDims       pnnx_unique_54           1 1 204 205
+BinaryOp                 add_26                   2 1 193 205 206 0=0
+Split                    splitncnn_21             1 2 206 207 208
+BinaryOp                 mul_27                   2 1 207 177 209 0=2
+ConvolutionDepthWise1D   convdw1d_91              1 1 209 210 0=192 1=3 2=9 3=1 4=9 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_56           1 1 210 211
+LayerNorm                ln_64                    1 1 211 212 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_57           1 1 212 213
+GELU                     gelu_16                  1 1 213 214
+Convolution1D            conv1d_41                1 1 214 215 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_59           1 1 215 216
+LayerNorm                ln_65                    1 1 216 217 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_60           1 1 217 218
+GELU                     gelu_17                  1 1 218 219
+modules.ReduceDims       pnnx_unique_61           1 1 219 220
+BinaryOp                 add_28                   2 1 208 220 221 0=0
+BinaryOp                 mul_29                   2 1 221 178 222 0=2
+Convolution1D            conv1d_42                1 1 222 223 0=29 1=1 2=1 3=1 4=0 5=1 6=5568
+Split                    splitncnn_22             1 2 223 224 225
+Tensor.expand_as         Tensor.expand_as_58      2 1 7 224 226
+BinaryOp                 mul_30                   2 1 225 226 227 0=2
+Squeeze                  squeeze_73               1 1 227 228 0=1 1=1 11=1 2=1
+modules.Transpose        pnnx_unique_62           1 1 228 229
+ExpandDims               unsqueeze_77             1 1 229 230
+ExpandDims               unsqueeze_78             1 1 230 231
+Slice                    tensor_split_1           1 3 231 232 233 234 -23300=3,10,10,-233 1=2
+BinaryOp                 div_31                   1 1 232 235 0=3 1=1 2=1.385641e+01
+BinaryOp                 div_32                   1 1 233 236 0=3 1=1 2=1.385641e+01
+Padding                  pad_25                   1 1 234 237 0=0 1=0 2=1 3=1 4=0 5=0.000000e+00 6=0
+modules.PRQTransform     pnnx_unique_63           4 1 237 165 235 236 238
+Concat                   cat_1                    2 1 166 238 239 0=0
+Split                    splitncnn_23             1 2 239 240 241
+Tensor.expand_as         Tensor.expand_as_59      2 1 6 240 242
+BinaryOp                 mul_33                   2 1 241 242 243 0=2
+torch.flip               torch.flip_79            1 1 243 244
+Slice                    split_2                  1 2 244 245 246 -23300=2,1,1 1=0
+Split                    splitncnn_24             1 2 245 247 248
+Convolution1D            conv1d_43                1 1 248 249 0=192 1=1 2=1 3=1 4=0 5=1 6=192
+Split                    splitncnn_25             1 2 249 250 251
+BinaryOp                 add_34                   2 1 251 81 252 0=0
+Split                    splitncnn_26             1 2 252 253 254
+Tensor.expand_as         Tensor.expand_as_60      2 1 5 250 255
+Split                    splitncnn_27             1 4 255 256 257 258 259
+BinaryOp                 mul_35                   2 1 253 256 260 0=2
+ConvolutionDepthWise1D   convdw1d_92              1 1 260 261 0=192 1=3 2=1 3=1 4=1 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_65           1 1 261 262
+LayerNorm                ln_66                    1 1 262 263 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_66           1 1 263 264
+GELU                     gelu_18                  1 1 264 265
+Convolution1D            conv1d_44                1 1 265 266 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_68           1 1 266 267
+LayerNorm                ln_67                    1 1 267 268 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_69           1 1 268 269
+GELU                     gelu_19                  1 1 269 270
+modules.ReduceDims       pnnx_unique_70           1 1 270 271
+BinaryOp                 add_36                   2 1 254 271 272 0=0
+Split                    splitncnn_28             1 2 272 273 274
+BinaryOp                 mul_37                   2 1 273 257 275 0=2
+ConvolutionDepthWise1D   convdw1d_93              1 1 275 276 0=192 1=3 2=3 3=1 4=3 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_72           1 1 276 277
+LayerNorm                ln_68                    1 1 277 278 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_73           1 1 278 279
+GELU                     gelu_20                  1 1 279 280
+Convolution1D            conv1d_45                1 1 280 281 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_75           1 1 281 282
+LayerNorm                ln_69                    1 1 282 283 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_76           1 1 283 284
+GELU                     gelu_21                  1 1 284 285
+modules.ReduceDims       pnnx_unique_77           1 1 285 286
+BinaryOp                 add_38                   2 1 274 286 287 0=0
+Split                    splitncnn_29             1 2 287 288 289
+BinaryOp                 mul_39                   2 1 288 258 290 0=2
+ConvolutionDepthWise1D   convdw1d_94              1 1 290 291 0=192 1=3 2=9 3=1 4=9 5=1 6=576 7=192
+modules.Transpose        pnnx_unique_79           1 1 291 292
+LayerNorm                ln_70                    1 1 292 293 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_80           1 1 293 294
+GELU                     gelu_22                  1 1 294 295
+Convolution1D            conv1d_46                1 1 295 296 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+modules.Transpose        pnnx_unique_82           1 1 296 297
+LayerNorm                ln_71                    1 1 297 298 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_83           1 1 298 299
+GELU                     gelu_23                  1 1 299 300
+modules.ReduceDims       pnnx_unique_84           1 1 300 301
+BinaryOp                 add_40                   2 1 289 301 302 0=0
+BinaryOp                 mul_41                   2 1 302 259 303 0=2
+Convolution1D            conv1d_47                1 1 303 304 0=29 1=1 2=1 3=1 4=0 5=1 6=5568
+Split                    splitncnn_30             1 2 304 305 306
+Tensor.expand_as         Tensor.expand_as_61      2 1 4 305 307
+BinaryOp                 mul_42                   2 1 306 307 308 0=2
+Squeeze                  squeeze_74               1 1 308 309 0=1 1=1 11=1 2=1
+modules.Transpose        pnnx_unique_85           1 1 309 310
+ExpandDims               unsqueeze_79             1 1 310 311
+ExpandDims               unsqueeze_80             1 1 311 312
+Slice                    tensor_split_2           1 3 312 313 314 315 -23300=3,10,10,-233 1=2
+BinaryOp                 div_43                   1 1 313 316 0=3 1=1 2=1.385641e+01
+BinaryOp                 div_44                   1 1 314 317 0=3 1=1 2=1.385641e+01
+Padding                  pad_26                   1 1 315 318 0=0 1=0 2=1 3=1 4=0 5=0.000000e+00 6=0
+modules.PRQTransform     pnnx_unique_86           4 1 318 246 316 317 319
+Concat                   cat_2                    2 1 247 319 320 0=0
+Split                    splitncnn_31             1 2 320 321 322
+Tensor.expand_as         Tensor.expand_as_62      2 1 3 321 323
+BinaryOp                 mul_45                   2 1 322 323 324 0=2
+Split                    splitncnn_32             1 4 324 325 326 327 328
+MemoryData               flows.0                  0 1 329 0=1 1=2
+MemoryData               pnnx_unique_87           0 1 330 0=1 1=2
+ExpandDims               unsqueeze_81             1 1 330 331
+Tensor.expand_as         Tensor.expand_as_63      2 1 331 327 332
+ExpandDims               unsqueeze_82             1 1 329 333
+Tensor.expand_as         Tensor.expand_as_64      2 1 333 326 334
+Tensor.expand_as         Tensor.expand_as_65      2 1 2 325 335
+UnaryOp                  neg_46                   1 1 334 336 0=1
+UnaryOp                  exp_47                   1 1 336 337 0=7
+BinaryOp                 sub_48                   2 1 328 332 338 0=1
+BinaryOp                 mul_49                   2 1 338 337 339 0=2
+BinaryOp                 mul_50                   2 1 339 335 340 0=2
+Slice                    split_3                  1 2 340 out0 342 -23300=2,1,1 1=0
