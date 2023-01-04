@@ -30,19 +30,22 @@
 5、如果下载apk则仅需进行3即可
 
 # 注意
-字典下载解压到项目assets的同名文件夹下，模型和配置文件下载到本地后手动导入
 
-字典链接:https://pan.baidu.com/s/1H33WODqiRvtaWPsjWE0XVw?pwd=uqo3 
+1、字典下载解压到项目assets的同名文件夹下，模型和配置文件下载到本地后手动导入
+
+2、字典链接:https://pan.baidu.com/s/1H33WODqiRvtaWPsjWE0XVw?pwd=uqo3 
 
 ~~模型链接:https://pan.baidu.com/s/1kBlWTQSKPn2TetUfCpA8kw?pwd=584k~~
 
-由于更换推理框架，因此目前仅支持ncnn多人模型，为了以后能够兼容声线转换，因此模型替换为基于@CjangCjengh大佬的多人模型
+3、由于更换推理框架，因此目前仅支持ncnn多人模型，为了以后能够兼容声线转换，因此模型替换为基于@CjangCjengh大佬的多人模型
 
-ncnn模型和配置文件链接：https://pan.baidu.com/s/1951Qcg4TK6I_rjSUr2MnLw?pwd=gc3t
+4、ncnn模型和配置文件链接：https://pan.baidu.com/s/1951Qcg4TK6I_rjSUr2MnLw?pwd=gc3t
 
-@CjangCjengh大佬项目地址：https://github.com/CjangCjengh/MoeGoe
+5、@CjangCjengh大佬项目地址：https://github.com/CjangCjengh/MoeGoe
 
-本项目主要由c++实现，因此确保安装ndk和配置好环境
+6、本项目主要由c++实现，因此确保安装ndk和配置好环境
+
+7、模型转换工具正在完善，以后也会发布，可以将自己训练好的模型转换成ncnn支持的格式，并且以后也会实现voice convert，总之，敬请期待！！
 
 # 鸣谢
 
