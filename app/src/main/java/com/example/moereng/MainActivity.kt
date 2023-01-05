@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSid() {
         binding.speakerId.maxValue = max_speaker - 1
-
+        binding.speakerId.displayedValues = configs?.speakers?.toTypedArray()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

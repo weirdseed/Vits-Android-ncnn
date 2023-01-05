@@ -172,8 +172,10 @@
 
     <NumberPicker
         android:id="@+id/speaker_id"
-        android:layout_width="100dp"
+        android:layout_width="85dp"
         android:layout_height="67dp"
+        android:scaleX="0.6"
+        android:scaleY="0.6"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.904"
@@ -190,10 +192,10 @@
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.826"
+        app:layout_constraintHorizontal_bias="0.831"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.801" />
+        app:layout_constraintVertical_bias="0.814" />
 
     <ProgressBar
         android:id="@+id/current_progress"
