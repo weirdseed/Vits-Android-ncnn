@@ -21,7 +21,7 @@
 
 1、确保安装好ndk并配置好相关环境
 
-2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，ncnn下载地址https://github.com/Tencent/ncnn/releases/tag/20221128
+2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，[ncnn下载地址](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)
 
 **请下载Vulkan版本**
 
@@ -41,7 +41,7 @@
 
 3、由于更换推理框架，因此目前仅支持ncnn多人模型，为了以后能够兼容声线转换，因此模型替换为基于@CjangCjengh大佬的多人模型
 
-4、ncnn模型和配置文件链接：https://github.com/weirdseed/Vits-Android-ncnn/releases/download/ncnn/Nene.+.Meguru.+.Yoshino.+.Mako.+.Murasame.+.Koharu.+.Nanami.zip
+4、ncnn模型和配置文件链接：[模型地址](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/ncnn/Nene.+.Meguru.+.Yoshino.+.Mako.+.Murasame.+.Koharu.+.Nanami.zip)
 
 5、@CjangCjengh大佬项目地址：https://github.com/CjangCjengh/MoeGoe
 
