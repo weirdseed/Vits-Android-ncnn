@@ -392,7 +392,6 @@ class MainActivity : AppCompatActivity() {
     external fun testgpu(): Boolean
     external fun words_split_cpp(text: String, assetManager: AssetManager): String
     companion object {
-        // Used to load the 'moereng' library on application startup.
         init {
             System.loadLibrary("moereng")
         }
