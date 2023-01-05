@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
         val outputs = ArrayList<List<Int>>()
         val sentences = words_split_cpp(text, assets).split("\n")
         var s = ""
-        val text_outputs = ArrayList<String>()
         for (sentence in sentences){
             if (sentence.contains("EOS"))
                 continue
@@ -104,7 +103,6 @@ class MainActivity : AppCompatActivity() {
                     cleaner = configs!!.data.text_cleaners[0]
                 )
                 outputs.add(seq)
-                text_outputs.add(s)
                 s = ""
             }
         }
@@ -113,10 +111,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
             }
             return null
-        }
-        var length = 0
-        for (t in text_outputs){
-            length += t.length
         }
 
 //        if (length < text.length){
@@ -130,7 +124,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun processWords(text: String) {
         flag = false
-        tracker.play()
         runOnUiThread {
             binding.currentProgress.visibility = View.VISIBLE
             binding.progressText.visibility = View.VISIBLE
@@ -140,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         }
         val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
         if (sentences != null){
+            tracker.play()
             for (i in sentences.indices) {
                 // 运行推理
                 val output =
@@ -153,17 +147,17 @@ class MainActivity : AppCompatActivity() {
                     binding.progressText.text = p.toString() + "/100"
                 }
             }
-            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
-            audioStream.clear()
-            tracker.stop()
-            flag = true
-            audioStream.clear()
         }
+        if (audioStream.isNotEmpty())
+            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
+
         runOnUiThread {
             binding.currentProgress.visibility = View.GONE
             binding.progressText.visibility = View.GONE
             binding.showProgressName.visibility = View.GONE
         }
+        tracker.stop()
+        audioStream.clear()
         flag = true
     }
 
@@ -237,8 +231,6 @@ class MainActivity : AppCompatActivity() {
         }
         // 权限申请
         requestExternalStorage()
-
-
 
         binding.selectModel.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
