@@ -117,7 +117,10 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
     Option opt;
     opt.num_threads = 8;
     pretty_print(data, opt, "input");
+    auto start = ncnn::get_current_time();
     auto output = SynthesizerTrn::forward(data, nets, vulkan,sid,false, noise_scale, 0.8, length_scale);
+    auto end = ncnn::get_current_time();
+    LOGI("Time cost:%f ms",end-start);
     jfloatArray res = env->NewFloatArray(output.h * output.w);
     env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
     return res;
