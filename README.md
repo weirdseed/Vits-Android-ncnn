@@ -23,7 +23,7 @@
 
 2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，[ncnn下载地址](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)
 
-**请下载Vulkan版本**
+**或者自行下载Vulkan版本，最好是1126的最新版或者自己编译，编译教程见ncnn项目地址页**
 
 3、将模型文件（.bin）和配置文件（.json）下载之后解压放在Download文件夹下，点击模型文件加载模型(仅需加载任意一个.bin文件即可），点击加载配置加载以.json为后缀的配置文件
 
