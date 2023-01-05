@@ -112,12 +112,6 @@ class MainActivity : AppCompatActivity() {
             }
             return null
         }
-
-//        if (length < text.length){
-//            runOnUiThread {
-//                Toast.makeText(this, "\""+text.substring(length, text.length)+"\""+"无法识别！", Toast.LENGTH_SHORT).show()
-//            }
-//        }
         return outputs
     }
 
