@@ -305,7 +305,6 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val uri = data?.data
-        var realpath = ""
         when (requestCode) {
             REQUEST_CODE_GRANT -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -320,7 +319,7 @@ class MainActivity : AppCompatActivity() {
                             if (load_model(realpath) && module != null) {
                                 runOnUiThread {
                                     Toast.makeText(this, "模型加载成功！", Toast.LENGTH_SHORT).show()
-                                    binding.modelPath.text = "加载成功"
+                                    binding.modelPath.text = realpath
                                 }
                             } else {
                                 runOnUiThread {
@@ -344,7 +343,7 @@ class MainActivity : AppCompatActivity() {
                         if (realpath.endsWith("json")) {
                             if (load_configs(realpath) && configs != null) {
                                 runOnUiThread {
-                                    binding.configPath.text = "加载成功"
+                                    binding.configPath.text = realpath
                                     Toast.makeText(this, "配置加载成功！", Toast.LENGTH_SHORT).show()
                                 }
                             } else {

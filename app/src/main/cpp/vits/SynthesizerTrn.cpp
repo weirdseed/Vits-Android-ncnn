@@ -43,7 +43,7 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Optio
     net.register_custom_layer("modules.ReduceDims", ReduceDim_layer_creator);
     net.register_custom_layer("modules.PRQTransform", PRQTransform_layer_creator);
     net.register_custom_layer("Embedding", Embedding_layer_creator);
-
+    net.opt = opt;
     std::string bin_path;
     if (folder.find_last_of('/') || folder.find_last_of('\\')) {
         bin_path += folder + name + ".ncnn.bin";
@@ -62,10 +62,11 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Optio
     return false;
 }
 
-std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p) {
+std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p, bool vulkan) {
     Mat length(1);
     length[0] = x.w;
     Extractor ex = enc_p.create_extractor();
+    ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", length);
     Mat out0, out1, out2, out3, test;
@@ -150,7 +151,7 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, bool vulkan, int sid, b
         Option opt;
         opt.num_threads = 4;
         // enc_p
-        auto enc_p_out = enc_p_forward(data, nets->enc_p);
+        auto enc_p_out = enc_p_forward(data, nets->enc_p,vulkan);
         Mat x = reducedims(enc_p_out[0]);
         Mat m_p = enc_p_out[1];
         Mat logs_p = enc_p_out[2];

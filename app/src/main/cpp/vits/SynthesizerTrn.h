@@ -19,7 +19,7 @@ private:
 
     bool load_model(const std::string& folder, Net& net, const Option& opt, const string name);
 
-    static std::vector<Mat> enc_p_forward(const Mat& x, const Net& enc_p);
+    static std::vector<Mat> enc_p_forward(const Mat& x, const Net& enc_p, bool vulkan);
     static Mat emb_g_forward(int sid, const Net& emb_g, bool vulkan);
     static Mat dp_forward(const Mat& x, const Mat& x_mask, const Mat& z, const Mat& g, const Net& dp, bool vulkan);
     static Mat flow_forward(const Mat& x, const Mat& x_mask, const Mat& g, const Net& flow, bool vulkan);
