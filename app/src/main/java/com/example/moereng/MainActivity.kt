@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         var s = ""
         for (sentence in sentences){
             if (sentence.contains("EOS"))
-                continue
+                break
             s += sentence.split("\t")[0]
             if (sentence.contains("変接続") || sentence.contains("記号") || sentence == sentences.last()){
                 if (s.length > 50) {
