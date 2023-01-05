@@ -1,6 +1,7 @@
 package com.example.moereng
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
@@ -27,6 +28,7 @@ import com.example.moereng.utils.ModelFileUtils.getPathFromUri
 import com.example.moereng.utils.Player
 import java.io.File
 import java.io.IOException
+import java.lang.Integer.min
 import kotlin.concurrent.thread
 
 
@@ -68,36 +70,101 @@ class MainActivity : AppCompatActivity() {
 
     private var max_speaker = 1
 
+    private fun sentence_split(text: String): List<List<Int>>?{
+        val outputs = ArrayList<List<Int>>()
+        val sentences = words_split_cpp(text, assets).split("\n")
+        var s = ""
+        val text_outputs = ArrayList<String>()
+        for (sentence in sentences){
+            if (sentence.contains("EOS"))
+                continue
+            s += sentence.split("\t")[0]
+            if (sentence.contains("変接続") || sentence.contains("記号")){
+                if (s.length > 50) {
+                    runOnUiThread {
+                        Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
+                    }
+                    return null
+                }
+                if (s.isEmpty()){
+                    runOnUiThread {
+                        Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
+                    }
+                    return null
+                }
+                if (s.length == 1){
+                    runOnUiThread {
+                        Toast.makeText(this, "句子不能过短！", Toast.LENGTH_SHORT).show()
+                    }
+                    return null
+                }
+                val seq = japanese_cleaner.text_to_sequence(
+                    s,
+                    symbols = configs!!.symbols,
+                    cleaner = configs!!.data.text_cleaners[0]
+                )
+                outputs.add(seq)
+                text_outputs.add(s)
+                s = ""
+            }
+        }
+        if (outputs.isEmpty()) {
+            runOnUiThread {
+                Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
+            }
+            return null
+        }
+        var length = 0
+        for (t in text_outputs){
+            length += t.length
+        }
+
+//        if (length < text.length){
+//            runOnUiThread {
+//                Toast.makeText(this, "\""+text.substring(length, text.length)+"\""+"无法识别！", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+        return outputs
+    }
+
+    @SuppressLint("SetTextI18n")
     private fun processWords(text: String) {
         flag = false
         tracker.play()
-        val sentences = text.replace("。", "、").split("、")
-        var input_text = ""
-        for (i in sentences.indices) {
-            input_text += sentences[i] + "、"
-            if (input_text.length < 25 && i != sentences.size - 1) {
-                continue
-            }
-            if (input_text.length > 50) {
-                input_text = input_text.substring(0, 50)
-            }
-            val seq = japanese_cleaner.text_to_sequence(
-                input_text,
-                symbols = configs!!.symbols,
-                cleaner = configs!!.data.text_cleaners[0]
-            )
-            // 运行推理
-            val output =
-                module?.forward(seq.toIntArray(), vulkan_state, sid, noise_scale, length_scale)
-            if (output != null) {
-                audioStream.addAll(output.toList())
-                input_text = ""
-            }
+        runOnUiThread {
+            binding.currentProgress.visibility = View.VISIBLE
+            binding.progressText.visibility = View.VISIBLE
+            binding.currentProgress.progress = 0
+            binding.progressText.text = "0/100"
+            binding.showProgressName.visibility = View.VISIBLE
         }
-        tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
-        tracker.stop()
+        val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
+        if (sentences != null){
+            for (i in sentences.indices) {
+                // 运行推理
+                val output =
+                    module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale)
+                if (output != null) {
+                    audioStream.addAll(output.toList())
+                }
+                runOnUiThread {
+                    val p = (((i.toFloat() + 1.0)/sentences.size.toFloat()) * 100).toInt()
+                    binding.currentProgress.progress = p
+                    binding.progressText.text = p.toString() + "/100"
+                }
+            }
+            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
+            audioStream.clear()
+            tracker.stop()
+            flag = true
+            audioStream.clear()
+        }
+        runOnUiThread {
+            binding.currentProgress.visibility = View.GONE
+            binding.progressText.visibility = View.GONE
+            binding.showProgressName.visibility = View.GONE
+        }
         flag = true
-        audioStream.clear()
     }
 
     private fun requestExternalStorage() {
@@ -116,7 +183,6 @@ class MainActivity : AppCompatActivity() {
                 startActivityForResult(intent, 1024)
             }
         }
-
     }
 
     private fun load_model(path: String): Boolean {
@@ -337,7 +403,7 @@ class MainActivity : AppCompatActivity() {
     external fun InitOpenJtalk(assetManager: AssetManager)
     external fun DestroyOpenJtalk()
     external fun testgpu(): Boolean
-
+    external fun words_split_cpp(text: String, assetManager: AssetManager): String
     companion object {
         // Used to load the 'moereng' library on application startup.
         init {
