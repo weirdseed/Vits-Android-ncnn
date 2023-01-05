@@ -77,12 +77,13 @@ Java_com_example_moereng_MainActivity_DestroyOpenJtalk(JNIEnv *env, jobject thiz
 }
 
 SynthesizerTrn net_g;
-static Nets* nets = new Nets();
+static Nets* nets;
 
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
                                          jstring path) {
+    nets = new Nets();
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *assetJni = new AssetJNI(env, thiz, asset_manager);
     Option opt;
@@ -97,6 +98,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
         opt.use_vulkan_compute = true;
     if (net_g.init(_path, assetJni, nets, opt)) return true;
     free(assetJni);
+    freenets(nets);
     return false;
 }
 
