@@ -33,33 +33,33 @@ std::string utf8_encode(const std::wstring& source);
 std::wstring utf8_decode(const std::string& source);
 
 template<typename T> void print_list(T t, int len) {
-	std::cout << "[";
-	for (int i = 0; i < len; i++) {
-		if (i != len - 1) {
-			std::cout << int(t[i]) << ",";
-		}
-		else {
-			std::cout << int(t[i]);
-		}
-	}
-	std::cout << "]" << endl;
+    std::cout << "[";
+    for (int i = 0; i < len; i++) {
+        if (i != len - 1) {
+            std::cout << int(t[i]) << ",";
+        }
+        else {
+            std::cout << int(t[i]);
+        }
+    }
+    std::cout << "]" << endl;
 }
 
 struct Feature {
-	wstring string;
-	wstring pos;
-	wstring pos_group1;
-	wstring pos_group2;
-	wstring pos_group3;
-	wstring ctype;
-	wstring cform;
-	wstring orig;
-	wstring read;
-	wstring pron;
-	int acc;
-	int mora_size;
-	wstring chain_rule;
-	int chain_flag;
+    wstring string;
+    wstring pos;
+    wstring pos_group1;
+    wstring pos_group2;
+    wstring pos_group3;
+    wstring ctype;
+    wstring cform;
+    wstring orig;
+    wstring read;
+    wstring pron;
+    int acc;
+    int mora_size;
+    wstring chain_rule;
+    int chain_flag;
 };
 
 wstring njd_node_get_string(NJDNode* node);
@@ -79,14 +79,14 @@ int njd_node_get_chain_flag(NJDNode * node);
 
 class OpenJtalk {
 private:
-	Mecab* mecab;
-	NJD* njd;
-	JPCommon* jpcommon;
-	void _clear();
+    Mecab* mecab;
+    NJD* njd;
+    JPCommon* jpcommon;
+    void _clear();
 public:
-	OpenJtalk(const char* path, AssetJNI* asjni);
-	~OpenJtalk();
-	vector<Feature*> run_frontend(wstring text);
-	vector<wstring> make_label(vector<Feature*> features);
+    OpenJtalk(const char* path, AssetJNI* asjni);
+    ~OpenJtalk();
+    vector<Feature*> run_frontend(wstring text);
+    vector<wstring> make_label(vector<Feature*> features);
+    static string words_split(const char*path, const char* inputs, AssetJNI *assetJni);
 };
-
