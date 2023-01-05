@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.6)
 # build configuration
 project(moereng)
 
+set(ncnn_DIR ${CMAKE_SOURCE_DIR}/ncnn/${ANDROID_ABI}/lib/cmake/ncnn)
+find_package(ncnn REQUIRED)
+
 aux_source_directory(mecab_api libmecabapi_source)
 aux_source_directory(asset_manager_api libassetmanager_source)
 aux_source_directory(jpcommon libjpcommon_source)
@@ -17,11 +20,13 @@ aux_source_directory(njd_set_pronunciation libnjd_set_pronunciation_source)
 aux_source_directory(njd_set_unvoiced_vowel libnjd_set_unvoiced_vowel_source)
 aux_source_directory(njd2jpcommon libnjd2jpcommon_source)
 aux_source_directory(text2mecab libtext2mecab_source)
+aux_source_directory(vits ncnn_vits_source)
 
 include_directories(src/main/cpp/asset_manager_api src/main/cpp/jpcommon src/main/cpp/mecab src/main/cpp/mecab2njd
         src/main/cpp/njd src/main/cpp/njd2jpcommon src/main/cpp/njd_set_accent_phrase
         src/main/cpp/njd_set_accent_type src/main/cpp/njd_set_digit src/main/cpp/njd_set_long_vowel
-        src/main/cpp/njd_set_pronunciation src/main/cpp/njd_set_unvoiced_vowel src/main/cpp/text2mecab)
+        src/main/cpp/njd_set_pronunciation src/main/cpp/njd_set_unvoiced_vowel src/main/cpp/text2mecab
+        src/main/cpp/vits)
 
 
 add_library(moereng SHARED ${libassetmanager_source} ${libmecab_source} ${libjpcommon_source}  ${libmecab2njd_source}
@@ -29,7 +34,9 @@ add_library(moereng SHARED ${libassetmanager_source} ${libmecab_source} ${libjpc
                       ${libnjd_set_accent_phrase_source} ${libnjd_set_accent_type_source}
                       ${libnjd_set_digit_source} ${libnjd_set_long_vowel_source}
                       ${libnjd_set_pronunciation_source} ${libnjd_set_unvoiced_vowel_source}
-                      ${libtext2mecab_source} ${libmecabapi_source} native-lib.cpp)
+                      ${libtext2mecab_source} ${libmecabapi_source} ${ncnn_vits_source} native-lib.cpp )
+
+
 
 find_library( # Sets the name of the path variable.
         android-lib
@@ -37,10 +44,9 @@ find_library( # Sets the name of the path variable.
         # you want CMake to locate.
         android)
 
-target_link_libraries(moereng ${android-lib} ${log-lib})
+
+
+target_link_libraries(moereng ncnn ${android-lib} ${log-lib})
 
 # set_target_properties(mecabandroid PROPERTIES VERSION ${MECAB_ANDROID_VERSION})
 #set_target_properties(moereng PROPERTIES SO_VERSION 1.0)
-
-
-
