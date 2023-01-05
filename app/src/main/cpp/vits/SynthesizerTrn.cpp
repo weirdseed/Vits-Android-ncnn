@@ -28,21 +28,21 @@ DEFINE_LAYER_CREATOR(ReduceDim);
 static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
 static ncnn::PoolAllocator g_workspace_pool_allocator;
 
-bool SynthesizerTrn::load_model(const std::string &folder, Net *net, const Option &opt,
+bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Option &opt,
                                 const string name) {
     LOGI("loading %s...\n", name.c_str());
-    net->register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
-    net->register_custom_layer("modules.Transpose", Transpose_layer_creator);
-    net->register_custom_layer("Embedding", Embedding_layer_creator);
-    net->register_custom_layer("modules.SequenceMask", SequenceMask_layer_creator);
-    net->register_custom_layer("attentions.Attention", Attention_layer_creator);
-    net->register_custom_layer("attentions.ExpandDim", ExpandDim_layer_creator);
-    net->register_custom_layer("attentions.SamePadding", SamePadding_layer_creator);
-    net->register_custom_layer("torch.flip", flip_layer_creator);
-    net->register_custom_layer("modules.CouplingOut", CouplingOut_layer_creator);
-    net->register_custom_layer("modules.ReduceDims", ReduceDim_layer_creator);
-    net->register_custom_layer("modules.PRQTransform", PRQTransform_layer_creator);
-    net->register_custom_layer("Embedding", Embedding_layer_creator);
+    net.register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
+    net.register_custom_layer("modules.Transpose", Transpose_layer_creator);
+    net.register_custom_layer("Embedding", Embedding_layer_creator);
+    net.register_custom_layer("modules.SequenceMask", SequenceMask_layer_creator);
+    net.register_custom_layer("attentions.Attention", Attention_layer_creator);
+    net.register_custom_layer("attentions.ExpandDim", ExpandDim_layer_creator);
+    net.register_custom_layer("attentions.SamePadding", SamePadding_layer_creator);
+    net.register_custom_layer("torch.flip", flip_layer_creator);
+    net.register_custom_layer("modules.CouplingOut", CouplingOut_layer_creator);
+    net.register_custom_layer("modules.ReduceDims", ReduceDim_layer_creator);
+    net.register_custom_layer("modules.PRQTransform", PRQTransform_layer_creator);
+    net.register_custom_layer("Embedding", Embedding_layer_creator);
 
     std::string bin_path;
     if (folder.find_last_of('/') || folder.find_last_of('\\')) {
@@ -50,8 +50,8 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net *net, const Optio
     } else {
         bin_path += folder + "/" + name + ".ncnn.bin";
     }
-    bool param_success = !net->load_param(assetManager, (name + ".ncnn.param").c_str());
-    bool bin_success = !net->load_model(bin_path.c_str());
+    bool param_success = !net.load_param(assetManager, (name + ".ncnn.param").c_str());
+    bool bin_success = !net.load_model(bin_path.c_str());
 
     if (param_success && bin_success) {
         LOGI("%s loaded!", name.c_str());
@@ -62,10 +62,10 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net *net, const Optio
     return false;
 }
 
-std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net *enc_p) {
+std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p) {
     Mat length(1);
     length[0] = x.w;
-    Extractor ex = enc_p->create_extractor();
+    Extractor ex = enc_p.create_extractor();
     ex.input("in0", x);
     ex.input("in1", length);
     Mat out0, out1, out2, out3, test;
@@ -80,11 +80,11 @@ std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net *enc_p) {
     return outputs;
 }
 
-Mat SynthesizerTrn::emb_g_forward(int sid, const Net *emb_g, bool vulkan) {
+Mat SynthesizerTrn::emb_g_forward(int sid, const Net& emb_g, bool vulkan) {
     Mat sid_mat(1);
     sid_mat[0] = (float) sid;
     Mat out;
-    auto ex = emb_g->create_extractor();
+    auto ex = emb_g.create_extractor();
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", sid_mat);
     ex.extract("out0", out);
@@ -92,9 +92,9 @@ Mat SynthesizerTrn::emb_g_forward(int sid, const Net *emb_g, bool vulkan) {
 }
 
 Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g,
-                               const Net *dp, bool vulkan) {
+                               const Net& dp, bool vulkan) {
     Mat out;
-    auto ex = dp->create_extractor();
+    auto ex = dp.create_extractor();
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", x_mask);
@@ -104,9 +104,9 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
     return out;
 }
 
-Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, const Net *flow,
+Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, const Net& flow,
                                  bool vulkan) {
-    auto ex = flow->create_extractor();
+    auto ex = flow.create_extractor();
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", x_mask);
@@ -116,8 +116,8 @@ Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, 
     return out;
 }
 
-Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net *dec_net, bool vulkan) {
-    auto ex = dec_net->create_extractor();
+Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net& dec_net, bool vulkan) {
+    auto ex = dec_net.create_extractor();
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", g);
@@ -126,7 +126,7 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net *dec_net, 
     return out;
 }
 
-bool SynthesizerTrn::init(const std::string &model_folder, AssetJNI *assetJni, Nets *nets,
+bool SynthesizerTrn::init(const std::string &model_folder, AssetJNI *assetJni, Nets* nets,
                           const Option &opt) {
     assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
     if (load_model(model_folder, nets->enc_p, opt, "enc_p") &&
@@ -142,7 +142,7 @@ SynthesizerTrn::SynthesizerTrn() {
 
 }
 
-Mat SynthesizerTrn::forward(const Mat &data, const Nets *nets, bool vulkan, int sid, bool voice_convrt,
+Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, bool vulkan, int sid, bool voice_convrt,
                         float noise_scale, float noise_scale_w, float length_scale) {
     LOGI("processing...\n");
     if (voice_convrt) return Mat();
@@ -216,11 +216,11 @@ SynthesizerTrn::~SynthesizerTrn() {
 }
 
 void freenets(Nets* nets){
-    free(nets->emb_g);
-    free(nets->enc_p);
-    free(nets->dec_net);
-    free(nets->dp);
-    free(nets->flow);
+//    free(nets->emb_g);
+//    free(nets->enc_p);
+//    free(nets->dec_net);
+//    free(nets->dp);
+//    free(nets->flow);
     free(nets);
 }
 

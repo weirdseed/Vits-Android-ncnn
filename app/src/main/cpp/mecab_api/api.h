@@ -88,5 +88,5 @@ public:
     ~OpenJtalk();
     vector<Feature*> run_frontend(wstring text);
     vector<wstring> make_label(vector<Feature*> features);
-    static string words_split(const char*path, const char* inputs, AssetJNI *assetJni);
+    string words_split(const char*path, const char* inputs, AssetJNI *assetJni);
 };

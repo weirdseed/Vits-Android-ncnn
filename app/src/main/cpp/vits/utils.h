@@ -1,8 +1,5 @@
 #ifndef UTILS_H
 #define UTILS_H
-
-#include "layer.h"
-#include "net.h"
 #include <vector>
 #include <math.h>
 #include <numeric>
@@ -10,6 +7,13 @@
 #include <string>
 #include <iomanip>
 #include <random>
+
+
+#include "layer.h"
+#include "net.h"
+#include "benchmark.h"
+
+
 using namespace ncnn;
 
 inline int16_t PCMFloat32ToInt16FmtConvert(float sample)

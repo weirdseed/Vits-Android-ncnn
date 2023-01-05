@@ -222,27 +222,7 @@ OpenJtalk::~OpenJtalk() {
 }
 
 string OpenJtalk::words_split(const char *path, const char *inputs, AssetJNI *assetJni) {
-    int i;
-    int argc = 3;
-    char **argv;
 
-    argv = (char **) malloc(sizeof(char *) * argc);
-
-    argv[0] = strdup("mecab");
-    argv[1] = strdup("-d");
-    argv[2] = strdup(path);
-
-    MeCab::Model *model = MeCab::createModel(assetJni, argc, argv);
-
-    for (i = 0; i < argc; i++)
-        free(argv[i]);
-    free(argv);
-
-    MeCab::Tagger* tagger = model->createTagger();
-
-    string text(inputs);
-
-    const char* result = tagger->parse(text.c_str());
-
-    return result;
+    auto* tagger = (MeCab::Tagger *)mecab->tagger;
+    return tagger->parse(inputs);
 }
