@@ -216,11 +216,6 @@ SynthesizerTrn::~SynthesizerTrn() {
 }
 
 void freenets(Nets* nets){
-//    free(nets->emb_g);
-//    free(nets->enc_p);
-//    free(nets->dec_net);
-//    free(nets->dp);
-//    free(nets->flow);
     free(nets);
 }
 
