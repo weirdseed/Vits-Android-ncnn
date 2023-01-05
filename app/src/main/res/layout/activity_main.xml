@@ -146,7 +146,7 @@
         android:layout_width="60dp"
         android:layout_height="21dp"
         android:layout_marginStart="16dp"
-        android:text="noise_scale"
+        android:text="噪声范围"
         android:textAlignment="center"
         android:textSize="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -159,7 +159,7 @@
         android:id="@+id/text2"
         android:layout_width="67dp"
         android:layout_height="23dp"
-        android:text="length_scale"
+        android:text="音频长度"
         android:textAlignment="center"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -188,14 +188,14 @@
         android:id="@+id/sidText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="sid"
+        android:text="讲话人"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.831"
+        app:layout_constraintHorizontal_bias="0.846"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.814" />
+        app:layout_constraintVertical_bias="0.808" />
 
     <ProgressBar
         android:id="@+id/current_progress"
