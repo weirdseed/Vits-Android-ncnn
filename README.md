@@ -41,7 +41,7 @@
 
 3、由于更换推理框架，因此目前仅支持ncnn多人模型，为了以后能够兼容声线转换，因此模型替换为基于@CjangCjengh大佬的多人模型
 
-4、ncnn模型和配置文件链接：https://pan.baidu.com/s/1951Qcg4TK6I_rjSUr2MnLw?pwd=gc3t
+4、ncnn模型和配置文件链接：https://github.com/weirdseed/Vits-Android-ncnn/releases/download/ncnn/Nene.+.Meguru.+.Yoshino.+.Mako.+.Murasame.+.Koharu.+.Nanami.zip
 
 5、@CjangCjengh大佬项目地址：https://github.com/CjangCjengh/MoeGoe
 
