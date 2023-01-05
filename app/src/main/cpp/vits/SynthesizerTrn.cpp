@@ -206,7 +206,6 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, bool vulkan, int sid, b
                             vulkan);
         LOGI("finished!\n");
         return o;
-//        return Mat();
     }
     return Mat();
 }
