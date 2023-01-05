@@ -52,7 +52,7 @@
 **模型禁止商用，后果自付！！！**
 
 # 预览图
-![Screenshot_1672926941](https://user-images.githubusercontent.com/57377927/210796870-c1e553d7-241f-4c88-b335-304971e647b1.png)
+![Screenshot_1672929199](https://user-images.githubusercontent.com/57377927/210804484-ca7a3ea6-7878-46a2-9ce7-7bdd42144705.png)
 
 # 鸣谢
 
