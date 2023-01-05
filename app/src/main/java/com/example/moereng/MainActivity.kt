@@ -72,9 +72,10 @@ class MainActivity : AppCompatActivity() {
         var sentences = words_split_cpp(text, assets).split("\n")
         sentences = sentences.subList(0, sentences.size - 2) // 删除EOS和空字符
         var s = ""
-        for (sentence in sentences) {
-            s += sentence.split("\t")[0]
-            if (sentence.contains("変接続") || sentence.contains("記号") || sentence == sentences.last()) {
+        for (i in sentences.indices) {
+            val sentence = sentences[i]
+            s += sentences[i].split("\t")[0]
+            if (sentence.contains("変接続") || sentence.contains("記号,句点") || i == sentences.size - 1) {
                 if (s.length > 50) {
                     runOnUiThread {
                         Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
