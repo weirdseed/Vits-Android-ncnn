@@ -39,7 +39,7 @@
 
 ~~模型链接:https://pan.baidu.com/s/1kBlWTQSKPn2TetUfCpA8kw?pwd=584k~~
 
-3、由于更换推理框架，因此目前仅支持ncnn多人模型，为了以后能够兼容声线转换，因此模型替换为基于@CjangCjengh大佬的多人模型
+3、由于更换了推理框架，目前仅支持ncnn多人模型，也是为了以后能够兼容声线转换，模型替换为基于@CjangCjengh大佬的多人模型
 
 4、ncnn模型和配置文件链接：[模型地址](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/ncnn/Nene.+.Meguru.+.Yoshino.+.Mako.+.Murasame.+.Koharu.+.Nanami.zip)
 
@@ -49,8 +49,12 @@
 
 7、模型转换工具正在完善，以后也会发布，可以将自己训练好的模型转换成ncnn支持的格式，并且以后也会实现voice convert，总之，敬请期待！！
 
+**模型禁止商用，后果自付！！！**
+
+# 预览图
+![Screenshot_1672926941](https://user-images.githubusercontent.com/57377927/210796870-c1e553d7-241f-4c88-b335-304971e647b1.png)
+
 # 鸣谢
 
 再次感谢CjangCjengh大佬的付出，以及@nihui群主提供这么棒的框架，以及各位热心群友帮忙解决模型转换的各种问题
 
-**模型禁止商用，后果自付！！！**
