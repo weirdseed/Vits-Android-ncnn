@@ -206,7 +206,6 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, bool vulkan, int sid, b
                             vulkan);
         LOGI("finished!\n");
         return o;
-//        return Mat();
     }
     return Mat();
 }
@@ -216,11 +215,7 @@ SynthesizerTrn::~SynthesizerTrn() {
 }
 
 void freenets(Nets* nets){
-//    free(nets->emb_g);
-//    free(nets->enc_p);
-//    free(nets->dec_net);
-//    free(nets->dp);
-//    free(nets->flow);
+
     free(nets);
 }
 

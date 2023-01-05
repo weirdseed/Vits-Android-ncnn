@@ -245,26 +245,26 @@ class MainActivity : AppCompatActivity() {
         binding.noiseScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 noise_scale = p1.toFloat() / 100f
-                Toast.makeText(this@MainActivity, noise_scale.toString(), Toast.LENGTH_SHORT).show()
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
+                Toast.makeText(this@MainActivity, noise_scale.toString(), Toast.LENGTH_SHORT).show()
             }
         })
         binding.lengthScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 length_scale = p1.toFloat() / 100f
-                Toast.makeText(this@MainActivity, length_scale.toString(), Toast.LENGTH_SHORT)
-                    .show()
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
+                Toast.makeText(this@MainActivity, length_scale.toString(), Toast.LENGTH_SHORT)
+                    .show()
             }
         })
         binding.speakerId.setOnValueChangedListener(object : NumberPicker.OnValueChangeListener {

@@ -126,7 +126,8 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_MainActivity_testgpu(JNIEnv *env, jobject thiz) {
-    if (get_gpu_count() != 0) return JNI_TRUE;
+    int n = get_gpu_count();
+    if (n != 0) return JNI_TRUE;
     return JNI_FALSE;
 }
 
