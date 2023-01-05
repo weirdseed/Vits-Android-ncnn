@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun sentence_split(text: String): List<List<Int>>?{
         val outputs = ArrayList<List<Int>>()
-        var sentences = words_split_cpp(text, assets).split("\n")
+        var sentences = words_split_cpp(text.replace(" ","、"), assets).split("\n")
         sentences = sentences.subList(0, sentences.size - 2)
         var s = ""
         for (i in sentences.indices){
