@@ -24,9 +24,9 @@
         android:id="@+id/textInputLayout"
         android:layout_width="409dp"
         android:layout_height="wrap_content"
+        tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="317dp"
-        tools:ignore="MissingConstraints">
+        tools:layout_editor_absoluteY="317dp">
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -35,16 +35,16 @@
         android:layout_width="312dp"
         android:layout_height="204dp"
         android:gravity="top"
-        android:hint="输入想要说的话（每句话不超过50字，用顿号隔开）"
+        android:hint="输入想要说的话"
         android:maxLength="1000"
         android:maxLines="50"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintHorizontal_bias="0.434"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.068" />
+        app:layout_constraintVertical_bias="0.03" />
 
     <Button
         android:id="@+id/playBtn"
@@ -53,10 +53,10 @@
         android:text="speak"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.439" />
+        app:layout_constraintVertical_bias="0.499" />
 
     <TextView
         android:id="@+id/model_path"
@@ -147,8 +147,8 @@
         android:layout_height="21dp"
         android:layout_marginStart="16dp"
         android:text="noise_scale"
-        android:textSize="10dp"
         android:textAlignment="center"
+        android:textSize="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -160,8 +160,8 @@
         android:layout_width="67dp"
         android:layout_height="23dp"
         android:text="length_scale"
-        android:textSize="10sp"
         android:textAlignment="center"
+        android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.046"
@@ -194,4 +194,49 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.801" />
+
+    <ProgressBar
+        android:id="@+id/current_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="315dp"
+        android:layout_height="17dp"
+        android:progress="0"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.364" />
+
+    <TextView
+        android:id="@+id/progress_text"
+        android:layout_width="40dp"
+        android:layout_height="15dp"
+        android:paddingTop="2dp"
+        android:textAlignment="center"
+        android:textSize="8sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.978"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.364" />
+
+    <TextView
+        android:id="@+id/show_progress_name"
+        android:layout_width="37dp"
+        android:layout_height="16dp"
+        android:paddingTop="2dp"
+        android:text="进度"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.029"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.365" />
 </androidx.constraintlayout.widget.ConstraintLayout>
