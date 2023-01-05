@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             if (sentence.contains("EOS"))
                 continue
             s += sentence.split("\t")[0]
-            if (sentence.contains("変接続") || sentence.contains("記号")){
+            if (sentence.contains("変接続") || sentence.contains("記号") || sentence == sentences.last()){
                 if (s.length > 50) {
                     runOnUiThread {
                         Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
