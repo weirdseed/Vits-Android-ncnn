@@ -50,7 +50,8 @@
 7、模型转换工具正在完善，以后也会发布，可以将自己训练好的模型转换成ncnn支持的格式，并且以后也会实现voice convert，总之，敬请期待！！
 
 # 预览图
-![Screenshot_1672910470](https://user-images.githubusercontent.com/57377927/210745272-b66ae222-b67a-4e4c-addb-7a1f8357b811.png)
+
+![Screenshot_1672910470](https://user-images.githubusercontent.com/57377927/210745717-7ec2327b-1e6e-44c7-80e5-b368ba49d0f9.png)
 
 # 鸣谢
 
