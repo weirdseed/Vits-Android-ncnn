@@ -74,12 +74,11 @@ class MainActivity : AppCompatActivity() {
         val outputs = ArrayList<List<Int>>()
         val sentences = words_split_cpp(text, assets).split("\n")
         var s = ""
-        val text_outputs = ArrayList<String>()
         for (sentence in sentences){
             if (sentence.contains("EOS"))
                 continue
             s += sentence.split("\t")[0]
-            if (sentence.contains("変接続") || sentence.contains("記号")){
+            if (sentence.contains("変接続") || sentence.contains("記号") || sentence == sentences.last()){
                 if (s.length > 50) {
                     runOnUiThread {
                         Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
@@ -104,7 +103,6 @@ class MainActivity : AppCompatActivity() {
                     cleaner = configs!!.data.text_cleaners[0]
                 )
                 outputs.add(seq)
-                text_outputs.add(s)
                 s = ""
             }
         }
@@ -114,23 +112,12 @@ class MainActivity : AppCompatActivity() {
             }
             return null
         }
-        var length = 0
-        for (t in text_outputs){
-            length += t.length
-        }
-
-//        if (length < text.length){
-//            runOnUiThread {
-//                Toast.makeText(this, "\""+text.substring(length, text.length)+"\""+"无法识别！", Toast.LENGTH_SHORT).show()
-//            }
-//        }
         return outputs
     }
 
     @SuppressLint("SetTextI18n")
     private fun processWords(text: String) {
         flag = false
-        tracker.play()
         runOnUiThread {
             binding.currentProgress.visibility = View.VISIBLE
             binding.progressText.visibility = View.VISIBLE
@@ -140,10 +127,12 @@ class MainActivity : AppCompatActivity() {
         }
         val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
         if (sentences != null){
+            tracker.play()
             for (i in sentences.indices) {
                 // 运行推理
                 val output =
                     module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale)
+
                 if (output != null) {
                     audioStream.addAll(output.toList())
                 }
@@ -153,17 +142,17 @@ class MainActivity : AppCompatActivity() {
                     binding.progressText.text = p.toString() + "/100"
                 }
             }
-            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
-            audioStream.clear()
-            tracker.stop()
-            flag = true
-            audioStream.clear()
         }
+        if (audioStream.isNotEmpty())
+            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
+
         runOnUiThread {
             binding.currentProgress.visibility = View.GONE
             binding.progressText.visibility = View.GONE
             binding.showProgressName.visibility = View.GONE
         }
+        tracker.stop()
+        audioStream.clear()
         flag = true
     }
 
@@ -237,8 +226,6 @@ class MainActivity : AppCompatActivity() {
         }
         // 权限申请
         requestExternalStorage()
-
-
 
         binding.selectModel.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
