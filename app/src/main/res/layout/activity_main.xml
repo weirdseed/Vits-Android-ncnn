@@ -35,7 +35,7 @@
         android:layout_width="312dp"
         android:layout_height="204dp"
         android:gravity="top"
-        android:hint="输入想要说的话（目前仅支持日语）"
+        android:hint="输入想要说的话"
         android:maxLength="1000"
         android:maxLines="50"
         android:textSize="12sp"
