@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -26,9 +25,7 @@ import com.example.moereng.utils.Cleaner
 import com.example.moereng.utils.ModelFileUtils
 import com.example.moereng.utils.ModelFileUtils.getPathFromUri
 import com.example.moereng.utils.Player
-import java.io.File
 import java.io.IOException
-import java.lang.Integer.min
 import kotlin.concurrent.thread
 
 
@@ -70,28 +67,27 @@ class MainActivity : AppCompatActivity() {
 
     private var max_speaker = 1
 
-    private fun sentence_split(text: String): List<List<Int>>?{
+    private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
-        val sentences = words_split_cpp(text, assets).split("\n")
+        var sentences = words_split_cpp(text, assets).split("\n")
+        sentences = sentences.subList(0, sentences.size - 2) // 删除EOS和空字符
         var s = ""
-        for (sentence in sentences){
-            if (sentence.contains("EOS"))
-                break
+        for (sentence in sentences) {
             s += sentence.split("\t")[0]
-            if (sentence.contains("変接続") || sentence.contains("記号") || sentence == sentences.last()){
+            if (sentence.contains("変接続") || sentence.contains("記号") || sentence == sentences.last()) {
                 if (s.length > 50) {
                     runOnUiThread {
                         Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
                     }
                     return null
                 }
-                if (s.isEmpty()){
+                if (s.isEmpty()) {
                     runOnUiThread {
                         Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
                     }
                     return null
                 }
-                if (s.length == 1){
+                if (s.length == 1) {
                     runOnUiThread {
                         Toast.makeText(this, "句子不能过短！", Toast.LENGTH_SHORT).show()
                     }
@@ -125,26 +121,37 @@ class MainActivity : AppCompatActivity() {
             binding.progressText.text = "0/100"
             binding.showProgressName.visibility = View.VISIBLE
         }
-        val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
-        if (sentences != null){
+        val sentences = sentence_split(text.replace(".", "、").replace("\n", ""))
+        if (sentences != null) {
             tracker.play()
             for (i in sentences.indices) {
                 // 运行推理
                 val output =
-                    module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale)
+                    module?.forward(
+                        sentences[i].toIntArray(),
+                        vulkan_state,
+                        sid,
+                        noise_scale,
+                        length_scale
+                    )
 
                 if (output != null) {
                     audioStream.addAll(output.toList())
                 }
                 runOnUiThread {
-                    val p = (((i.toFloat() + 1.0)/sentences.size.toFloat()) * 100).toInt()
+                    val p = (((i.toFloat() + 1.0) / sentences.size.toFloat()) * 100).toInt()
                     binding.currentProgress.progress = p
                     binding.progressText.text = p.toString() + "/100"
                 }
             }
         }
         if (audioStream.isNotEmpty())
-            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
+            tracker.write(
+                audioStream.toFloatArray(),
+                0,
+                audioStream.size,
+                AudioTrack.WRITE_BLOCKING
+            )
 
         runOnUiThread {
             binding.currentProgress.visibility = View.GONE
@@ -390,6 +397,7 @@ class MainActivity : AppCompatActivity() {
     external fun DestroyOpenJtalk()
     external fun testgpu(): Boolean
     external fun words_split_cpp(text: String, assetManager: AssetManager): String
+
     companion object {
         init {
             System.loadLibrary("moereng")
