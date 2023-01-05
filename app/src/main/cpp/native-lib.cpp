@@ -1,10 +1,12 @@
 #include <jni.h>
 #include "mecab_api/api.h"
+#include "vits/SynthesizerTrn.h"
 
 class Initializer{
 public:
     AssetJNI* asjni;
     OpenJtalk* openJtalk;
+
     void init_openjtalk(JNIEnv* _env, jobject _obj, jobject _assetManager){
         asjni = new AssetJNI(_env, _obj, _assetManager);
         openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", asjni);
@@ -20,6 +22,9 @@ Initializer::~Initializer() {
 
 Initializer openJInit;
 
+static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
+static ncnn::PoolAllocator g_workspace_pool_allocator;
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_moereng_MainActivity_InitOpenJtalk(JNIEnv *env, jobject thiz,
@@ -27,6 +32,16 @@ Java_com_example_moereng_MainActivity_InitOpenJtalk(JNIEnv *env, jobject thiz,
     openJInit.init_openjtalk(env, thiz, asset_manager);
 }
 
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_example_moereng_MainActivity_words_1split_1cpp(JNIEnv *env, jobject thiz, jstring text,
+                                                        jobject asset_manager) {
+    char* ctext = (char*)env->GetStringUTFChars(text, nullptr);
+    string stext(ctext);
+    auto* assetJni = new AssetJNI(env, thiz, asset_manager);
+    string res = openJInit.openJtalk->words_split("open_jtalk_dic_utf_8-1.11", stext.c_str(), assetJni);
+    return env->NewStringUTF(res.c_str());
+}
 
 // 生成label并转换为java列表
 extern "C"
@@ -58,4 +73,63 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_moereng_MainActivity_DestroyOpenJtalk(JNIEnv *env, jobject thiz) {
     delete &openJInit;
+}
+
+SynthesizerTrn net_g;
+Nets* nets = nullptr;
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
+                                         jstring path) {
+    nets = new Nets();
+    const char *_path = env->GetStringUTFChars(path, 0);
+    AssetJNI *assetJni = new AssetJNI(env, thiz, asset_manager);
+    Option opt;
+    opt.lightmode = true;
+    opt.num_threads = 4;
+    opt.blob_allocator = &g_blob_pool_allocator;
+    opt.workspace_allocator = &g_workspace_pool_allocator;
+    opt.use_packing_layout = true;
+
+    // use vulkan compute
+    if (ncnn::get_gpu_count() != 0)
+        opt.use_vulkan_compute = true;
+    if (net_g.init(_path, assetJni, nets, opt)) return true;
+    freenets(nets);
+    return false;
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jboolean vulkan, jint sid, jfloat noise_scale, jfloat length_scale) {
+    int* x_ = env->GetIntArrayElements(x, 0);
+    jsize x_size = env->GetArrayLength(x);
+    Mat data(x_size, 1);
+    for (int i = 0; i < data.c; i++){
+        float* p = data.channel(i);
+        for (int j = 0; j < x_size; j++){
+            p[j] = (float)x_[j];
+        }
+    }
+    Option opt;
+    opt.num_threads = 8;
+    pretty_print(data, opt, "input");
+    auto output = net_g.forward(data, nets, vulkan,sid,false, noise_scale, 0.8, length_scale);
+    jfloatArray res = env->NewFloatArray(output.h * output.w);
+    env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
+    return res;
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_moereng_MainActivity_testgpu(JNIEnv *env, jobject thiz) {
+    if (ncnn::get_gpu_count() != 0) return JNI_TRUE;
+    return JNI_FALSE;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_moereng_Vits_destroy(JNIEnv *env, jobject thiz) {
+    freenets(nets);
 }
