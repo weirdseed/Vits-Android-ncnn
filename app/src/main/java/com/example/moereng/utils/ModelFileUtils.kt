@@ -18,9 +18,9 @@ object ModelFileUtils {
     fun getPathFromUri(context: Context, uri: Uri): String? {
         var path: String? = null
         if (DocumentsContract.isDocumentUri(context, uri)) {
-            var docId = DocumentsContract.getDocumentId(uri)
+            val docId = DocumentsContract.getDocumentId(uri)
             // android 8.0
-            if (docId.startsWith("raw:")){
+            if (docId.startsWith("raw:")) {
                 return docId.replaceFirst("raw:", "")
             }
             val splits = docId.split(":").toTypedArray()
@@ -39,20 +39,21 @@ object ModelFileUtils {
 
             when (uri.authority) {
                 "com.android.externalstorage.documents" -> if ("primary" == type) {
-                    path = Environment.getExternalStorageDirectory().toString() + File.separator + id
+                    path =
+                        Environment.getExternalStorageDirectory().toString() + File.separator + id
                 }
-                "com.android.providers.downloads.documents" ->
-                {
-                    if ("raw" == type){
+                "com.android.providers.downloads.documents" -> {
+                    if ("raw" == type) {
                         path = id
-                    }else {
-                        for (contentUriPrefix in contentUriPrefixesToTry){
-                            if (id!= null){
+                    } else {
+                        for (contentUriPrefix in contentUriPrefixesToTry) {
+                            if (id != null) {
                                 val contentUri = ContentUris.withAppendedId(
                                     Uri.parse(contentUriPrefix),
                                     id.toLong()
                                 )
-                                val t_path = getMediaPathFromUri(context, contentUri, null, null)
+                                val t_path = getMediaPathFromUri(context, contentUri,
+                                    null, null)
                                 if (t_path != null) path = t_path
                             }
                         }
@@ -125,18 +126,18 @@ object ModelFileUtils {
             val config_buffer = config_stream.bufferedReader().use { it.readText() }
             config_stream.close()
             val config = Gson().fromJson(config_buffer, Configs::class.java)
-            for (cleaner in config.data.text_cleaners){
-                if (cleaner !in listOf("japanese_cleaners","japanese_cleaners2")) {
+            for (cleaner in config.data.text_cleaners) {
+                if (cleaner !in listOf("japanese_cleaners", "japanese_cleaners2")) {
                     Toast.makeText(context, "抱歉，目前还不支持此模型！", Toast.LENGTH_SHORT).show()
                     return null
                 }
-                if (config.symbols.isEmpty()){
+                if (config.symbols.isEmpty()) {
                     Toast.makeText(context, "配置文件必须包含symbols！", Toast.LENGTH_SHORT).show()
                     return null
                 }
             }
             return config
-        } catch (e: Exception){
+        } catch (e: Exception) {
             return null
         }
     }

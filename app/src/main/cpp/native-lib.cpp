@@ -2,12 +2,12 @@
 #include "mecab_api/api.h"
 #include "vits/SynthesizerTrn.h"
 
-class Initializer{
+class Initializer {
 public:
-    AssetJNI* asjni;
-    OpenJtalk* openJtalk;
+    AssetJNI *asjni;
+    OpenJtalk *openJtalk;
 
-    void init_openjtalk(JNIEnv* _env, jobject _obj, jobject _assetManager){
+    void init_openjtalk(JNIEnv *_env, jobject _obj, jobject _assetManager) {
         asjni = new AssetJNI(_env, _obj, _assetManager);
         openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", asjni);
     }
@@ -36,10 +36,11 @@ extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_example_moereng_MainActivity_words_1split_1cpp(JNIEnv *env, jobject thiz, jstring text,
                                                         jobject asset_manager) {
-    char* ctext = (char*)env->GetStringUTFChars(text, nullptr);
+    char *ctext = (char *) env->GetStringUTFChars(text, nullptr);
     string stext(ctext);
-    auto* assetJni = new AssetJNI(env, thiz, asset_manager);
-    string res = openJInit.openJtalk->words_split("open_jtalk_dic_utf_8-1.11", stext.c_str(), assetJni);
+    auto *assetJni = new AssetJNI(env, thiz, asset_manager);
+    string res = openJInit.openJtalk->words_split("open_jtalk_dic_utf_8-1.11", stext.c_str(),
+                                                  assetJni);
     delete assetJni;
     return env->NewStringUTF(res.c_str());
 }
@@ -48,20 +49,20 @@ Java_com_example_moereng_MainActivity_words_1split_1cpp(JNIEnv *env, jobject thi
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_example_moereng_utils_Cleaner_extract_1labels(JNIEnv *env, jobject thiz, jstring text) {
-    char* ctext = (char*)env->GetStringUTFChars(text, nullptr);
+    char *ctext = (char *) env->GetStringUTFChars(text, nullptr);
     // 转换编码
     string stext(ctext);
     wstring wtext = utf8_decode(stext);
     jclass array_list_class = env->FindClass("java/util/ArrayList");
-    jmethodID array_list_constructor = env->GetMethodID(array_list_class, "<init>","()V");
+    jmethodID array_list_constructor = env->GetMethodID(array_list_class, "<init>", "()V");
     jobject array_list = env->NewObject(array_list_class, array_list_constructor);
-    jmethodID array_list_add = env->GetMethodID(array_list_class, "add","(Ljava/lang/Object;)Z");
-    if (openJInit.openJtalk){
+    jmethodID array_list_add = env->GetMethodID(array_list_class, "add", "(Ljava/lang/Object;)Z");
+    if (openJInit.openJtalk) {
         auto features = openJInit.openJtalk->run_frontend(wtext);
         auto labels = openJInit.openJtalk->make_label(features);
 
         // vector到列表
-        for (const wstring& label: labels){
+        for (const wstring &label: labels) {
             jstring str = env->NewStringUTF(utf8_encode(label).c_str());
             env->CallBooleanMethod(array_list, array_list_add, str);
             env->DeleteLocalRef(str);
@@ -71,7 +72,7 @@ Java_com_example_moereng_utils_Cleaner_extract_1labels(JNIEnv *env, jobject thiz
 }
 
 SynthesizerTrn net_g;
-static Nets* nets;
+static Nets *nets;
 
 extern "C"
 JNIEXPORT jboolean JNICALL
@@ -80,6 +81,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
     nets = new Nets();
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *assetJni = new AssetJNI(env, thiz, asset_manager);
+
     Option opt;
     opt.lightmode = true;
     opt.num_threads = num_threads;

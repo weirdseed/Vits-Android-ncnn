@@ -26,7 +26,7 @@ DEFINE_LAYER_CREATOR(SamePadding);
 DEFINE_LAYER_CREATOR(ReduceDim);
 
 
-bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Option &opt,
+bool SynthesizerTrn::load_model(const std::string &folder, Net &net, const Option &opt,
                                 const string name) {
     LOGI("loading %s...\n", name.c_str());
     net.register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
@@ -60,7 +60,8 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Optio
     return false;
 }
 
-std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p, bool vulkan, const int num_threads) {
+std::vector<Mat>
+SynthesizerTrn::enc_p_forward(const Mat &x, const Net &enc_p, bool vulkan, const int num_threads) {
     Mat length(1);
     length[0] = x.w;
     Extractor ex = enc_p.create_extractor();
@@ -80,7 +81,7 @@ std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p, b
     return outputs;
 }
 
-Mat SynthesizerTrn::emb_g_forward(int sid, const Net& emb_g, bool vulkan, const int num_threads) {
+Mat SynthesizerTrn::emb_g_forward(int sid, const Net &emb_g, bool vulkan, const int num_threads) {
     Mat sid_mat(1);
     sid_mat[0] = (float) sid;
     Mat out;
@@ -93,7 +94,7 @@ Mat SynthesizerTrn::emb_g_forward(int sid, const Net& emb_g, bool vulkan, const 
 }
 
 Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g,
-                               const Net& dp, bool vulkan, const int num_threads) {
+                               const Net &dp, bool vulkan, const int num_threads) {
     Mat out;
     Extractor ex = dp.create_extractor();
     ex.set_num_threads(num_threads);
@@ -106,7 +107,7 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
     return out;
 }
 
-Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, const Net& flow,
+Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, const Net &flow,
                                  bool vulkan, const int num_threads) {
     Extractor ex = flow.create_extractor();
     ex.set_num_threads(num_threads);
@@ -119,7 +120,8 @@ Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, 
     return out;
 }
 
-Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net& dec_net, bool vulkan, const int num_threads) {
+Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec_net, bool vulkan,
+                                const int num_threads) {
     Extractor ex = dec_net.create_extractor();
     ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
@@ -130,7 +132,7 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net& dec_net, 
     return out;
 }
 
-bool SynthesizerTrn::init(const std::string &model_folder, AssetJNI *assetJni, Nets* nets,
+bool SynthesizerTrn::init(const std::string &model_folder, AssetJNI *assetJni, Nets *nets,
                           const Option &opt) {
     assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
     if (load_model(model_folder, nets->enc_p, opt, "enc_p") &&
@@ -146,15 +148,16 @@ SynthesizerTrn::SynthesizerTrn() {
 
 }
 
-Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, int num_threads, bool vulkan, int sid, bool voice_convrt,
-                        float noise_scale, float noise_scale_w, float length_scale) {
+Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool vulkan, int sid,
+                            bool voice_convrt,
+                            float noise_scale, float noise_scale_w, float length_scale) {
     LOGI("processing...\n");
     if (voice_convrt) return Mat();
     else {
         Option opt;
         opt.num_threads = num_threads;
         // enc_p
-        auto enc_p_out = enc_p_forward(data, nets->enc_p,vulkan, num_threads);
+        auto enc_p_out = enc_p_forward(data, nets->enc_p, vulkan, num_threads);
         Mat x = reducedims(enc_p_out[0]);
         Mat m_p = enc_p_out[1];
         Mat logs_p = enc_p_out[2];
@@ -218,7 +221,7 @@ SynthesizerTrn::~SynthesizerTrn() {
 
 }
 
-void freenets(Nets* nets){
+void freenets(Nets *nets) {
 
     free(nets);
 }

@@ -10,11 +10,13 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,7 +26,6 @@ import com.example.moereng.utils.Cleaner
 import com.example.moereng.utils.ModelFileUtils
 import com.example.moereng.utils.ModelFileUtils.getPathFromUri
 import com.example.moereng.utils.Player
-import java.io.File
 import java.io.IOException
 import java.lang.Integer.min
 import kotlin.concurrent.thread
@@ -77,40 +78,41 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun init_spinner(){
+    private fun init_spinner() {
         val spinner_array = IntArray(max_threads)
-        for (i in 1..max_threads){
-            spinner_array[i-1] = i
+        for (i in 1..max_threads) {
+            spinner_array[i - 1] = i
         }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_array.toList())
+        val adapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_array.toList())
         binding.threadSpinner.adapter = adapter
         binding.threadSpinner.setSelection(min(current_threads - 1, max_threads - 1))
     }
 
-    private fun sentence_split(text: String): List<List<Int>>?{
+    private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
-        var sentences = words_split_cpp(text.replace(" ","、"), assets).split("\n")
+        var sentences = words_split_cpp(text.replace(" ", "、"), assets).split("\n")
         sentences = sentences.subList(0, sentences.size - 2)
         var s = ""
-        for (i in sentences.indices){
+        for (i in sentences.indices) {
             val sentence = sentences[i]
             if (sentence.contains("EOS"))
                 break
             s += sentence.split("\t")[0]
-            if (sentence.contains("変接続") || sentence.contains("記号") || i == sentences.size-1){
+            if (sentence.contains("変接続") || sentence.contains("記号") || i == sentences.size - 1) {
                 if (s.length > 50) {
                     runOnUiThread {
                         Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
                     }
                     return null
                 }
-                if (s.isEmpty()){
+                if (s.isEmpty()) {
                     runOnUiThread {
                         Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
                     }
                     return null
                 }
-                if (s.length == 1){
+                if (s.length == 1) {
                     runOnUiThread {
                         Toast.makeText(this, "句子不能过短！", Toast.LENGTH_SHORT).show()
                     }
@@ -131,6 +133,12 @@ class MainActivity : AppCompatActivity() {
             }
             return null
         }
+        if (outputs.size == 1){
+            runOnUiThread{
+                Toast.makeText(this, "仅支持日文！", Toast.LENGTH_SHORT).show()
+            }
+            return null
+        }
         return outputs
     }
 
@@ -145,26 +153,39 @@ class MainActivity : AppCompatActivity() {
             binding.showProgressName.visibility = View.VISIBLE
         }
         try {
-            val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
-            if (sentences != null){
+            val sentences = sentence_split(text.replace(".", "、")
+                .replace("\n", ""))
+            if (sentences != null) {
                 tracker.play()
                 for (i in sentences.indices) {
                     // 运行推理
                     val output =
-                        module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale, current_threads)
+                        module?.forward(
+                            sentences[i].toIntArray(),
+                            vulkan_state,
+                            sid,
+                            noise_scale,
+                            length_scale,
+                            current_threads
+                        )
 
                     if (output != null) {
                         audioStream.addAll(output.toList())
                     }
                     runOnUiThread {
-                        val p = (((i.toFloat() + 1.0)/sentences.size.toFloat()) * 100).toInt()
+                        val p = (((i.toFloat() + 1.0) / sentences.size.toFloat()) * 100).toInt()
                         binding.currentProgress.progress = p
                         binding.progressText.text = p.toString() + "/100"
                     }
                 }
             }
             if (audioStream.isNotEmpty())
-                tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
+                tracker.write(
+                    audioStream.toFloatArray(),
+                    0,
+                    audioStream.size,
+                    AudioTrack.WRITE_BLOCKING
+                )
 
             runOnUiThread {
                 binding.currentProgress.visibility = View.GONE
@@ -174,7 +195,7 @@ class MainActivity : AppCompatActivity() {
             tracker.stop()
             audioStream.clear()
 
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e("MainActivity", e.message.toString())
         }
         flag = true
@@ -304,14 +325,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.speakerId.setOnValueChangedListener { p0, p1, p2 -> sid = p2 }
 
-        binding.threadSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        binding.threadSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                current_threads = min(p2+1, max_threads)
+                current_threads = min(p2 + 1, max_threads)
                 Log.i("MainActivity", "current threads = ${current_threads}")
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                TODO("Not yet implemented")
             }
 
         }
@@ -376,7 +396,7 @@ class MainActivity : AppCompatActivity() {
                                         .show()
                                 }
                             }
-                        } catch (e: Exception){
+                        } catch (e: Exception) {
                             Log.e("MainActivity", e.message.toString())
                             runOnUiThread {
                                 Toast.makeText(this, "模型加载失败！", Toast.LENGTH_SHORT).show()
@@ -407,7 +427,7 @@ class MainActivity : AppCompatActivity() {
                                     .show()
                             }
                         }
-                    } catch (e: Exception){
+                    } catch (e: Exception) {
                         Log.e("MainActivity", e.message.toString())
                         Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
                     }
@@ -444,6 +464,7 @@ class MainActivity : AppCompatActivity() {
     external fun testgpu(): Boolean
     external fun words_split_cpp(text: String, assetManager: AssetManager): String
     external fun check_threads_cpp(): Int
+
     companion object {
         init {
             System.loadLibrary("moereng")
