@@ -218,7 +218,7 @@
         android:layout_width="40dp"
         android:layout_height="15dp"
         android:paddingTop="2dp"
-        android:textAlignment="center"
+        android:textAlignment="viewEnd"
         android:textSize="8sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -243,4 +243,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.365" />
+
+    <Spinner
+        android:id="@+id/thread_spinner"
+        android:layout_width="77dp"
+        android:layout_height="40dp"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.952"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.505" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="50dp"
+        android:layout_height="18dp"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:text="线程数"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.955"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.464" />
 </androidx.constraintlayout.widget.ConstraintLayout>

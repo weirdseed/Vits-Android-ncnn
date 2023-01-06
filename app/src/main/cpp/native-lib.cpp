@@ -76,13 +76,13 @@ static Nets* nets;
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
-                                         jstring path) {
+                                         jstring path, jint num_threads) {
     nets = new Nets();
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *assetJni = new AssetJNI(env, thiz, asset_manager);
     Option opt;
     opt.lightmode = true;
-    opt.num_threads = 4;
+    opt.num_threads = num_threads;
     opt.blob_allocator = &g_blob_pool_allocator;
     opt.workspace_allocator = &g_workspace_pool_allocator;
     opt.use_packing_layout = true;
@@ -90,6 +90,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
     // use vulkan compute
     if (ncnn::get_gpu_count() != 0)
         opt.use_vulkan_compute = true;
+
     if (net_g.init(_path, assetJni, nets, opt)) return true;
     free(assetJni);
     freenets(nets);
@@ -98,7 +99,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
 
 extern "C"
 JNIEXPORT jfloatArray JNICALL
-Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jboolean vulkan, jint sid, jfloat noise_scale, jfloat length_scale) {
+Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jboolean vulkan, jint sid, jfloat noise_scale, jfloat length_scale, jint num_threads) {
     int* x_ = env->GetIntArrayElements(x, nullptr);
     jsize x_size = env->GetArrayLength(x);
     Mat data(x_size, 1);
@@ -111,7 +112,7 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
     if (vulkan) LOGI("vulkan on");
     else LOGI("vulkan off");
     auto start = get_current_time();
-    auto output = SynthesizerTrn::forward(data, nets, vulkan,sid,false, noise_scale, 0.8, length_scale);
+    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan,sid,false, noise_scale, 0.8, length_scale);
     auto end = get_current_time();
     LOGI("time cost: %f ms", end-start);
     jfloatArray res = env->NewFloatArray(output.h * output.w);
@@ -131,4 +132,10 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_moereng_Vits_destroy(JNIEnv *env, jobject thiz) {
     freenets(nets);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_moereng_MainActivity_check_1threads_1cpp(JNIEnv *env, jobject thiz) {
+    return ncnn::get_physical_big_cpu_count();
 }

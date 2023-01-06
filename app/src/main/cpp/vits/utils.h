@@ -12,7 +12,7 @@
 #include "layer.h"
 #include "net.h"
 #include "benchmark.h"
-
+#include "cpu.h"
 
 using namespace ncnn;
 

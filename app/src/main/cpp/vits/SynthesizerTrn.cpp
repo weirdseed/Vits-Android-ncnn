@@ -25,8 +25,6 @@ DEFINE_LAYER_CREATOR(SamePadding);
 
 DEFINE_LAYER_CREATOR(ReduceDim);
 
-static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
-static ncnn::PoolAllocator g_workspace_pool_allocator;
 
 bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Option &opt,
                                 const string name) {
@@ -62,10 +60,11 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net& net, const Optio
     return false;
 }
 
-std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p, bool vulkan) {
+std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p, bool vulkan, const int num_threads) {
     Mat length(1);
     length[0] = x.w;
     Extractor ex = enc_p.create_extractor();
+    ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", length);
@@ -81,11 +80,12 @@ std::vector<Mat> SynthesizerTrn::enc_p_forward(const Mat &x, const Net& enc_p, b
     return outputs;
 }
 
-Mat SynthesizerTrn::emb_g_forward(int sid, const Net& emb_g, bool vulkan) {
+Mat SynthesizerTrn::emb_g_forward(int sid, const Net& emb_g, bool vulkan, const int num_threads) {
     Mat sid_mat(1);
     sid_mat[0] = (float) sid;
     Mat out;
-    auto ex = emb_g.create_extractor();
+    Extractor ex = emb_g.create_extractor();
+    ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", sid_mat);
     ex.extract("out0", out);
@@ -93,9 +93,10 @@ Mat SynthesizerTrn::emb_g_forward(int sid, const Net& emb_g, bool vulkan) {
 }
 
 Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g,
-                               const Net& dp, bool vulkan) {
+                               const Net& dp, bool vulkan, const int num_threads) {
     Mat out;
-    auto ex = dp.create_extractor();
+    Extractor ex = dp.create_extractor();
+    ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", x_mask);
@@ -106,8 +107,9 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
 }
 
 Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, const Net& flow,
-                                 bool vulkan) {
-    auto ex = flow.create_extractor();
+                                 bool vulkan, const int num_threads) {
+    Extractor ex = flow.create_extractor();
+    ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", x_mask);
@@ -117,8 +119,9 @@ Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, 
     return out;
 }
 
-Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net& dec_net, bool vulkan) {
-    auto ex = dec_net.create_extractor();
+Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net& dec_net, bool vulkan, const int num_threads) {
+    Extractor ex = dec_net.create_extractor();
+    ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", g);
@@ -143,27 +146,27 @@ SynthesizerTrn::SynthesizerTrn() {
 
 }
 
-Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, bool vulkan, int sid, bool voice_convrt,
+Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, int num_threads, bool vulkan, int sid, bool voice_convrt,
                         float noise_scale, float noise_scale_w, float length_scale) {
     LOGI("processing...\n");
     if (voice_convrt) return Mat();
     else {
         Option opt;
-        opt.num_threads = 4;
+        opt.num_threads = num_threads;
         // enc_p
-        auto enc_p_out = enc_p_forward(data, nets->enc_p,vulkan);
+        auto enc_p_out = enc_p_forward(data, nets->enc_p,vulkan, num_threads);
         Mat x = reducedims(enc_p_out[0]);
         Mat m_p = enc_p_out[1];
         Mat logs_p = enc_p_out[2];
         Mat x_mask = reducedims(enc_p_out[3]);
 
-        Mat g = mattranspose(emb_g_forward(sid, nets->emb_g, vulkan), opt);
+        Mat g = mattranspose(emb_g_forward(sid, nets->emb_g, vulkan, num_threads), opt);
 
         g = reducedims(g);
 
         Mat z = randn(x.w, 2, opt);
 
-        Mat logw = dp_forward(x, x_mask, z, g, nets->dp, vulkan);
+        Mat logw = dp_forward(x, x_mask, z, g, nets->dp, vulkan, num_threads);
 
         Mat w = product(matproduct(matexp(logw, opt), x_mask, opt), length_scale, opt);
 
@@ -197,14 +200,14 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets* nets, bool vulkan, int sid, b
                           opt);
 
         z = flow_forward(expanddims(z_p), mattranspose(expanddims(y_mask), opt), expanddims(g),
-                         nets->flow, vulkan);
+                         nets->flow, vulkan, num_threads);
 
         y_mask = mattranspose(y_mask, opt);
 
         y_mask = expand(y_mask, z.w, z.h, opt);
 
         Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g), nets->dec_net,
-                            vulkan);
+                            vulkan, num_threads);
         LOGI("finished!\n");
         return o;
     }

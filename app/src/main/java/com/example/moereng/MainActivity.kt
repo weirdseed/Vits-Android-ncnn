@@ -14,9 +14,7 @@ import android.os.Environment.DIRECTORY_DOWNLOADS
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.NumberPicker
-import android.widget.SeekBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -52,6 +50,10 @@ class MainActivity : AppCompatActivity() {
 
     private var vulkan_state = false
 
+    private var current_threads = 1
+
+    private var max_threads = 1
+
     private val REQUEST_CODE_GRANT = 0
 
     private val REQUEST_CODE_SELECT_MODEL = 1
@@ -69,6 +71,21 @@ class MainActivity : AppCompatActivity() {
     private var sid = 0
 
     private var max_speaker = 1
+
+    private fun check_threads() {
+        max_threads = check_threads_cpp()
+
+    }
+
+    private fun init_spinner(){
+        val spinner_array = IntArray(max_threads)
+        for (i in 1..max_threads){
+            spinner_array[i-1] = i
+        }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_array.toList())
+        binding.threadSpinner.adapter = adapter
+        binding.threadSpinner.setSelection(min(current_threads - 1, max_threads - 1))
+    }
 
     private fun sentence_split(text: String): List<List<Int>>?{
         val outputs = ArrayList<List<Int>>()
@@ -134,7 +151,7 @@ class MainActivity : AppCompatActivity() {
                 for (i in sentences.indices) {
                     // 运行推理
                     val output =
-                        module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale)
+                        module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale, current_threads)
 
                     if (output != null) {
                         audioStream.addAll(output.toList())
@@ -201,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         if (folder == "") return false
         try {
             module = Vits()
-            return module!!.init_vits(assets, folder)
+            return module!!.init_vits(assets, folder, max_threads)
         } catch (e: IOException) {
             return false
         }
@@ -226,13 +243,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 权限申请
+        requestExternalStorage()
+
         if (testgpu()) {
             binding.vulkanSwitcher.visibility = View.VISIBLE
         } else {
             binding.vulkanSwitcher.visibility = View.GONE
         }
-        // 权限申请
-        requestExternalStorage()
+
+        check_threads()
+
+        init_spinner()
 
         binding.selectModel.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -240,15 +263,18 @@ class MainActivity : AppCompatActivity() {
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             startActivityForResult(intent, REQUEST_CODE_SELECT_MODEL)
         }
+
         binding.selectConfig.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.type = "*/*"
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             startActivityForResult(intent, REQUEST_CODE_SELECT_CONFIG)
         }
+
         binding.vulkanSwitcher.setOnCheckedChangeListener { bottomview, ischecked ->
             vulkan_state = ischecked
         }
+
         binding.noiseScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 noise_scale = p1.toFloat() / 100f
@@ -261,6 +287,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, noise_scale.toString(), Toast.LENGTH_SHORT).show()
             }
         })
+
         binding.lengthScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 length_scale = p1.toFloat() / 100f
@@ -274,16 +301,26 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         })
-        binding.speakerId.setOnValueChangedListener(object : NumberPicker.OnValueChangeListener {
-            override fun onValueChange(p0: NumberPicker?, p1: Int, p2: Int) {
-                sid = p2
+
+        binding.speakerId.setOnValueChangedListener { p0, p1, p2 -> sid = p2 }
+
+        binding.threadSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                current_threads = min(p2+1, max_threads)
+                Log.i("MainActivity", "current threads = ${current_threads}")
             }
 
-        })
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+        }
 
         // 初始化openjtalk模型
         initOpenjtalk(assets)
+
         japanese_cleaner = Cleaner()
+
         tracker = Player.buildTracker()
 
         binding.playBtn.setOnClickListener {
@@ -406,6 +443,7 @@ class MainActivity : AppCompatActivity() {
     external fun InitOpenJtalk(assetManager: AssetManager)
     external fun testgpu(): Boolean
     external fun words_split_cpp(text: String, assetManager: AssetManager): String
+    external fun check_threads_cpp(): Int
     companion object {
         init {
             System.loadLibrary("moereng")
