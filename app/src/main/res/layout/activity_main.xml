@@ -60,11 +60,11 @@
 
     <TextView
         android:id="@+id/model_path"
-        android:layout_width="89dp"
-        android:layout_height="32dp"
+        android:layout_width="107dp"
+        android:layout_height="33dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
-        android:text="模型路径"
+        android:text="请把模型放在Android/media下"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -100,11 +100,11 @@
 
     <TextView
         android:id="@+id/config_path"
-        android:layout_width="94dp"
-        android:layout_height="30dp"
+        android:layout_width="108dp"
+        android:layout_height="34dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
-        android:text="配置文件路径"
+        android:text="请把配置文件放在Android/media下"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
