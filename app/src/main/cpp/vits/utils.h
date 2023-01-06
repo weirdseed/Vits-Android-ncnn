@@ -16,22 +16,6 @@
 
 using namespace ncnn;
 
-inline int16_t PCMFloat32ToInt16FmtConvert(float sample)
-{
-    if (sample < -0.999999f)
-    {
-        return INT16_MIN;
-    }
-    else if (sample > 0.999999f)
-    {
-        return INT16_MAX;
-    }
-    else
-    {
-        return static_cast<int16_t>(sample * 32767.0f);
-    }
-}
-
 void pretty_print(const ncnn::Mat& m, const Option& opt, const char* name = "");
 
 Mat softmax(const Mat& blob, const Option& opt, int axis=-1); // °´ÐÐÇósoftmax
@@ -91,8 +75,6 @@ Mat mattranspose(const Mat& m, const Option& opt);
 Mat matmul(const Mat& m1, const Mat& m2, const Option& opt);
 
 void mask_fill(Mat& m, const Mat& mask, const char* condition, float condition_value, float value, const Option& opt);
-
-void drop(Mat& m, float scale, const Option& opt);
 
 Mat _get_relative_embeddings(const Mat& relative_embeddings, int length, int window_size, const Option& opt);
 

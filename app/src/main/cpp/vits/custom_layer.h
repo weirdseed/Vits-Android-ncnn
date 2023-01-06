@@ -361,8 +361,6 @@ public:
         weight_data = mb.load(weight_data_size, 0);
         if (weight_data.empty())
             return -100;
-//        float* tmp = (float*)weight_data;
-//        std::vector<float> t_v(tmp, tmp+weight_data.cstep);
         weight_data = weight_data.reshape(num_embeddings, embedding_dim);
         return 0;
     }
@@ -403,7 +401,6 @@ private:
     int n_heads = 2;
     int k_channels = 96;
     int window_size = 4;
-    float p_dropout = 0.1;
 public:
     Attention() {
     }

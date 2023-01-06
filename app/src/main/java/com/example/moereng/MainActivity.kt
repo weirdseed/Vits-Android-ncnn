@@ -127,34 +127,39 @@ class MainActivity : AppCompatActivity() {
             binding.progressText.text = "0/100"
             binding.showProgressName.visibility = View.VISIBLE
         }
-        val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
-        if (sentences != null){
-            tracker.play()
-            for (i in sentences.indices) {
-                // 运行推理
-                val output =
-                    module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale)
+        try {
+            val sentences = sentence_split(text.replace(".", "、").replace("\n",""))
+            if (sentences != null){
+                tracker.play()
+                for (i in sentences.indices) {
+                    // 运行推理
+                    val output =
+                        module?.forward(sentences[i].toIntArray(), vulkan_state, sid, noise_scale, length_scale)
 
-                if (output != null) {
-                    audioStream.addAll(output.toList())
-                }
-                runOnUiThread {
-                    val p = (((i.toFloat() + 1.0)/sentences.size.toFloat()) * 100).toInt()
-                    binding.currentProgress.progress = p
-                    binding.progressText.text = p.toString() + "/100"
+                    if (output != null) {
+                        audioStream.addAll(output.toList())
+                    }
+                    runOnUiThread {
+                        val p = (((i.toFloat() + 1.0)/sentences.size.toFloat()) * 100).toInt()
+                        binding.currentProgress.progress = p
+                        binding.progressText.text = p.toString() + "/100"
+                    }
                 }
             }
-        }
-        if (audioStream.isNotEmpty())
-            tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
+            if (audioStream.isNotEmpty())
+                tracker.write(audioStream.toFloatArray(), 0, audioStream.size, AudioTrack.WRITE_BLOCKING)
 
-        runOnUiThread {
-            binding.currentProgress.visibility = View.GONE
-            binding.progressText.visibility = View.GONE
-            binding.showProgressName.visibility = View.GONE
+            runOnUiThread {
+                binding.currentProgress.visibility = View.GONE
+                binding.progressText.visibility = View.GONE
+                binding.showProgressName.visibility = View.GONE
+            }
+            tracker.stop()
+            audioStream.clear()
+
+        } catch (e: Exception){
+            Log.e("MainActivity", e.message.toString())
         }
-        tracker.stop()
-        audioStream.clear()
         flag = true
     }
 
@@ -314,31 +319,38 @@ class MainActivity : AppCompatActivity() {
             REQUEST_CODE_SELECT_MODEL -> {
                 thread {
                     if (uri != null && uri.path != null) {
-                        val realpath = getPathFromUri(this, uri)!!
-                        if (realpath.endsWith(".bin")) {
-                            if (load_model(realpath) && module != null) {
-                                runOnUiThread {
-                                    Toast.makeText(this, "模型加载成功！", Toast.LENGTH_SHORT).show()
-                                    binding.modelPath.text = realpath
+                        try {
+                            val realpath = getPathFromUri(this, uri)
+                            if (realpath != null && realpath.endsWith(".bin")) {
+                                if (load_model(realpath) && module != null) {
+                                    runOnUiThread {
+                                        Toast.makeText(this, "模型加载成功！", Toast.LENGTH_SHORT).show()
+                                        binding.modelPath.text = realpath
+                                    }
+                                } else {
+                                    runOnUiThread {
+                                        Toast.makeText(this, "模型加载失败！", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             } else {
                                 runOnUiThread {
-                                    Toast.makeText(this, "模型加载失败！", Toast.LENGTH_SHORT).show()
+                                    binding.modelPath.text = "加载失败"
+                                    Toast.makeText(this, "请选择正确的模型文件,以.bin结尾", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             }
-                        } else {
+                        } catch (e: Exception){
+                            Log.e("MainActivity", e.message.toString())
                             runOnUiThread {
-                                binding.modelPath.text = "加载失败"
-                                Toast.makeText(this, "请选择正确的模型文件,以.bin结尾", Toast.LENGTH_SHORT)
-                                    .show()
+                                Toast.makeText(this, "模型加载失败！", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 }
             }
             REQUEST_CODE_SELECT_CONFIG -> {
-                thread {
-                    if (uri != null) {
+                if (uri != null) {
+                    try {
                         val realpath = getPathFromUri(this, uri)!!
                         if (realpath.endsWith("json")) {
                             if (load_configs(realpath) && configs != null) {
@@ -358,7 +370,11 @@ class MainActivity : AppCompatActivity() {
                                     .show()
                             }
                         }
+                    } catch (e: Exception){
+                        Log.e("MainActivity", e.message.toString())
+                        Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
                     }
+
                 }
             }
         }
@@ -381,7 +397,6 @@ class MainActivity : AppCompatActivity() {
         tracker.release()
         module = null
         module?.destroy()
-        DestroyOpenJtalk()
     }
 
     /**
@@ -389,7 +404,6 @@ class MainActivity : AppCompatActivity() {
      * which is packaged with this application.
      */
     external fun InitOpenJtalk(assetManager: AssetManager)
-    external fun DestroyOpenJtalk()
     external fun testgpu(): Boolean
     external fun words_split_cpp(text: String, assetManager: AssetManager): String
     companion object {

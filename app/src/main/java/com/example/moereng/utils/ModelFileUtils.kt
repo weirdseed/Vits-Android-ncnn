@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import com.example.moereng.data.Configs
 import com.google.gson.Gson
@@ -19,10 +18,11 @@ object ModelFileUtils {
     fun getPathFromUri(context: Context, uri: Uri): String? {
         var path: String? = null
         if (DocumentsContract.isDocumentUri(context, uri)) {
-            //如果是document类型的Uri，通过document id处理，内部会调用Uri.decode(docId)进行解码
-            val docId = DocumentsContract.getDocumentId(uri)
-            //primary:Azbtrace.txt
-            //video:A1283522
+            var docId = DocumentsContract.getDocumentId(uri)
+            // android 8.0
+            if (docId.startsWith("raw:")){
+                return docId.replaceFirst("raw:", "")
+            }
             val splits = docId.split(":").toTypedArray()
             var type: String? = null
             var id: String? = null
@@ -30,19 +30,33 @@ object ModelFileUtils {
                 type = splits[0]
                 id = splits[1]
             }
+
+            val contentUriPrefixesToTry = arrayOf(
+                "content://downloads/public_downloads",
+                "content://downloads/my_downloads",
+                "content://downloads/all_downloads"
+            )
+
             when (uri.authority) {
                 "com.android.externalstorage.documents" -> if ("primary" == type) {
-                    path =
-                        Environment.getExternalStorageDirectory().toString() + File.separator + id
+                    path = Environment.getExternalStorageDirectory().toString() + File.separator + id
                 }
-                "com.android.providers.downloads.documents" -> path = if ("raw" == type) {
-                    id
-                } else {
-                    val contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"),
-                        java.lang.Long.valueOf(docId)
-                    )
-                    getMediaPathFromUri(context, contentUri, null, null)
+                "com.android.providers.downloads.documents" ->
+                {
+                    if ("raw" == type){
+                        path = id
+                    }else {
+                        for (contentUriPrefix in contentUriPrefixesToTry){
+                            if (id!= null){
+                                val contentUri = ContentUris.withAppendedId(
+                                    Uri.parse(contentUriPrefix),
+                                    id.toLong()
+                                )
+                                val t_path = getMediaPathFromUri(context, contentUri, null, null)
+                                if (t_path != null) path = t_path
+                            }
+                        }
+                    }
                 }
                 "com.android.providers.media.documents" -> {
                     var externalUri: Uri? = null
@@ -52,9 +66,9 @@ object ModelFileUtils {
                         "audio" -> externalUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                         "document" -> externalUri = MediaStore.Files.getContentUri("external")
                     }
+                    val selection = "_id=?"
+                    val selectionArgs = arrayOf(id)
                     if (externalUri != null) {
-                        val selection = "_id=?"
-                        val selectionArgs = arrayOf(id)
                         path = getMediaPathFromUri(context, externalUri, selection, selectionArgs)
                     }
                 }
@@ -62,10 +76,8 @@ object ModelFileUtils {
         } else if (ContentResolver.SCHEME_CONTENT.equals(uri.scheme, ignoreCase = true)) {
             path = getMediaPathFromUri(context, uri, null, null)
         } else if (ContentResolver.SCHEME_FILE.equals(uri.scheme, ignoreCase = true)) {
-            //如果是file类型的Uri(uri.fromFile)，直接获取图片路径即可
             path = uri.path
         }
-        //确保如果返回路径，则路径合法
         return if (path == null) null else if (File(path).exists()) path else null
     }
 
@@ -76,7 +88,6 @@ object ModelFileUtils {
         selectionArgs: Array<String?>?
     ): String? {
         var path: String?
-        val authroity = uri.authority
         path = uri.path
         val sdPath = Environment.getExternalStorageDirectory().absolutePath
         if (!path!!.startsWith(sdPath)) {

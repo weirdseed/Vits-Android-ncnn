@@ -70,12 +70,6 @@ Java_com_example_moereng_utils_Cleaner_extract_1labels(JNIEnv *env, jobject thiz
     return array_list;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_example_moereng_MainActivity_DestroyOpenJtalk(JNIEnv *env, jobject thiz) {
-    delete &openJInit;
-}
-
 SynthesizerTrn net_g;
 static Nets* nets;
 
@@ -114,6 +108,8 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
             p[j] = (float)x_[j];
         }
     }
+    if (vulkan) LOGI("vulkan on");
+    else LOGI("vulkan off");
     auto start = get_current_time();
     auto output = SynthesizerTrn::forward(data, nets, vulkan,sid,false, noise_scale, 0.8, length_scale);
     auto end = get_current_time();

@@ -911,31 +911,6 @@ void mask_fill(Mat& m, const Mat& mask, const char* condition, float condition_v
 	}
 }
 
-void drop(Mat& m, float scale, const Option& opt)
-{
-	if (scale == 1.f)
-	{
-		return;
-	}
-
-	int w = m.w;
-	int h = m.h;
-	int channels = m.c;
-	int size = w * h;
-
-	#pragma omp parallel for num_threads(opt.num_threads)
-	for (int q = 0; q < channels; q++)
-	{
-		float* ptr = m.channel(q);
-
-		for (int i = 0; i < size; i++)
-		{
-			ptr[i] = ptr[i] * (1/(1-scale));
-		}
-	}
-
-}
-
 Mat _get_relative_embeddings(const Mat& relative_embeddings, int length, int window_size, const Option& opt)
 {
 	int pad_length = std::max(length - window_size - 1, 0);
