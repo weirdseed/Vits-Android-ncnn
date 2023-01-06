@@ -409,33 +409,36 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             REQUEST_CODE_SELECT_CONFIG -> {
-                if (uri != null) {
-                    try {
-                        val realpath = getPathFromUri(this, uri)!!
-                        if (realpath.endsWith("json")) {
-                            if (load_configs(realpath) && configs != null) {
-                                runOnUiThread {
-                                    binding.configPath.text = realpath
-                                    Toast.makeText(this, "配置加载成功！", Toast.LENGTH_SHORT).show()
+                thread {
+                    if (uri != null) {
+                        try {
+                            val realpath = getPathFromUri(this, uri)!!
+                            if (realpath.endsWith("json")) {
+                                if (load_configs(realpath) && configs != null) {
+                                    runOnUiThread {
+                                        binding.configPath.text = realpath
+                                        Toast.makeText(this, "配置加载成功！", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    runOnUiThread {
+                                        binding.configPath.text = "加载失败"
+                                        Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             } else {
                                 runOnUiThread {
-                                    binding.configPath.text = "加载失败"
-                                    Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "请选择正确的配置文件，以.json结尾", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             }
-                        } else {
-                            runOnUiThread {
-                                Toast.makeText(this, "请选择正确的配置文件，以.json结尾", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", e.message.toString())
+                            Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
                         }
-                    } catch (e: Exception) {
-                        Log.e("MainActivity", e.message.toString())
-                        Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
-                    }
 
+                    }
                 }
+
             }
         }
 
