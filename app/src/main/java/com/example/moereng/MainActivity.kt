@@ -133,9 +133,12 @@ class MainActivity : AppCompatActivity() {
             }
             return null
         }
-        if (outputs.size == 1){
+        var sum = 0
+        for (o in outputs)
+            sum += o.sum()
+        if (sum == 0){
             runOnUiThread{
-                Toast.makeText(this, "仅支持日文！", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "解析失败！", Toast.LENGTH_SHORT).show()
             }
             return null
         }
