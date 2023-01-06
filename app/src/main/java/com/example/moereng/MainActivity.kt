@@ -106,18 +106,6 @@ class MainActivity : AppCompatActivity() {
                     }
                     return null
                 }
-                if (s.isEmpty()) {
-                    runOnUiThread {
-                        Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
-                    }
-                    return null
-                }
-                if (s.length == 1) {
-                    runOnUiThread {
-                        Toast.makeText(this, "句子不能过短！", Toast.LENGTH_SHORT).show()
-                    }
-                    return null
-                }
                 val seq = japanese_cleaner.text_to_sequence(
                     s,
                     symbols = configs!!.symbols,
