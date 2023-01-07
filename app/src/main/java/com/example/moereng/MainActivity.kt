@@ -117,19 +117,11 @@ class MainActivity : AppCompatActivity() {
                 s = ""
             }
         }
-        if (outputs.isEmpty()) {
-            runOnUiThread {
-                Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
-                throw RuntimeException("unknown error!")
-            }
-            return null
-        }
-        var sum = 0
         for (o in outputs)
             if (o.sum() == 0){
                 runOnUiThread{
                     Toast.makeText(this, "解析失败！", Toast.LENGTH_SHORT).show()
-//                    throw RuntimeException("parse failed!")
+                    throw RuntimeException("parse failed!")
                 }
                 return null
         }
