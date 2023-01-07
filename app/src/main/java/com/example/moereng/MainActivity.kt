@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                     runOnUiThread {
                         val p = (((i.toFloat() + 1.0) / sentences.size.toFloat()) * 100).toInt()
                         binding.currentProgress.progress = p
-                        binding.progressText.text = p.toString() + "/100"
+                        binding.progressText.text = "$p/100"
                     }
                 }
             }
