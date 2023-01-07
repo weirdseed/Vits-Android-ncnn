@@ -91,7 +91,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
-        var sentences = words_split_cpp(text.replace(" ", "、"), assets).split("\n")
+        var sentences = words_split_cpp(text.replace(" ", "、"), assets)
+            .replace(".", "、")
+            .split("\n")
         sentences = sentences.subList(0, sentences.size - 2)
         var s = ""
         for (i in sentences.indices) {
@@ -118,17 +120,18 @@ class MainActivity : AppCompatActivity() {
         if (outputs.isEmpty()) {
             runOnUiThread {
                 Toast.makeText(this, "未知错误！", Toast.LENGTH_SHORT).show()
+                throw RuntimeException("unknown error!")
             }
             return null
         }
         var sum = 0
         for (o in outputs)
-            sum += o.sum()
-        if (sum == 0){
-            runOnUiThread{
-                Toast.makeText(this, "解析失败！", Toast.LENGTH_SHORT).show()
-            }
-            return null
+            if (o.sum() == 0){
+                runOnUiThread{
+                    Toast.makeText(this, "解析失败！", Toast.LENGTH_SHORT).show()
+//                    throw RuntimeException("parse failed!")
+                }
+                return null
         }
         return outputs
     }
@@ -144,8 +147,7 @@ class MainActivity : AppCompatActivity() {
             binding.showProgressName.visibility = View.VISIBLE
         }
         try {
-            val sentences = sentence_split(text.replace(".", "、")
-                .replace("\n", ""))
+            val sentences = sentence_split(text)
             if (sentences != null) {
                 tracker.play()
                 for (i in sentences.indices) {
