@@ -61,10 +61,6 @@ class MainActivity : AppCompatActivity() {
 
     private val REQUEST_CODE_SELECT_CONFIG = 2
 
-    private fun initOpenjtalk(assetManager: AssetManager) {
-        InitOpenJtalk(assetManager)
-    }
-
     private var noise_scale: Float = .667f
 
     private var length_scale: Float = 1f
@@ -72,6 +68,16 @@ class MainActivity : AppCompatActivity() {
     private var sid = 0
 
     private var max_speaker = 1
+
+    private fun initOpenjtalk(assetManager: AssetManager) {
+        InitOpenJtalk(assetManager)
+    }
+
+    private fun clean_inputs(text: String): String{
+        return text.replace("\"","").replace("\'","")
+            .replace("\t"," ").replace("\n", "、")
+            .replace("”","")
+    }
 
     private fun check_threads() {
         max_threads = check_threads_cpp()
@@ -91,20 +97,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
-        var sentences = words_split_cpp(text.replace(" ", "、"), assets)
-            .replace(".", "、")
-            .split("\n")
-        sentences = sentences.subList(0, sentences.size - 2)
+        var sentences = words_split_cpp(clean_inputs(text), assets)
+            .replace("EOS\n","").split("\n")
+        sentences = sentences.subList(0, sentences.size - 1)
         var s = ""
         for (i in sentences.indices) {
             val sentence = sentences[i]
-            if (sentence.contains("EOS"))
-                break
             s += sentence.split("\t")[0]
-            if (sentence.contains("変接続") || sentence.contains("記号") || i == sentences.size - 1) {
+            if (sentence.contains("記号,読点") ||
+                sentence.contains("記号,句点") ||
+                sentence.contains("記号,一般") ||
+                sentence.contains("記号,空白") ||
+                i == sentences.size - 1) {
                 if (s.length > 50) {
                     runOnUiThread {
-                        Toast.makeText(this, "一句话不能超过50个字符", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "一句话不能超过50个字符！",
+                            Toast.LENGTH_SHORT).show()
                     }
                     return null
                 }
@@ -113,17 +121,18 @@ class MainActivity : AppCompatActivity() {
                     symbols = configs!!.symbols,
                     cleaner = configs!!.data.text_cleaners[0]
                 )
+                if (seq.isEmpty() || seq.sum() == 0)
+                    continue
                 outputs.add(seq)
                 s = ""
             }
         }
-        for (o in outputs)
-            if (o.sum() == 0){
-                runOnUiThread{
-                    Toast.makeText(this, "解析失败！", Toast.LENGTH_SHORT).show()
-                    throw RuntimeException("parse failed!")
-                }
-                return null
+        if (outputs.isEmpty() || outputs.size == 1){
+            runOnUiThread {
+                Toast.makeText(this, "解析失败！仅支持日语！请检查是否包含不支持字符！",
+                    Toast.LENGTH_SHORT).show()
+            }
+            return null
         }
         return outputs
     }
