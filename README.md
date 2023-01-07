@@ -1,4 +1,4 @@
-# vits日语模型（~~莲华~~）Android部署
+# vits日语模型Android部署
 
 # 介绍
 
