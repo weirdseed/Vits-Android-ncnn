@@ -73,10 +73,10 @@ class MainActivity : AppCompatActivity() {
         InitOpenJtalk(assetManager)
     }
 
-    private fun clean_inputs(text: String): String{
-        return text.replace("\"","").replace("\'","")
-            .replace("\t"," ").replace("\n", "、")
-            .replace("”","")
+    private fun clean_inputs(text: String): String {
+        return text.replace("\"", "").replace("\'", "")
+            .replace("\t", " ").replace("\n", "、")
+            .replace("”", "")
     }
 
     private fun check_threads() {
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
     private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
         var sentences = words_split_cpp(clean_inputs(text), assets)
-            .replace("EOS\n","").split("\n")
+            .replace("EOS\n", "").split("\n")
         sentences = sentences.subList(0, sentences.size - 1)
         var s = ""
         for (i in sentences.indices) {
@@ -108,11 +108,14 @@ class MainActivity : AppCompatActivity() {
                 sentence.contains("記号,句点") ||
                 sentence.contains("記号,一般") ||
                 sentence.contains("記号,空白") ||
-                i == sentences.size - 1) {
+                i == sentences.size - 1
+            ) {
                 if (s.length > 50) {
                     runOnUiThread {
-                        Toast.makeText(this, "一句话不能超过50个字符！",
-                            Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this, "一句话不能超过50个字符！",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     return null
                 }
@@ -127,10 +130,12 @@ class MainActivity : AppCompatActivity() {
                 s = ""
             }
         }
-        if (outputs.isEmpty() || outputs.size == 1){
+        if (outputs.isEmpty() || outputs.size == 1) {
             runOnUiThread {
-                Toast.makeText(this, "解析失败！仅支持日语！请检查是否包含不支持字符！",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this, "解析失败！仅支持日语！请检查是否包含不支持字符！",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             return null
         }
@@ -347,13 +352,16 @@ class MainActivity : AppCompatActivity() {
                             processWords(inputText.toString())
                         }
                     } else {
-                        Toast.makeText(this, "别急。。。", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "稍等...",
+                            Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(this, "请输入文字", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "请输入文字",
+                        Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(this, "请先加载配置文件和模型文件！", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "请先加载配置文件和模型文件！",
+                    Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -375,25 +383,29 @@ class MainActivity : AppCompatActivity() {
                             if (realpath != null && realpath.endsWith(".bin")) {
                                 if (load_model(realpath) && module != null) {
                                     runOnUiThread {
-                                        Toast.makeText(this, "模型加载成功！", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "模型加载成功！",
+                                            Toast.LENGTH_SHORT).show()
                                         binding.modelPath.text = realpath
                                     }
                                 } else {
                                     runOnUiThread {
-                                        Toast.makeText(this, "模型加载失败！", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "模型加载失败！",
+                                            Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             } else {
                                 runOnUiThread {
                                     binding.modelPath.text = "加载失败"
-                                    Toast.makeText(this, "请选择正确的模型文件,以.bin结尾", Toast.LENGTH_SHORT)
+                                    Toast.makeText(this, "请选择正确的模型文件,以.bin结尾",
+                                        Toast.LENGTH_SHORT)
                                         .show()
                                 }
                             }
                         } catch (e: Exception) {
                             Log.e("MainActivity", e.message.toString())
                             runOnUiThread {
-                                Toast.makeText(this, "模型加载失败！", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "模型加载失败！",
+                                    Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -408,23 +420,27 @@ class MainActivity : AppCompatActivity() {
                                 if (load_configs(realpath) && configs != null) {
                                     runOnUiThread {
                                         binding.configPath.text = realpath
-                                        Toast.makeText(this, "配置加载成功！", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "配置加载成功！",
+                                            Toast.LENGTH_SHORT).show()
                                     }
                                 } else {
                                     runOnUiThread {
                                         binding.configPath.text = "加载失败"
-                                        Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "配置加载失败！",
+                                            Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             } else {
                                 runOnUiThread {
-                                    Toast.makeText(this, "请选择正确的配置文件，以.json结尾", Toast.LENGTH_SHORT)
+                                    Toast.makeText(this, "请选择正确的配置文件，以.json结尾",
+                                        Toast.LENGTH_SHORT)
                                         .show()
                                 }
                             }
                         } catch (e: Exception) {
                             Log.e("MainActivity", e.message.toString())
-                            Toast.makeText(this, "配置加载失败！", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "配置加载失败！",
+                                Toast.LENGTH_SHORT).show()
                         }
 
                     }
@@ -457,10 +473,10 @@ class MainActivity : AppCompatActivity() {
      * A native method that is implemented by the 'moereng' native library,
      * which is packaged with this application.
      */
-    external fun InitOpenJtalk(assetManager: AssetManager)
-    external fun testgpu(): Boolean
-    external fun words_split_cpp(text: String, assetManager: AssetManager): String
-    external fun check_threads_cpp(): Int
+    private external fun InitOpenJtalk(assetManager: AssetManager)
+    private external fun testgpu(): Boolean
+    private external fun words_split_cpp(text: String, assetManager: AssetManager): String
+    private external fun check_threads_cpp(): Int
 
     companion object {
         init {
