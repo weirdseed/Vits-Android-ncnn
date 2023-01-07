@@ -95,6 +95,26 @@ class MainActivity : AppCompatActivity() {
         binding.threadSpinner.setSelection(min(current_threads - 1, max_threads - 1))
     }
 
+    @SuppressLint("SetTextI18n")
+    private fun show_tips(type: String){
+        when(type){
+            "model"-> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                    binding.modelPath.text = "加载失败，请把文件放在Android/media下"
+                } else {
+                    binding.modelPath.text = "加载失败，请把文件放在Download文件夹下"
+                }
+            }
+            "config"->{
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                    binding.configPath.text = "加载失败，请把文件放在Android/media下"
+                } else {
+                    binding.configPath.text = "加载失败，请把文件放在Download文件夹下"
+                }
+            }
+        }
+    }
+
     private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
         var sentences = words_split_cpp(clean_inputs(text), assets)
@@ -389,13 +409,13 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 } else {
                                     runOnUiThread {
+                                        show_tips("model")
                                         Toast.makeText(this, "模型加载失败！",
                                             Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             } else {
                                 runOnUiThread {
-                                    binding.modelPath.text = "加载失败"
                                     Toast.makeText(this, "请选择正确的模型文件,以.bin结尾",
                                         Toast.LENGTH_SHORT)
                                         .show()
@@ -404,6 +424,7 @@ class MainActivity : AppCompatActivity() {
                         } catch (e: Exception) {
                             Log.e("MainActivity", e.message.toString())
                             runOnUiThread {
+                                show_tips("model")
                                 Toast.makeText(this, "模型加载失败！",
                                     Toast.LENGTH_SHORT).show()
                             }
@@ -425,7 +446,7 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 } else {
                                     runOnUiThread {
-                                        binding.configPath.text = "加载失败"
+                                        show_tips("config")
                                         Toast.makeText(this, "配置加载失败！",
                                             Toast.LENGTH_SHORT).show()
                                     }
@@ -438,9 +459,10 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.e("MainActivity", e.message.toString())
+                            show_tips("config")
                             Toast.makeText(this, "配置加载失败！",
                                 Toast.LENGTH_SHORT).show()
+
                         }
 
                     }

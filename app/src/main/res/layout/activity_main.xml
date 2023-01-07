@@ -104,7 +104,7 @@
         android:layout_height="34dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
-        android:text="配置文件路径"
+        android:text="请把配置文件放在Android/media下"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
