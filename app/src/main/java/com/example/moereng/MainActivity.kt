@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                 s = ""
             }
         }
-        if (outputs.isEmpty() || outputs.size == 1) {
+        if (outputs.isEmpty()) {
             runOnUiThread {
                 Toast.makeText(
                     this, "解析失败！仅支持日语！请检查是否包含不支持字符！",
