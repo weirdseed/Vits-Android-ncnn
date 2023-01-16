@@ -2,6 +2,7 @@
 #include "mecab_api/api.h"
 #include "vits/SynthesizerTrn.h"
 
+
 class Initializer {
 public:
     AssetJNI *asjni;
@@ -72,12 +73,20 @@ Java_com_example_moereng_utils_Cleaner_extract_1labels(JNIEnv *env, jobject thiz
 }
 
 SynthesizerTrn net_g;
-static Nets *nets;
+static Nets *nets = nullptr;
+
+static
+void freenets() {
+    delete nets;
+    nets = nullptr;
+}
 
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
-                                         jstring path, jint num_threads) {
+                                         jstring path, jboolean voice_convert, jboolean multi,
+                                         jint num_threads) {
+    if (nets != nullptr) freenets();
     nets = new Nets();
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *assetJni = new AssetJNI(env, thiz, asset_manager);
@@ -93,16 +102,19 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
     if (ncnn::get_gpu_count() != 0)
         opt.use_vulkan_compute = true;
 
-    if (net_g.init(_path, assetJni, nets, opt)) return true;
+    if (net_g.init(_path, voice_convert, multi, assetJni, nets, opt)) return true;
     free(assetJni);
-    freenets(nets);
+    freenets();
     return false;
 }
 
 extern "C"
 JNIEXPORT jfloatArray JNICALL
 Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jboolean vulkan,
-                                      jint sid, jfloat noise_scale, jfloat length_scale,
+                                      jboolean multi, jint sid,
+                                      jfloat noise_scale,
+                                      jfloat noise_scale_w,
+                                      jfloat length_scale,
                                       jint num_threads) {
     // jarray to ncnn mat
     int *x_ = env->GetIntArrayElements(x, nullptr);
@@ -119,13 +131,31 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
     if (vulkan) LOGI("vulkan on");
     else LOGI("vulkan off");
     auto start = get_current_time();
-    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, sid,
-                                          noise_scale, 0.8, length_scale);
+    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, multi, sid,
+                                          noise_scale, noise_scale_w, length_scale);
     auto end = get_current_time();
     LOGI("time cost: %f ms", end - start);
     jfloatArray res = env->NewFloatArray(output.h * output.w);
     env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
     return res;
+
+//    try{
+//        auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, multi, sid,
+//                                              noise_scale, 0.8, length_scale);
+//        auto end = get_current_time();
+//        LOGI("time cost: %f ms", end - start);
+//        jfloatArray res = env->NewFloatArray(output.h * output.w);
+//        env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
+//        return res;
+//    } catch (exception e){
+//        jclass exception_class = env->FindClass("java/lang/RuntimeException");
+//        if (exception_class){
+//            env->ThrowNew(exception_class, e.what());
+//        }
+//        env->DeleteLocalRef(exception_class);
+//    }
+//    return nullptr;
+
 }
 
 extern "C"
@@ -167,7 +197,7 @@ Java_com_example_moereng_MainActivity_testgpu(JNIEnv *env, jobject thiz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_moereng_Vits_destroy(JNIEnv *env, jobject thiz) {
-    freenets(nets);
+    freenets();
 }
 
 extern "C"

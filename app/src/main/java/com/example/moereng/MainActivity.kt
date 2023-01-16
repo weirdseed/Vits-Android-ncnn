@@ -47,9 +47,13 @@ class MainActivity : AppCompatActivity() {
     private var isRefused = true
 
     // 判断是否处理完毕
-    private var flag = true
+    private var finish_flag = true
 
     private var vulkan_state = false
+
+    private var voice_convert = false
+
+    private var multi = true
 
     private var current_threads = 1
 
@@ -62,6 +66,8 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_CODE_SELECT_CONFIG = 2
 
     private var noise_scale: Float = .667f
+
+    private var noise_scale_w: Float = .8f
 
     private var length_scale: Float = 1f
 
@@ -79,11 +85,13 @@ class MainActivity : AppCompatActivity() {
             .replace("”", "")
     }
 
+    // check max supported threads
     private fun check_threads() {
         max_threads = check_threads_cpp()
 
     }
 
+    // init speaker spinner
     private fun init_spinner() {
         val spinner_array = IntArray(max_threads)
         for (i in 1..max_threads) {
@@ -100,18 +108,28 @@ class MainActivity : AppCompatActivity() {
         when (type) {
             "model" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    binding.modelPath.text = "加载失败，请把文件放在Android/media下"
+                    binding.modelPath.text = "加载失败，请把文件放在Android/media/model/文件夹"
                 } else {
-                    binding.modelPath.text = "加载失败，请把文件放在Download文件夹下"
+                    binding.modelPath.text = "加载失败，请把文件放在Download文件夹"
                 }
             }
             "config" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    binding.configPath.text = "加载失败，请把文件放在Android/media下"
+                    binding.configPath.text = "加载失败，请把文件放在Android/media/model/文件夹"
                 } else {
-                    binding.configPath.text = "加载失败，请把文件放在Download文件夹下"
+                    binding.configPath.text = "加载失败，请把文件放在Download文件夹"
                 }
             }
+        }
+    }
+
+    private fun init_path(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            binding.configPath.text = "请把文件放在Android/media/model/文件夹"
+            binding.modelPath.text = "请把文件放在Android/media/model/文件夹"
+        } else {
+            binding.configPath.text = "请把文件放在Download文件夹"
+            binding.modelPath.text = "请把文件放在Download文件夹"
         }
     }
 
@@ -166,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     // inference and play sound
     @SuppressLint("SetTextI18n")
     private fun processWords(text: String) {
-        flag = false
+        finish_flag = false
         runOnUiThread {
             binding.currentProgress.visibility = View.VISIBLE
             binding.progressText.visibility = View.VISIBLE
@@ -179,13 +197,15 @@ class MainActivity : AppCompatActivity() {
             if (sentences != null) {
                 tracker.play()
                 for (i in sentences.indices) {
-                    // 运行推理
+                    // start inference
                     val output =
                         module?.forward(
                             sentences[i].toIntArray(),
                             vulkan_state,
+                            multi,
                             sid,
                             noise_scale,
+                            noise_scale_w,
                             length_scale,
                             current_threads
                         )
@@ -199,6 +219,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+            // write audio stream
             if (audioStream.isNotEmpty())
                 tracker.write(
                     audioStream.toFloatArray(),
@@ -218,7 +239,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("MainActivity", e.message.toString())
         }
-        flag = true
+        finish_flag = true
     }
 
     private fun requestExternalStorage() {
@@ -239,6 +260,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // load and initialize models
     private fun load_model(path: String): Boolean {
         var folder = ""
         if (path.endsWith("dec.ncnn.bin")) {
@@ -259,23 +281,33 @@ class MainActivity : AppCompatActivity() {
         if (folder == "") return false
         try {
             module = Vits()
-            return module!!.init_vits(assets, folder, max_threads)
+            return module!!.init_vits(assets, folder, voice_convert, multi, max_threads)
         } catch (e: IOException) {
             return false
         }
     }
 
+    // load config file
     private fun load_configs(path: String): Boolean {
-        configs = null
         configs = ModelFileUtils.parseConfig(this, path)
         if (configs != null) {
-            max_speaker = configs!!.data.n_speakers
-            showSid()
+            if (configs!!.data.n_speakers > 1){
+                multi = true
+                max_speaker = configs!!.data.n_speakers
+                showSid()
+            } else {
+                binding.speakerId.visibility = View.GONE
+                binding.sidText.visibility = View.GONE
+                multi = false
+            }
         }
         return configs != null
     }
 
+    // show speakers' names
     private fun showSid() {
+        binding.speakerId.visibility = View.VISIBLE
+        binding.sidText.visibility = View.VISIBLE
         binding.speakerId.maxValue = max_speaker - 1
         binding.speakerId.displayedValues = configs?.speakers?.toTypedArray()
     }
@@ -288,15 +320,21 @@ class MainActivity : AppCompatActivity() {
         // 权限申请
         requestExternalStorage()
 
+        // detect gpu availability
         if (testgpu()) {
             binding.vulkanSwitcher.visibility = View.VISIBLE
         } else {
             binding.vulkanSwitcher.visibility = View.GONE
         }
 
+        // get max threads
         check_threads()
 
+        // init speakers spinner
         init_spinner()
+
+        // init path string
+        init_path()
 
         binding.selectModel.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -312,10 +350,12 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, REQUEST_CODE_SELECT_CONFIG)
         }
 
+        // vulkan switcher
         binding.vulkanSwitcher.setOnCheckedChangeListener { bottomview, ischecked ->
             vulkan_state = ischecked
         }
 
+        // noise slider
         binding.noiseScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 noise_scale = p1.toFloat() / 100f
@@ -329,6 +369,22 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        // noise w slider
+        binding.noiseScaleW.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                noise_scale_w = p1.toFloat() / 100f
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                Toast.makeText(this@MainActivity, noise_scale_w.toString(), Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
+        // length slider
         binding.lengthScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 length_scale = p1.toFloat() / 100f
@@ -343,8 +399,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        // speaker ids spinner listener
         binding.speakerId.setOnValueChangedListener { p0, p1, p2 -> sid = p2 }
 
+        // threads spinner listener
         binding.threadSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                 current_threads = min(p2 + 1, max_threads)
@@ -359,6 +417,7 @@ class MainActivity : AppCompatActivity() {
         // 初始化openjtalk模型
         initOpenjtalk(assets)
 
+        // initialize cleaner
         japanese_cleaner = Cleaner()
 
         tracker = Player.buildTracker()
@@ -368,7 +427,7 @@ class MainActivity : AppCompatActivity() {
             if (module != null && configs != null) {
                 if (inputText!!.isNotEmpty()) {
                     // 处理完毕
-                    if (flag) {
+                    if (finish_flag) {
                         thread {
                             processWords(inputText.toString())
                         }
@@ -430,8 +489,8 @@ class MainActivity : AppCompatActivity() {
                                     Toast.makeText(
                                         this, "请选择正确的模型文件,以.bin结尾",
                                         Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                                    ).show()
+                                    binding.modelPath.text = "加载失败！"
                                 }
                             }
                         } catch (e: Exception) {
@@ -448,6 +507,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             REQUEST_CODE_SELECT_CONFIG -> {
+                init_path()
+                binding.modelPath.visibility = View.GONE
+                binding.selectModel.visibility = View.GONE
                 if (uri != null) {
                     try {
                         val realpath = getPathFromUri(this, uri)!!
@@ -458,19 +520,23 @@ class MainActivity : AppCompatActivity() {
                                     this, "配置加载成功！",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                binding.modelPath.visibility = View.VISIBLE
+                                binding.selectModel.visibility = View.VISIBLE
                             } else {
                                 show_tips("config")
                                 Toast.makeText(
                                     this, "配置加载失败！",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                binding.modelPath.visibility = View.GONE
+                                binding.selectModel.visibility = View.GONE
                             }
                         } else {
                             Toast.makeText(
                                 this, "请选择正确的配置文件，以.json结尾",
                                 Toast.LENGTH_SHORT
-                            )
-                                .show()
+                            ).show()
+                            binding.configPath.text = "加载失败！"
                         }
                     } catch (e: Exception) {
                         show_tips("config")

@@ -19,8 +19,8 @@ private:
 
     AAssetManager *assetManager{};
 
-    bool load_model(const std::string &folder, Net &net, const Option &opt,
-                    const string name, bool multi = true);
+    bool load_model(const std::string &folder, bool multi, Net &net, const Option &opt,
+                    const string name);
 
     static std::vector<Mat>
     enc_p_forward(const Mat &x, const Net &enc_p, bool vulkan, const int num_threads);
@@ -31,7 +31,7 @@ private:
     static Mat emb_g_forward(int sid, const Net &emb_g, bool vulkan, const int num_threads);
 
     static Mat
-    dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g, const Net &dp,
+    dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g, float noise_scale, const Net &dp,
                bool vulkan, const int num_threads);
 
     static Mat
@@ -45,21 +45,18 @@ private:
 
 public:
 
-    bool init(const std::string &model_folder, AssetJNI *assetJni, Nets *nets, const Option &opt,
-              bool voice_convert = false, bool multi = true);
+    bool init(const std::string &model_folder, bool voice_convert, bool multi, AssetJNI *assetJni, Nets *nets, const Option &opt);
 
     SynthesizerTrn();
 
-    static Mat forward(const Mat &x, Nets *nets, int num_threads, bool vulkan = false, int sid = 0,
-                       float noise_scale = .667, float noise_scale_w = 0.8, float length_scale = 1);
+    static Mat forward(const Mat &x, Nets *nets, int num_threads, bool vulkan = false, bool multi = false,
+                       int sid = 0, float noise_scale = .667, float noise_scale_w = 0.8, float length_scale = 1);
 
     static Mat voice_convert(const Mat& x, int raw_sid, int target_sid,
                              Nets *net, int num_threads, bool vulkan = false);
 
     ~SynthesizerTrn();
 };
-
-void freenets(Nets *nets);
 
 #endif
 #pragma once

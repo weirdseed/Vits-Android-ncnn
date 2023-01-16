@@ -29,8 +29,8 @@ DEFINE_LAYER_CREATOR(ZerosLike)
 
 DEFINE_LAYER_CREATOR(RandnLike)
 
-bool SynthesizerTrn::load_model(const std::string &folder, Net &net, const Option &opt,
-                                const string name, bool multi) {
+bool SynthesizerTrn::load_model(const std::string &folder, bool multi,Net &net, const Option &opt,
+                                const string name) {
     LOGI("loading %s...\n", name.c_str());
     net.register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
     net.register_custom_layer("modules.Transpose", Transpose_layer_creator);
@@ -51,6 +51,7 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net &net, const Optio
     std::string bin_path = join_path(folder, name + ".ncnn.bin");
     std::string param_path = name + ".ncnn.param";
     if (multi) param_path = "multi/" + param_path;
+    else param_path = "single/" + param_path;
     bool param_success = !net.load_param(assetManager, param_path.c_str());
     bool bin_success = !net.load_model(bin_path.c_str());
 
@@ -115,7 +116,7 @@ Mat SynthesizerTrn::emb_g_forward(int sid, const Net &emb_g,
     return out;
 }
 
-Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g,
+Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g, float noise_scale,
                                const Net &dp, bool vulkan, const int num_threads) {
     Mat out;
     Extractor ex = dp.create_extractor();
@@ -124,7 +125,15 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
     ex.input("in0", x);
     ex.input("in1", x_mask);
     ex.input("in2", z);
-    ex.input("in3", g);
+    Mat nsc;
+    nsc.create_like(z);
+    nsc.fill(noise_scale);
+    if (!g.empty()) {
+        ex.input("in3", nsc);
+        ex.input("in4", g);
+    } else {
+        ex.input("in3", nsc);
+    }
     ex.extract("out0", out);
     return out;
 }
@@ -137,7 +146,7 @@ Mat SynthesizerTrn::flow_reverse_forward(const Mat &x, const Mat &x_mask, const 
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", x_mask);
-    ex.input("in2", g);
+    if (!g.empty()) ex.input("in2", g);
     Mat out;
     ex.extract("out0", out);
     return out;
@@ -162,46 +171,40 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec_net, 
     ex.set_num_threads(num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
-    ex.input("in1", g);
+    if (!g.empty()) ex.input("in1", g);
     Mat out;
     ex.extract("out0", out);
     return out;
 }
 
-bool SynthesizerTrn::init(const std::string &model_folder, AssetJNI *assetJni, Nets *nets,
-                          const Option &opt, bool voice_convert, bool multi) {
+bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
+                          AssetJNI *assetJni, Nets *nets, const Option &opt) {
     assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
-//    if (voice_convert){
-//        if (load_model(model_folder, nets->enc_q, opt, "enc_q") &&
-//            load_model(model_folder, nets->dec_net, opt, "dec") &&
-//            load_model(model_folder, nets->flow, opt, "flow") &&
-//            load_model(model_folder, nets->flow_reverse, opt, "flow.reverse") &&
-//            load_model(model_folder, nets->emb_g, opt, "emb_g"))
-//            return true;
-//    } else {
-//        if (load_model(model_folder, nets->enc_p, opt, "enc_p") &&
-//            load_model(model_folder, nets->enc_q, opt, "enc_q") &&
-//            load_model(model_folder, nets->dec_net, opt, "dec") &&
-//            load_model(model_folder, nets->flow_reverse, opt, "flow.reverse") &&
-//            load_model(model_folder, nets->dp, opt, "dp") &&
-//            load_model(model_folder, nets->emb_g, opt, "emb_g"))
-//            return true;
-//    }
-    if (load_model(model_folder, nets->enc_p, opt, "enc_p") &&
-        load_model(model_folder, nets->enc_q, opt, "enc_q") &&
-        load_model(model_folder, nets->dec_net, opt, "dec") &&
-        load_model(model_folder, nets->flow, opt, "flow") &&
-        load_model(model_folder, nets->flow_reverse, opt, "flow.reverse") &&
-        load_model(model_folder, nets->dp, opt, "dp") &&
-        load_model(model_folder, nets->emb_g, opt, "emb_g"))
-        return true;
+    if (multi){
+        if (load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
+            load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
+            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
+            load_model(model_folder, multi, nets->flow, opt, "flow") &&
+            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
+            load_model(model_folder, multi, nets->dp, opt, "dp") &&
+            load_model(model_folder, multi, nets->emb_g, opt, "emb_g"))
+            return true;
+    } else {
+        if (load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
+            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
+            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
+            load_model(model_folder, multi, nets->dp, opt, "dp"))
+            return true;
+    }
+
     return false;
 }
 
 SynthesizerTrn::SynthesizerTrn() = default;
 
-Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool vulkan, int sid,
-                            float noise_scale, float noise_scale_w, float length_scale) {
+// c++ implementation of SynthesizerTrn
+Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool vulkan, bool multi,
+                            int sid, float noise_scale, float noise_scale_w, float length_scale) {
     LOGI("processing...\n");
     Option opt;
     opt.num_threads = num_threads;
@@ -212,13 +215,12 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
     Mat logs_p = enc_p_out[2];
     Mat x_mask = reducedims(enc_p_out[3]);
 
-    Mat g = mattranspose(emb_g_forward(sid, nets->emb_g, vulkan, num_threads), opt);
-
-    g = reducedims(g);
+    Mat g;
+    if (multi) g = reducedims(mattranspose(emb_g_forward(sid, nets->emb_g, vulkan, num_threads), opt));
 
     Mat z = randn(x.w, 2, opt);
 
-    Mat logw = dp_forward(x, x_mask, z, g, nets->dp, vulkan, num_threads);
+    Mat logw = dp_forward(x, x_mask, z, g, noise_scale_w, nets->dp, vulkan, num_threads);
 
     Mat w = product(matproduct(matexp(logw, opt), x_mask, opt), length_scale, opt);
 
@@ -228,8 +230,7 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
 
     if (summed[0] < 1) summed[0] = 1;
 
-    Mat y_length = summed.clone();
-    Mat y_mask = sequence_mask(y_length, opt, y_length[0]);
+    Mat y_mask = sequence_mask(summed, opt, summed[0]);
 
     y_mask = mattranspose(y_mask, opt);
     y_mask = reducedims(y_mask);
@@ -258,6 +259,7 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
 
     Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g), nets->dec_net,
                         vulkan, num_threads);
+    o = product(o, 2, opt);
     LOGI("finished!\n");
     return o;
 }
@@ -267,7 +269,6 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     Option opt;
     opt.num_threads = num_threads;
     LOGI("start converting...\n");
-
     // stft transform
     auto spec = stft(audio, 1024, 256, 1024, opt)[0];
     spec = matsqrt(Plus(matpow(spec, 2, opt), 1e-6, opt), opt);
@@ -289,9 +290,7 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
 
 SynthesizerTrn::~SynthesizerTrn() = default;
 
-void freenets(Nets *nets) {
-    free(nets);
-}
+
 
 
 

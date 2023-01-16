@@ -99,9 +99,7 @@ void pretty_print(const ncnn::Mat &m, const Option &opt, const char *name) {
 }
 
 Mat softmax(const Mat &m, const Option &opt, int axis) {
-    // value = exp( value - global max value )
-    // sum all value
-    // value = value / sum
+    if (m.empty()) return m;
     Mat blob = m.clone();
     int dims = blob.dims;
     size_t elemsize = blob.elemsize;
@@ -327,6 +325,7 @@ Mat softmax(const Mat &m, const Option &opt, int axis) {
 }
 
 Mat cumsum(const Mat &blob, const Option &opt) {
+    if (blob.empty()) return blob;
     int w = blob.w;
     int h = blob.h;
     int c = blob.c;
@@ -350,6 +349,7 @@ Mat cumsum(const Mat &blob, const Option &opt) {
 
 Mat pad(const Mat &blob, int pad_top, int pad_bottom, int pad_left, int pad_right, float pad_value,
         const Option &opt) {
+    if (blob.empty()) return blob;
     Mat res;
     int pad_row = pad_left + pad_right;
     int pad_column = pad_top + pad_bottom;
@@ -376,6 +376,7 @@ Mat pad(const Mat &blob, int pad_top, int pad_bottom, int pad_left, int pad_righ
 
 Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_w, int stride_h,
           const Option &opt) {
+    if (blob.empty()) return blob;
     Mat res;
     int res_w = ceil(float(right - left) / float(stride_w));
     int res_h = ceil(float(bottom - top) / float(stride_h));
@@ -417,6 +418,7 @@ Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_
 }
 
 Mat reducedims(const Mat &m) {
+    if (m.empty()) return m;
     if (m.dims == 1) return m;
     if (m.dims == 2) return m.reshape(m.w*m.h);
     if (m.dims == 3) {
@@ -430,12 +432,14 @@ Mat reducedims(const Mat &m) {
 }
 
 Mat expanddims(const Mat &m) {
+    if (m.empty()) return m;
     if (m.dims == 1) return m.reshape(m.w, 1);
     if (m.dims == 2) return m.reshape(m.w, m.h, 1);
 	return m;
 }
 
 void set_column_value(Mat &blob, int column, float value, const Option &opt) {
+    if (blob.empty()) return;
     int w = blob.w;
     int h = blob.h;
     int c = blob.c;
@@ -451,6 +455,7 @@ void set_column_value(Mat &blob, int column, float value, const Option &opt) {
 }
 
 Mat softplus(const Mat &blob, const Option &opt) {
+    if (blob.empty()) return blob;
     Mat res;
     res.create_like(blob);
 
@@ -466,6 +471,7 @@ Mat softplus(const Mat &blob, const Option &opt) {
 }
 
 Mat searchsorted(Mat &bin_locations, const Mat &inputs, const Option &opt) {
+    if (bin_locations.empty() || inputs.empty()) return {};
     float eps = 1e-6;
     int h = bin_locations.h;
     int w = bin_locations.w;
@@ -516,6 +522,7 @@ Mat searchsorted(Mat &bin_locations, const Mat &inputs, const Option &opt) {
 }
 
 Mat gather(Mat &blob, Mat &index, const Option &opt) {
+    if (blob.empty()) return blob;
     Mat res;
     res.create_like(index);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -533,6 +540,7 @@ Mat gather(Mat &blob, Mat &index, const Option &opt) {
 }
 
 Mat matplus(const Mat &m1, const Mat &m2, const Option &opt) {
+    if (m1.empty() || m2.empty()) return {};
     Mat res;
     res.create_like(m1);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -548,6 +556,7 @@ Mat matplus(const Mat &m1, const Mat &m2, const Option &opt) {
 }
 
 Mat matminus(const Mat &m1, const Mat &m2, const Option &opt) {
+    if (m1.empty() || m2.empty()) return {};
     Mat res;
     res.create_like(m1);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -563,6 +572,7 @@ Mat matminus(const Mat &m1, const Mat &m2, const Option &opt) {
 }
 
 Mat matdiv(const Mat &m1, const Mat &m2, const Option &opt) {
+    if (m1.empty() || m2.empty()) return {};
     Mat res;
     res.create_like(m1);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -578,6 +588,7 @@ Mat matdiv(const Mat &m1, const Mat &m2, const Option &opt) {
 }
 
 Mat matproduct(const Mat &m1, const Mat &m2, const Option &opt) {
+    if (m1.empty() || m2.empty()) return {};
     Mat res;
     res.create_like(m1);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -593,6 +604,7 @@ Mat matproduct(const Mat &m1, const Mat &m2, const Option &opt) {
 }
 
 Mat product(const Mat &m, float value, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -607,6 +619,7 @@ Mat product(const Mat &m, float value, const Option &opt) {
 }
 
 Mat matpow(const Mat &m, float value, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -621,6 +634,7 @@ Mat matpow(const Mat &m, float value, const Option &opt) {
 }
 
 Mat matexp(const Mat &m, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -635,6 +649,7 @@ Mat matexp(const Mat &m, const Option &opt) {
 }
 
 Mat ceil(const Mat &m, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -649,6 +664,7 @@ Mat ceil(const Mat &m, const Option &opt) {
 }
 
 Mat sum(const Mat &m, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create(1);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -665,6 +681,7 @@ Mat sum(const Mat &m, const Option &opt) {
 }
 
 Mat div(const Mat &m, float value, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -679,6 +696,7 @@ Mat div(const Mat &m, float value, const Option &opt) {
 }
 
 Mat matsqrt(const Mat &m, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -707,6 +725,7 @@ float matmax(const Mat &m, const Option &opt) {
 }
 
 Mat expand(const Mat &m, int w, int h, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     if (m.dims > 2) res.create(w, h, m.c);
     else res.create(w, h);
@@ -750,6 +769,7 @@ Mat randn(int w, int h, const Option &opt, int c) {
 }
 
 Mat sequence_mask(const Mat &length, const Option &opt, float max_length_) {
+    if (length.empty()) return {};
     int max_length = 0;
     if (max_length_ == 0) {
         max_length = matmax(length, opt);
@@ -780,6 +800,7 @@ Mat sequence_mask(const Mat &length, const Option &opt, float max_length_) {
 }
 
 Mat generate_path(const Mat &duration, const Mat mask, const Option &opt) {
+    if (duration.empty() || mask.empty()) return {};
     Mat cum_duration = cumsum(duration, opt);
     int t_y = mask.h;
     Mat path = sequence_mask(cum_duration, opt, t_y);
@@ -791,6 +812,7 @@ Mat generate_path(const Mat &duration, const Mat mask, const Option &opt) {
 }
 
 Mat mattranspose(const Mat &m, const Option &opt) {
+    if (m.empty()) return m;
     int w = m.w;
     int h = m.h;
     int c = m.c;
@@ -814,6 +836,7 @@ Mat mattranspose(const Mat &m, const Option &opt) {
 }
 
 Mat matmul(const Mat &m1, const Mat &m2, const Option &opt) {
+    if (m1.empty() || m2.empty()) return {};
     Mat res;
     res.create(m2.w, m1.h, m1.c);
 
@@ -842,6 +865,7 @@ Mat matmul(const Mat &m1, const Mat &m2, const Option &opt) {
 
 void mask_fill(Mat &m, const Mat &mask, const char *condition, float condition_value, float value,
                const Option &opt) {
+    if (m.empty() || mask.empty()) return;
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < m.c; i++) {
         float *ptr = m.channel(i);
@@ -890,6 +914,7 @@ Mat _get_relative_embeddings(const Mat &relative_embeddings, int length, int win
 }
 
 Mat _matmul_with_relative_keys(const Mat &x, const Mat &y, const Option &opt) {
+    if (x.empty() || y.empty()) return {};
     // concat
     Mat y_;
     y_.create(y.w, y.h, y.c * 2);
@@ -904,6 +929,7 @@ Mat _matmul_with_relative_keys(const Mat &x, const Mat &y, const Option &opt) {
 }
 
 Mat _relative_position_to_absolute_position(const Mat &x, const Option &opt) {
+    if (x.empty()) return x;
     int heads = x.c;
     int length = x.h;
     // padding
@@ -919,6 +945,7 @@ Mat _relative_position_to_absolute_position(const Mat &x, const Option &opt) {
 }
 
 Mat _absolute_position_to_relative_position(const Mat &x, const Option &opt) {
+    if (x.empty()) return {};
     int heads = x.c;
     int length = x.h;
     Mat x_pad = pad(x, 0, 0, 0, length - 1, 0, opt);
@@ -931,6 +958,7 @@ Mat _absolute_position_to_relative_position(const Mat &x, const Option &opt) {
 }
 
 Mat _matmul_with_relative_values(const Mat &x, const Mat &y, const Option &opt) {
+    if (x.empty() || y.empty()) return {};
     // concat
     Mat y_;
     y_.create(y.w, y.h, y.c * 2);
@@ -944,12 +972,14 @@ Mat _matmul_with_relative_values(const Mat &x, const Mat &y, const Option &opt) 
 }
 
 Mat zeros_like(const Mat &x, const Option &opt) {
+    if (x.empty()) return x;
     Mat out = x.clone();
     out.fill(0);
     return out;
 }
 
 Mat concat(const Mat &m1, const Mat &m2, const Option &opt) {
+    if (m1.empty() || m2.empty()) return {};
     Mat res(m1.w, m1.h+m2.h);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < m1.c; i++) {
@@ -1011,6 +1041,7 @@ std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const s
 
 std::vector<Mat> rfft(const Mat& m, Option& opt)
 {
+    if (m.empty()) return {};
     Mat real, image;
     if (m.dims == 2) {
         real.create(m.w / 2 + 1, m.h);
@@ -1072,6 +1103,7 @@ Mat hanning_window(const int n, Option& opt)
 
 Mat as_strides(const Mat& x, const int h, const int w, Option& opt)
 {
+    if (x.empty()) return {};
     Mat res(h, w);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < x.c; i++) {
@@ -1088,6 +1120,7 @@ Mat as_strides(const Mat& x, const int h, const int w, Option& opt)
 
 Mat frame(const Mat& x, const int frame_length, const int hop_length, Option& opt)
 {
+    if (x.empty()) return {};
     // x: [1,n]
     int x_w_trimmed = x.w - (frame_length - 1);
     auto xw = as_strides(x, x_w_trimmed, frame_length, opt);
@@ -1098,6 +1131,7 @@ Mat frame(const Mat& x, const int frame_length, const int hop_length, Option& op
 
 std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_length, const int win_length, Option& opt)
 {
+    if (y.empty()) return {};
     // hann window
     auto fft_window = hanning_window(win_length, opt);
     fft_window = reducedims(mattranspose(fft_window, opt));
@@ -1137,6 +1171,7 @@ std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_lengt
 }
 
 Mat Plus(const Mat &m, float value, const Option &opt) {
+    if (m.empty()) return m;
     Mat res;
     res.create_like(m);
     #pragma omp parallel for num_threads(opt.num_threads)

@@ -39,7 +39,6 @@ add_library(moereng SHARED ${libassetmanager_source} ${libmecab_source} ${libjpc
                       ${ncnn_vits_source}  native-lib.cpp )
 
 
-
 find_library( # Sets the name of the path variable.
         android-lib
         # Specifies the name of the NDK library that

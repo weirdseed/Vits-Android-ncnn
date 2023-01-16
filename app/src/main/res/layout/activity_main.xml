@@ -7,6 +7,34 @@
     tools:context=".MainActivity">
 
     <SeekBar
+        android:id="@+id/noise_scale_w"
+        android:layout_width="226dp"
+        android:layout_height="36dp"
+        android:max="100"
+        android:min="0"
+        android:progress="80"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.663" />
+
+    <TextView
+        android:id="@+id/text3"
+        android:layout_width="60dp"
+        android:layout_height="21dp"
+        android:layout_marginStart="16dp"
+        android:text="噪声范围1"
+        android:textAlignment="center"
+        android:textSize="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.67"
+        tools:ignore="MissingConstraints" />
+
+    <SeekBar
         android:id="@+id/length_scale"
         android:layout_width="226dp"
         android:layout_height="36dp"
@@ -18,7 +46,22 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.68" />
+        app:layout_constraintVertical_bias="0.732" />
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="67dp"
+        android:layout_height="23dp"
+        android:text="音频长度"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.046"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.737"
+        tools:ignore="MissingConstraints" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout"
@@ -47,6 +90,19 @@
         app:layout_constraintVertical_bias="0.03" />
 
     <Button
+        android:id="@+id/select_config"
+        android:layout_width="83dp"
+        android:layout_height="52dp"
+        android:text="加载配置"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.048"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.868" />
+
+    <Button
         android:id="@+id/playBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,60 +114,52 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.499" />
 
-    <TextView
-        android:id="@+id/model_path"
-        android:layout_width="107dp"
-        android:layout_height="33dp"
-        android:ellipsize="end"
-        android:gravity="center_vertical"
-        android:text="模型文件路径"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.828" />
-
-    <Button
-        android:id="@+id/select_config"
-        android:layout_width="83dp"
-        android:layout_height="52dp"
-        android:text="配置文件"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.131"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.936" />
-
     <Button
         android:id="@+id/select_model"
         android:layout_width="85dp"
         android:layout_height="48dp"
-        android:text="模型文件"
+        android:text="加载模型"
+        android:textSize="10sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.959" />
+
+    <TextView
+        android:id="@+id/model_path"
+        android:layout_width="130dp"
+        android:layout_height="52dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:text="模型文件路径"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.125"
+        app:layout_constraintHorizontal_bias="0.412"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.834" />
+        app:layout_constraintVertical_bias="0.958" />
+
+
 
     <TextView
         android:id="@+id/config_path"
-        android:layout_width="108dp"
-        android:layout_height="34dp"
+        android:layout_width="130dp"
+        android:layout_height="52dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
-        android:text="请把配置文件放在Android/media下"
+        android:text="配置文件路径"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintHorizontal_bias="0.412"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.921" />
+        app:layout_constraintVertical_bias="0.872" />
 
     <Switch
         android:id="@+id/vulkan_switcher"
@@ -155,27 +203,13 @@
         app:layout_constraintVertical_bias="0.595"
         tools:ignore="MissingConstraints" />
 
-    <TextView
-        android:id="@+id/text2"
-        android:layout_width="67dp"
-        android:layout_height="23dp"
-        android:text="音频长度"
-        android:textAlignment="center"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.046"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.686"
-        tools:ignore="MissingConstraints" />
-
     <NumberPicker
         android:id="@+id/speaker_id"
         android:layout_width="85dp"
         android:layout_height="67dp"
         android:scaleX="0.8"
         android:scaleY="0.8"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.904"
@@ -189,6 +223,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="讲话人"
+        android:visibility="gone"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -247,7 +282,7 @@
     <Spinner
         android:id="@+id/thread_spinner"
         android:layout_width="77dp"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:scaleX="0.8"
         android:scaleY="0.8"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -255,7 +290,7 @@
         app:layout_constraintHorizontal_bias="0.952"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.505" />
+        app:layout_constraintVertical_bias="0.51" />
 
     <TextView
         android:id="@+id/textView"
