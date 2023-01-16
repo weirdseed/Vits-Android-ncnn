@@ -4,9 +4,9 @@
 
 本项目基于https://github.com/jaywalnut310/vits 训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
 
-日语cleaners基于https://github.com/CjangCjengh/MoeGoe
+日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)
 
-日语分词和声调基于https://github.com/r9y9/open_jtalk 进行移植部署
+日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)进行移植部署
 
 # 更新
 - 将pytorch模型转换为ncnn模型，缩小模型体积和安装包体积，实现推理加速
@@ -43,11 +43,9 @@
 
 4、ncnn模型和配置文件链接：[模型地址](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/ncnn/Nene.+.Meguru.+.Yoshino.+.Mako.+.Murasame.+.Koharu.+.Nanami.zip)
 
-5、@CjangCjengh大佬项目地址：https://github.com/CjangCjengh/MoeGoe
+5、本项目主要由c++实现，因此确保安装ndk和配置好环境
 
-6、本项目主要由c++实现，因此确保安装ndk和配置好环境
-
-7、模型转换工具正在完善，以后也会发布，可以将自己训练好的模型转换成ncnn支持的格式，并且以后也会实现voice convert，总之，敬请期待！！
+6、模型转换工具正在完善，以后也会发布，可以将自己训练好的模型转换成ncnn支持的格式，并且以后也会实现voice convert，总之，敬请期待！！
 
 **模型禁止商用，后果自付！！！**
 
