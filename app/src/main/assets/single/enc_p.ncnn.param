@@ -1,0 +1,211 @@
+7767517
+209 298
+Input                    in0                      0 1 in0
+Input                    in1                      0 1 in1
+Embedding                    embed_43                 1 1 in0 2 0=192 1=43 2=0 3=8256
+BinaryOp                 mul_0                    1 1 2 3 0=2 1=1 2=1.385641e+01
+modules.Transpose        transepose               1 1 3 4
+Split                    splitncnn_0              1 3 4 5 6 7
+modules.SequenceMask     sequence_mask            2 1 5 in1 8
+ExpandDims               unsqueeze_56             1 1 8 9 -23303=1,0
+Split                    splitncnn_1              1 29 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 out3
+Tensor.expand_as         Tensor.expand_as_18      2 1 37 6 39
+BinaryOp                 mul_1                    2 1 7 39 40 0=2
+Split                    splitncnn_2              1 2 40 41 42
+Tensor.expand_as         Tensor.expand_as_19      2 1 36 41 43
+BinaryOp                 mul_2                    2 1 42 43 44 0=2
+Split                    splitncnn_3              1 5 44 45 46 47 48 49
+MemoryData               encoder.attn_layers.0    0 1 50 0=96 1=9
+MemoryData               pnnx_unique_0            0 1 51 0=96 1=9
+Convolution1D            conv1d_8                 1 1 47 52 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_7                 1 1 48 53 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_6                 1 1 49 54 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.Attention     attention                6 1 51 50 10 53 54 52 55
+Convolution1D            conv1d_9                 1 1 55 56 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.ExpandDim     expand_dim               2 1 56 45 57
+BinaryOp                 add_3                    2 1 46 57 58 0=0
+modules.Transpose        transpose                1 1 58 59
+LayerNorm                ln_44                    1 1 59 60 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_2            1 1 60 61
+Split                    splitncnn_4              1 4 61 62 63 64 65
+Tensor.expand_as         Tensor.expand_as_20      2 1 35 63 66
+BinaryOp                 mul_4                    2 1 64 66 67 0=2
+attentions.SamePadding   padding                  1 1 67 68
+Convolution1D            conv1drelu_0             1 1 68 69 0=768 1=3 2=1 3=1 4=0 5=1 6=442368 9=1
+Split                    splitncnn_5              1 2 69 70 71
+Tensor.expand_as         Tensor.expand_as_21      2 1 34 70 72
+BinaryOp                 mul_5                    2 1 71 72 73 0=2
+attentions.SamePadding   pnnx_unique_3            1 1 73 74
+Convolution1D            conv1d_11                1 1 74 75 0=192 1=3 2=1 3=1 4=0 5=1 6=442368
+Split                    splitncnn_6              1 2 75 76 77
+Tensor.expand_as         Tensor.expand_as_22      2 1 33 76 78
+BinaryOp                 mul_6                    2 1 77 78 79 0=2
+attentions.ExpandDim     pnnx_unique_4            2 1 79 62 80
+BinaryOp                 add_7                    2 1 65 80 81 0=0
+modules.Transpose        pnnx_unique_6            1 1 81 82
+LayerNorm                ln_45                    1 1 82 83 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_7            1 1 83 84
+Split                    splitncnn_7              1 5 84 85 86 87 88 89
+MemoryData               encoder.attn_layers.1    0 1 90 0=96 1=9
+MemoryData               pnnx_unique_8            0 1 91 0=96 1=9
+Convolution1D            conv1d_14                1 1 87 92 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_13                1 1 88 93 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_12                1 1 89 94 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.Attention     pnnx_unique_9            6 1 91 90 11 93 94 92 95
+Convolution1D            conv1d_15                1 1 95 96 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.ExpandDim     pnnx_unique_10           2 1 96 85 97
+BinaryOp                 add_8                    2 1 86 97 98 0=0
+modules.Transpose        pnnx_unique_12           1 1 98 99
+LayerNorm                ln_46                    1 1 99 100 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_13           1 1 100 101
+Split                    splitncnn_8              1 4 101 102 103 104 105
+Tensor.expand_as         Tensor.expand_as_23      2 1 32 103 106
+BinaryOp                 mul_9                    2 1 104 106 107 0=2
+attentions.SamePadding   pnnx_unique_14           1 1 107 108
+Convolution1D            conv1drelu_1             1 1 108 109 0=768 1=3 2=1 3=1 4=0 5=1 6=442368 9=1
+Split                    splitncnn_9              1 2 109 110 111
+Tensor.expand_as         Tensor.expand_as_24      2 1 31 110 112
+BinaryOp                 mul_10                   2 1 111 112 113 0=2
+attentions.SamePadding   pnnx_unique_15           1 1 113 114
+Convolution1D            conv1d_17                1 1 114 115 0=192 1=3 2=1 3=1 4=0 5=1 6=442368
+Split                    splitncnn_10             1 2 115 116 117
+Tensor.expand_as         Tensor.expand_as_25      2 1 30 116 118
+BinaryOp                 mul_11                   2 1 117 118 119 0=2
+attentions.ExpandDim     pnnx_unique_16           2 1 119 102 120
+BinaryOp                 add_12                   2 1 105 120 121 0=0
+modules.Transpose        pnnx_unique_18           1 1 121 122
+LayerNorm                ln_47                    1 1 122 123 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_19           1 1 123 124
+Split                    splitncnn_11             1 5 124 125 126 127 128 129
+MemoryData               encoder.attn_layers.2    0 1 130 0=96 1=9
+MemoryData               pnnx_unique_20           0 1 131 0=96 1=9
+Convolution1D            conv1d_20                1 1 127 132 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_19                1 1 128 133 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_18                1 1 129 134 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.Attention     pnnx_unique_21           6 1 131 130 12 133 134 132 135
+Convolution1D            conv1d_21                1 1 135 136 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.ExpandDim     pnnx_unique_22           2 1 136 125 137
+BinaryOp                 add_13                   2 1 126 137 138 0=0
+modules.Transpose        pnnx_unique_24           1 1 138 139
+LayerNorm                ln_48                    1 1 139 140 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_25           1 1 140 141
+Split                    splitncnn_12             1 4 141 142 143 144 145
+Tensor.expand_as         Tensor.expand_as_26      2 1 29 143 146
+BinaryOp                 mul_14                   2 1 144 146 147 0=2
+attentions.SamePadding   pnnx_unique_26           1 1 147 148
+Convolution1D            conv1drelu_2             1 1 148 149 0=768 1=3 2=1 3=1 4=0 5=1 6=442368 9=1
+Split                    splitncnn_13             1 2 149 150 151
+Tensor.expand_as         Tensor.expand_as_27      2 1 28 150 152
+BinaryOp                 mul_15                   2 1 151 152 153 0=2
+attentions.SamePadding   pnnx_unique_27           1 1 153 154
+Convolution1D            conv1d_23                1 1 154 155 0=192 1=3 2=1 3=1 4=0 5=1 6=442368
+Split                    splitncnn_14             1 2 155 156 157
+Tensor.expand_as         Tensor.expand_as_28      2 1 27 156 158
+BinaryOp                 mul_16                   2 1 157 158 159 0=2
+attentions.ExpandDim     pnnx_unique_28           2 1 159 142 160
+BinaryOp                 add_17                   2 1 145 160 161 0=0
+modules.Transpose        pnnx_unique_30           1 1 161 162
+LayerNorm                ln_49                    1 1 162 163 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_31           1 1 163 164
+Split                    splitncnn_15             1 5 164 165 166 167 168 169
+MemoryData               encoder.attn_layers.3    0 1 170 0=96 1=9
+MemoryData               pnnx_unique_32           0 1 171 0=96 1=9
+Convolution1D            conv1d_26                1 1 167 172 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_25                1 1 168 173 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_24                1 1 169 174 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.Attention     pnnx_unique_33           6 1 171 170 13 173 174 172 175
+Convolution1D            conv1d_27                1 1 175 176 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.ExpandDim     pnnx_unique_34           2 1 176 165 177
+BinaryOp                 add_18                   2 1 166 177 178 0=0
+modules.Transpose        pnnx_unique_36           1 1 178 179
+LayerNorm                ln_50                    1 1 179 180 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_37           1 1 180 181
+Split                    splitncnn_16             1 4 181 182 183 184 185
+Tensor.expand_as         Tensor.expand_as_29      2 1 26 183 186
+BinaryOp                 mul_19                   2 1 184 186 187 0=2
+attentions.SamePadding   pnnx_unique_38           1 1 187 188
+Convolution1D            conv1drelu_3             1 1 188 189 0=768 1=3 2=1 3=1 4=0 5=1 6=442368 9=1
+Split                    splitncnn_17             1 2 189 190 191
+Tensor.expand_as         Tensor.expand_as_30      2 1 25 190 192
+BinaryOp                 mul_20                   2 1 191 192 193 0=2
+attentions.SamePadding   pnnx_unique_39           1 1 193 194
+Convolution1D            conv1d_29                1 1 194 195 0=192 1=3 2=1 3=1 4=0 5=1 6=442368
+Split                    splitncnn_18             1 2 195 196 197
+Tensor.expand_as         Tensor.expand_as_31      2 1 24 196 198
+BinaryOp                 mul_21                   2 1 197 198 199 0=2
+attentions.ExpandDim     pnnx_unique_40           2 1 199 182 200
+BinaryOp                 add_22                   2 1 185 200 201 0=0
+modules.Transpose        pnnx_unique_42           1 1 201 202
+LayerNorm                ln_51                    1 1 202 203 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_43           1 1 203 204
+Split                    splitncnn_19             1 5 204 205 206 207 208 209
+MemoryData               encoder.attn_layers.4    0 1 210 0=96 1=9
+MemoryData               pnnx_unique_44           0 1 211 0=96 1=9
+Convolution1D            conv1d_32                1 1 207 212 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_31                1 1 208 213 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_30                1 1 209 214 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.Attention     pnnx_unique_45           6 1 211 210 14 213 214 212 215
+Convolution1D            conv1d_33                1 1 215 216 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.ExpandDim     pnnx_unique_46           2 1 216 205 217
+BinaryOp                 add_23                   2 1 206 217 218 0=0
+modules.Transpose        pnnx_unique_48           1 1 218 219
+LayerNorm                ln_52                    1 1 219 220 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_49           1 1 220 221
+Split                    splitncnn_20             1 4 221 222 223 224 225
+Tensor.expand_as         Tensor.expand_as_32      2 1 23 223 226
+BinaryOp                 mul_24                   2 1 224 226 227 0=2
+attentions.SamePadding   pnnx_unique_50           1 1 227 228
+Convolution1D            conv1drelu_4             1 1 228 229 0=768 1=3 2=1 3=1 4=0 5=1 6=442368 9=1
+Split                    splitncnn_21             1 2 229 230 231
+Tensor.expand_as         Tensor.expand_as_33      2 1 22 230 232
+BinaryOp                 mul_25                   2 1 231 232 233 0=2
+attentions.SamePadding   pnnx_unique_51           1 1 233 234
+Convolution1D            conv1d_35                1 1 234 235 0=192 1=3 2=1 3=1 4=0 5=1 6=442368
+Split                    splitncnn_22             1 2 235 236 237
+Tensor.expand_as         Tensor.expand_as_34      2 1 21 236 238
+BinaryOp                 mul_26                   2 1 237 238 239 0=2
+attentions.ExpandDim     pnnx_unique_52           2 1 239 222 240
+BinaryOp                 add_27                   2 1 225 240 241 0=0
+modules.Transpose        pnnx_unique_54           1 1 241 242
+LayerNorm                ln_53                    1 1 242 243 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_55           1 1 243 244
+Split                    splitncnn_23             1 5 244 245 246 247 248 249
+MemoryData               encoder.attn_layers.5    0 1 250 0=96 1=9
+MemoryData               pnnx_unique_56           0 1 251 0=96 1=9
+Convolution1D            conv1d_38                1 1 247 252 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_37                1 1 248 253 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+Convolution1D            conv1d_36                1 1 249 254 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.Attention     pnnx_unique_57           6 1 251 250 15 253 254 252 255
+Convolution1D            conv1d_39                1 1 255 256 0=192 1=1 2=1 3=1 4=0 5=1 6=36864
+attentions.ExpandDim     pnnx_unique_58           2 1 256 245 257
+BinaryOp                 add_28                   2 1 246 257 258 0=0
+modules.Transpose        pnnx_unique_60           1 1 258 259
+LayerNorm                ln_54                    1 1 259 260 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_61           1 1 260 261
+Split                    splitncnn_24             1 4 261 262 263 264 265
+Tensor.expand_as         Tensor.expand_as_35      2 1 20 263 266
+BinaryOp                 mul_29                   2 1 264 266 267 0=2
+attentions.SamePadding   pnnx_unique_62           1 1 267 268
+Convolution1D            conv1drelu_5             1 1 268 269 0=768 1=3 2=1 3=1 4=0 5=1 6=442368 9=1
+Split                    splitncnn_25             1 2 269 270 271
+Tensor.expand_as         Tensor.expand_as_36      2 1 19 270 272
+BinaryOp                 mul_30                   2 1 271 272 273 0=2
+attentions.SamePadding   pnnx_unique_63           1 1 273 274
+Convolution1D            conv1d_41                1 1 274 275 0=192 1=3 2=1 3=1 4=0 5=1 6=442368
+Split                    splitncnn_26             1 2 275 276 277
+Tensor.expand_as         Tensor.expand_as_37      2 1 18 276 278
+BinaryOp                 mul_31                   2 1 277 278 279 0=2
+attentions.ExpandDim     pnnx_unique_64           2 1 279 262 280
+BinaryOp                 add_32                   2 1 265 280 281 0=0
+modules.Transpose        pnnx_unique_66           1 1 281 282
+LayerNorm                ln_55                    1 1 282 283 0=192 1=1.000000e-05 2=1
+modules.Transpose        pnnx_unique_67           1 1 283 284
+Split                    splitncnn_27             1 2 284 285 286
+Tensor.expand_as         Tensor.expand_as_38      2 1 17 285 287
+BinaryOp                 mul_33                   2 1 286 287 288 0=2
+Split                    splitncnn_28             1 2 288 out0 290
+Convolution1D            conv1d_42                1 1 290 291 0=384 1=1 2=1 3=1 4=0 5=1 6=73728
+Split                    splitncnn_29             1 2 291 292 293
+Tensor.expand_as         Tensor.expand_as_39      2 1 16 292 294
+BinaryOp                 mul_34                   2 1 293 294 295 0=2
+Slice                    split_0                  1 2 295 out1 out2 -23300=2,192,-233 1=0
