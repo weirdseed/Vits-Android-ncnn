@@ -96,17 +96,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun show_tips(type: String){
-        when(type){
-            "model"-> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+    private fun show_tips(type: String) {
+        when (type) {
+            "model" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     binding.modelPath.text = "加载失败，请把文件放在Android/media下"
                 } else {
                     binding.modelPath.text = "加载失败，请把文件放在Download文件夹下"
                 }
             }
-            "config"->{
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            "config" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     binding.configPath.text = "加载失败，请把文件放在Android/media下"
                 } else {
                     binding.configPath.text = "加载失败，请把文件放在Download文件夹下"
@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // split sentence and clean text
     private fun sentence_split(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
         var sentences = words_split_cpp(clean_inputs(text), assets)
@@ -162,6 +163,7 @@ class MainActivity : AppCompatActivity() {
         return outputs
     }
 
+    // inference and play sound
     @SuppressLint("SetTextI18n")
     private fun processWords(text: String) {
         flag = false
@@ -187,7 +189,6 @@ class MainActivity : AppCompatActivity() {
                             length_scale,
                             current_threads
                         )
-
                     if (output != null) {
                         audioStream.addAll(output.toList())
                     }
@@ -372,16 +373,22 @@ class MainActivity : AppCompatActivity() {
                             processWords(inputText.toString())
                         }
                     } else {
-                        Toast.makeText(this, "稍等...",
-                            Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this, "稍等...",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
-                    Toast.makeText(this, "请输入文字",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this, "请输入文字",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } else {
-                Toast.makeText(this, "请先加载配置文件和模型文件！",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this, "请先加载配置文件和模型文件！",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -403,21 +410,27 @@ class MainActivity : AppCompatActivity() {
                             if (realpath != null && realpath.endsWith(".bin")) {
                                 if (load_model(realpath) && module != null) {
                                     runOnUiThread {
-                                        Toast.makeText(this, "模型加载成功！",
-                                            Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this, "模型加载成功！",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         binding.modelPath.text = realpath
                                     }
                                 } else {
                                     runOnUiThread {
                                         show_tips("model")
-                                        Toast.makeText(this, "模型加载失败！",
-                                            Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this, "模型加载失败！",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
                             } else {
                                 runOnUiThread {
-                                    Toast.makeText(this, "请选择正确的模型文件,以.bin结尾",
-                                        Toast.LENGTH_SHORT)
+                                    Toast.makeText(
+                                        this, "请选择正确的模型文件,以.bin结尾",
+                                        Toast.LENGTH_SHORT
+                                    )
                                         .show()
                                 }
                             }
@@ -425,49 +438,48 @@ class MainActivity : AppCompatActivity() {
                             Log.e("MainActivity", e.message.toString())
                             runOnUiThread {
                                 show_tips("model")
-                                Toast.makeText(this, "模型加载失败！",
-                                    Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this, "模型加载失败！",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
                 }
             }
             REQUEST_CODE_SELECT_CONFIG -> {
-                thread {
-                    if (uri != null) {
-                        try {
-                            val realpath = getPathFromUri(this, uri)!!
-                            if (realpath.endsWith("json")) {
-                                if (load_configs(realpath) && configs != null) {
-                                    runOnUiThread {
-                                        binding.configPath.text = realpath
-                                        Toast.makeText(this, "配置加载成功！",
-                                            Toast.LENGTH_SHORT).show()
-                                    }
-                                } else {
-                                    runOnUiThread {
-                                        show_tips("config")
-                                        Toast.makeText(this, "配置加载失败！",
-                                            Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                if (uri != null) {
+                    try {
+                        val realpath = getPathFromUri(this, uri)!!
+                        if (realpath.endsWith("json")) {
+                            if (load_configs(realpath) && configs != null) {
+                                binding.configPath.text = realpath
+                                Toast.makeText(
+                                    this, "配置加载成功！",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             } else {
-                                runOnUiThread {
-                                    Toast.makeText(this, "请选择正确的配置文件，以.json结尾",
-                                        Toast.LENGTH_SHORT)
-                                        .show()
-                                }
+                                show_tips("config")
+                                Toast.makeText(
+                                    this, "配置加载失败！",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-                        } catch (e: Exception) {
-                            show_tips("config")
-                            Toast.makeText(this, "配置加载失败！",
-                                Toast.LENGTH_SHORT).show()
-
+                        } else {
+                            Toast.makeText(
+                                this, "请选择正确的配置文件，以.json结尾",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
                         }
-
+                    } catch (e: Exception) {
+                        show_tips("config")
+                        Toast.makeText(
+                            this, "配置加载失败！",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
-
             }
         }
 

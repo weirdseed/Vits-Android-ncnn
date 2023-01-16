@@ -101,22 +101,56 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
 
 extern "C"
 JNIEXPORT jfloatArray JNICALL
-Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jboolean vulkan, jint sid, jfloat noise_scale, jfloat length_scale, jint num_threads) {
-    int* x_ = env->GetIntArrayElements(x, nullptr);
+Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jboolean vulkan,
+                                      jint sid, jfloat noise_scale, jfloat length_scale,
+                                      jint num_threads) {
+    // jarray to ncnn mat
+    int *x_ = env->GetIntArrayElements(x, nullptr);
     jsize x_size = env->GetArrayLength(x);
     Mat data(x_size, 1);
-    for (int i = 0; i < data.c; i++){
-        float* p = data.channel(i);
-        for (int j = 0; j < x_size; j++){
-            p[j] = (float)x_[j];
+    for (int i = 0; i < data.c; i++) {
+        float *p = data.channel(i);
+        for (int j = 0; j < x_size; j++) {
+            p[j] = (float) x_[j];
         }
     }
+
+    // inference
     if (vulkan) LOGI("vulkan on");
     else LOGI("vulkan off");
     auto start = get_current_time();
-    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan,sid,false, noise_scale, 0.8, length_scale);
+    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, sid,
+                                          noise_scale, 0.8, length_scale);
     auto end = get_current_time();
-    LOGI("time cost: %f ms", end-start);
+    LOGI("time cost: %f ms", end - start);
+    jfloatArray res = env->NewFloatArray(output.h * output.w);
+    env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
+    return res;
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatArray audio,
+                                             jint raw_sid, jint target_sid, jboolean vulkan,
+                                             jint num_threads) {
+    // audio to ncnn mat
+    float* audio_ = env->GetFloatArrayElements(audio, nullptr);
+    jsize audio_size = env->GetArrayLength(audio);
+    Mat audio_mat(audio_size, 1);
+    for (int i = 0; i < audio_mat.c; i++) {
+        float *p = audio_mat.channel(i);
+        for (int j = 0; j < audio_size; j++) {
+            p[j] = audio_[j];
+        }
+    }
+
+    // voice conversion
+    if (vulkan) LOGI("vulkan on");
+    else LOGI("vulkan off");
+    auto start = get_current_time();
+    auto output = SynthesizerTrn::voice_convert(audio_mat, raw_sid, target_sid, nets, num_threads, vulkan);
+    auto end = get_current_time();
+    LOGI("time cost: %f ms", end - start);
     jfloatArray res = env->NewFloatArray(output.h * output.w);
     env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
     return res;

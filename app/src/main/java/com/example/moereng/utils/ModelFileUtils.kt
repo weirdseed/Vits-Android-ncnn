@@ -118,7 +118,6 @@ object ModelFileUtils {
         return path
     }
 
-
     fun parseConfig(context: Context, path: String): Configs? {
         try {
             val config_file = File(path)

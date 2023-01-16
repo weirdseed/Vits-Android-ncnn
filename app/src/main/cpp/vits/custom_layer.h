@@ -6,12 +6,11 @@
 #include <numeric>
 #include "utils.h"
 
+// definition of custom layers
 
 class expand_as : public Layer {
 public:
     expand_as() {
-        one_blob_only = false;
-        support_inplace = false;
     }
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
@@ -25,6 +24,12 @@ public:
         int h_t = to.h;
 
         Mat &top_blob = top_blobs[0];
+
+        if (w == w_t && h == h_t) {
+            top_blob = from;
+            return 0;
+        }
+
         top_blob.create_like(to);
         if (top_blob.empty()) return -100;
 
@@ -105,7 +110,6 @@ public:
 class PRQTransform : public Layer {
 public:
     PRQTransform() {
-        one_blob_only = false;
     }
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
@@ -298,45 +302,41 @@ public:
     }
 };
 
-class CouplingOut : public Layer {
+class ResidualReverse : public Layer {
+private:
+    bool reverse;
 public:
-    CouplingOut() {
+    ResidualReverse() {
     }
+    virtual int load_param(const ParamDict& pd) {
+        reverse = bool(pd.get(0, 0));
+        return 0;
+    }
+    virtual int forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const {
+        Mat& top_blob = top_blobs[0];
+        // reverse
+        if (reverse) {
+            const Mat& _x0 = reducedims(bottom_blobs[3]);
+            const Mat& _x1 = reducedims(bottom_blobs[2]);
+            const Mat& _stats = bottom_blobs[1];
+            const Mat& _x_mask = reducedims(bottom_blobs[0]);
 
-    virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
-                        const Option &opt) const {
-        const Mat &x0 = bottom_blobs[3];
-        const Mat &x1 = bottom_blobs[0];
-        const Mat &stats = bottom_blobs[1];
-        const Mat &x_mask = bottom_blobs[2];
-
-        Mat &top_blob = top_blobs[0];
-
-        int w = x1.w;
-        int h = x1.h;
-        int c = x1.c;
-        top_blob.create(w, 2 * h, c);
-        if (top_blob.empty()) return -100;
-
-        Mat x = matminus(x1, stats, opt);
-        Mat x2 = matproduct(x, x_mask, opt);
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int i = 0; i < c; i++) {
-            float *out_ptr = top_blob.channel(i);
-            const float *ptr0 = x0.channel(i);
-            float *ptr2 = x2.channel(i);
-            for (int i = 0; i < 2 * h; i++) {
-                if (i < h) {
-                    memcpy(out_ptr, ptr0, w * sizeof(float));
-                    ptr0 += w;
-                } else {
-                    memcpy(out_ptr, ptr2, w * sizeof(float));
-                    ptr2 += w;
-                }
-                out_ptr += w;
-            }
+            auto x_mask = expand(_x_mask, _stats.w, _stats.h, opt);
+            auto stats = matproduct(_stats, x_mask, opt);
+            auto x1 = matminus(_x1, stats, opt);
+            x1 = matproduct(x1, x_mask, opt);
+            top_blob = expanddims(concat(_x0, x1, opt));
         }
+        else {
+            const Mat& _x0 = reducedims(bottom_blobs[3]);
+            const Mat& _x1 = reducedims(bottom_blobs[1]);
+            const Mat& _stats = bottom_blobs[0];
+            const Mat& _x_mask = reducedims(bottom_blobs[2]);
+
+            auto x1 = matplus(_stats, _x1, opt);
+            top_blob = expanddims(concat(_x0, x1, opt));
+        }
+        if (top_blob.empty()) return -100;
         return 0;
     }
 };
@@ -523,6 +523,28 @@ public:
     }
 };
 
+class RandnLike : public Layer {
+public:
+    RandnLike() {
+        one_blob_only = true;
+    }
+    virtual int forward(const Mat& bottom_blob, Mat& top_blob, const Option& opt) const {
+        top_blob = randn(bottom_blob.w, bottom_blob.h, opt);
+        if (top_blob.empty()) return -100;
+        return 0;
+    }
+};
 
+class ZerosLike : public Layer {
+public:
+    ZerosLike() {
+        one_blob_only = true;
+    }
+    virtual int forward(const Mat& bottom_blob, Mat& top_blob, const Option& opt) const {
+        top_blob = zeros_like(bottom_blob, opt);
+        if (top_blob.empty()) return -100;
+        return 0;
+    }
+};
 #endif
 #pragma once

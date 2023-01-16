@@ -13,6 +13,11 @@ class Vits {
         num_threads: Int
     ): FloatArray
 
+    external fun voice_convert(
+        audio: FloatArray, raw_sid: Int, target_sid: Int,
+        vulkan: Boolean, num_threads: Int
+    ): FloatArray
+
     external fun destroy()
 
     companion object {
