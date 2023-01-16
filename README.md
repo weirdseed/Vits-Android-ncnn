@@ -2,7 +2,7 @@
 
 # 介绍
 
-本项目基于https://github.com/jaywalnut310/vits 训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
+本项目基于[vits](https://github.com/jaywalnut310/vits)训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
 
 日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)
 
