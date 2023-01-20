@@ -11,12 +11,12 @@ android {
         minSdk 24
         targetSdk 29
         versionCode 2
-        versionName "1.1"
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags '-std=c++11 -fexceptions -frtti'
+                cppFlags '-std=c++11'
             }
         }
     }

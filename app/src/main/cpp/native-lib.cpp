@@ -32,18 +32,9 @@ extern "C" {
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_utils_VitsUtils_initOpenJtalk(JNIEnv *env, jobject thiz,
                                                        jobject asset_manager) {
-    try {
-        AssetJNI assetJni(env, thiz, asset_manager);
-        openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", &assetJni);
-        return JNI_TRUE;
-    } catch (...){
-        jclass exception_class = env->FindClass("java/lang/RuntimeException");
-        if (exception_class) {
-            env->ThrowNew(exception_class, "Openjtalk init failed");
-        }
-        env->DeleteLocalRef(exception_class);
-        return JNI_FALSE;
-    }
+    AssetJNI assetJni(env, thiz, asset_manager);
+    openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", &assetJni);
+    return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -151,26 +142,17 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
     }
 
     // inference
-    try {
-        if (vulkan) LOGI("vulkan on");
-        else
-            LOGI("vulkan off");
-        auto start = get_current_time();
-        auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, multi, sid,
-                                              noise_scale, noise_scale_w, length_scale);
-        auto end = get_current_time();
-        LOGI("time cost: %f ms", end - start);
-        jfloatArray res = env->NewFloatArray(output.h * output.w);
-        env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
-        return res;
-    } catch (...) {
-        jclass exception_class = env->FindClass("java/lang/RuntimeException");
-        if (exception_class) {
-            env->ThrowNew(exception_class, "inference failed!");
-        }
-        env->DeleteLocalRef(exception_class);
-    }
-    return nullptr;
+    if (vulkan) LOGI("vulkan on");
+    else
+        LOGI("vulkan off");
+    auto start = get_current_time();
+    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, multi, sid,
+                                          noise_scale, noise_scale_w, length_scale);
+    auto end = get_current_time();
+    LOGI("time cost: %f ms", end - start);
+    jfloatArray res = env->NewFloatArray(output.h * output.w);
+    env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
+    return res;
 }
 
 JNIEXPORT jfloatArray JNICALL
@@ -187,27 +169,20 @@ Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatAr
             p[j] = audio_[j];
         }
     }
-    try {
-        // voice conversion
-        if (vulkan) LOGI("vulkan on");
-        else
-            LOGI("vulkan off");
-        auto start = get_current_time();
-        auto output = SynthesizerTrn::voice_convert(audio_mat, raw_sid, target_sid, nets, num_threads,
-                                                    vulkan);
-        auto end = get_current_time();
-        LOGI("time cost: %f ms", end - start);
-        jfloatArray res = env->NewFloatArray(output.h * output.w);
-        env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
-        return res;
-    } catch (...){
-        jclass exception_class = env->FindClass("java/lang/RuntimeException");
-        if (exception_class) {
-            env->ThrowNew(exception_class, "converting failed!");
-        }
-        env->DeleteLocalRef(exception_class);
-    }
-    return nullptr;
+
+    // voice conversion
+    if (vulkan) LOGI("vulkan on");
+    else
+        LOGI("vulkan off");
+    auto start = get_current_time();
+    auto output = SynthesizerTrn::voice_convert(audio_mat, raw_sid, target_sid, nets, num_threads,
+                                                vulkan);
+    auto end = get_current_time();
+    LOGI("time cost: %f ms", end - start);
+    jfloatArray res = env->NewFloatArray(output.h * output.w);
+    env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
+    return res;
+
 }
 
 JNIEXPORT void JNICALL
