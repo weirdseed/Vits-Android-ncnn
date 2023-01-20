@@ -36,7 +36,7 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
-            android:text="已录制 00:00:00"
+            android:text="已录制: 00:00:00"
             android:textSize="12sp" />
 
     </LinearLayout>
