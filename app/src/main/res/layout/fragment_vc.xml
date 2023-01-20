@@ -6,7 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".fragments.VCFragment">
 
-<!--    load wave file -->
+    <!-- record audio-->
+    <LinearLayout
+        android:id="@+id/record_audio_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:scaleX="0.9"
+        android:scaleY="0.9"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.141"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.023">
+
+        <Button
+            android:id="@+id/record_audio_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="开始录制"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/audio_length"
+            android:layout_width="180dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="已录制 00:00:00"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <!-- load wave file -->
     <LinearLayout
         android:id="@+id/load_audio_layout"
         android:layout_width="wrap_content"
@@ -19,7 +54,7 @@
         app:layout_constraintHorizontal_bias="0.141"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.074">
+        app:layout_constraintVertical_bias="0.135">
 
         <Button
             android:id="@+id/load_audio_btn"
@@ -41,163 +76,7 @@
 
     </LinearLayout>
 
-<!--    progress bar -->
-    <LinearLayout
-        android:id="@+id/progressLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:visibility="gone"
-        android:scaleX="0.9"
-        android:scaleY="0.9"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.238"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.151">
-
-        <TextView
-            android:id="@+id/show_progress_name"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:gravity="center"
-            android:text="进度"
-            android:textSize="12sp" />
-
-        <ProgressBar
-            android:id="@+id/current_progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="300dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:progress="0"
-            android:scaleX="1.0"
-            android:scaleY="0.8"
-            tools:layout_editor_absoluteX="55dp"
-            tools:layout_editor_absoluteY="7dp" />
-
-        <TextView
-            android:id="@+id/progress_text"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:gravity="center"
-            android:text="0/100"
-            android:textSize="12sp" />
-
-    </LinearLayout>
-
-<!--    source speaker -->
-    <LinearLayout
-        android:id="@+id/src_sid_pick_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="5dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.047"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.272">
-
-        <TextView
-            android:id="@+id/src_sid_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="原讲话人"
-            android:textSize="12sp" />
-
-        <NumberPicker
-            android:id="@+id/src_sid_picker"
-            android:layout_width="wrap_content"
-            android:scaleY="0.8"
-            android:scaleX="0.8"
-            android:layout_height="70dp" />
-    </LinearLayout>
-
-<!--    target speaker -->
-    <LinearLayout
-        android:id="@+id/tgt_sid_pick_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="5dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.32"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.272">
-
-        <TextView
-            android:id="@+id/tgt_sid_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="目标讲话人"
-            android:textSize="12sp" />
-
-        <NumberPicker
-            android:id="@+id/tgt_sid_picker"
-            android:layout_width="wrap_content"
-            android:layout_height="70dp"
-            android:scaleX="0.8"
-            android:scaleY="0.8" />
-    </LinearLayout>
-
-    <!--    thread spinner -->
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="2dp"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.601"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.252">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="线程数"
-            android:textAlignment="center" />
-
-        <Spinner
-            android:id="@+id/thread_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-
-    </LinearLayout>
-
-<!--    gpu switcher-->
-    <Switch
-        android:id="@+id/vulkan_switcher"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:text="开启gpu"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.948"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.253"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-<!--    audio process buttons -->
+    <!-- progressing bar -->
     <LinearLayout
         android:id="@+id/relativeLayout3"
         android:layout_width="wrap_content"
@@ -206,9 +85,10 @@
         android:scaleY="0.8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.436">
+        app:layout_constraintVertical_bias="0.486">
 
         <Button
             android:id="@+id/playBtn"
@@ -234,7 +114,7 @@
 
     </LinearLayout>
 
-<!--    load config -->
+    <!-- source speaker -->
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
@@ -244,10 +124,10 @@
         android:scaleY="0.8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.141"
+        app:layout_constraintHorizontal_bias="0.132"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.57">
+        app:layout_constraintVertical_bias="0.606">
 
         <Button
             android:id="@+id/select_config"
@@ -269,21 +149,174 @@
 
     </LinearLayout>
 
-<!--    load model -->
+    <!-- target speaker -->
+    <LinearLayout
+        android:id="@+id/src_sid_pick_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.044"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.327">
+
+        <TextView
+            android:id="@+id/src_sid_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="原讲话人"
+            android:textSize="12sp" />
+
+        <NumberPicker
+            android:id="@+id/src_sid_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:scaleX="0.8"
+            android:scaleY="0.8" />
+    </LinearLayout>
+
+    <!-- thread spinner -->
+    <LinearLayout
+        android:id="@+id/progressLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:scaleX="0.9"
+        android:scaleY="0.9"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.227"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.204">
+
+        <TextView
+            android:id="@+id/show_progress_name"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:gravity="center"
+            android:text="进度"
+            android:textSize="12sp" />
+
+        <ProgressBar
+            android:id="@+id/current_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="260dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:progress="0"
+            android:scaleX="1.0"
+            android:scaleY="0.8"
+            tools:layout_editor_absoluteX="55dp"
+            tools:layout_editor_absoluteY="7dp" />
+
+        <TextView
+            android:id="@+id/progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:gravity="center"
+            android:text="0/100"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <!-- gpu switcher-->
+    <LinearLayout
+        android:id="@+id/tgt_sid_pick_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.317"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.327">
+
+        <TextView
+            android:id="@+id/tgt_sid_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="目标讲话人"
+            android:textSize="12sp" />
+
+        <NumberPicker
+            android:id="@+id/tgt_sid_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:scaleX="0.8"
+            android:scaleY="0.8" />
+    </LinearLayout>
+
+    <!-- audio process buttons -->
+    <Switch
+        android:id="@+id/vulkan_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:text="开启gpu"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.945"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.307"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <!-- load config -->
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="2dp"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.598"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.307">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="线程数"
+            android:textAlignment="center" />
+
+        <Spinner
+            android:id="@+id/thread_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <!-- load model -->
     <LinearLayout
         android:id="@+id/load_model_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:visibility="gone"
         android:scaleX="0.8"
         android:scaleY="0.8"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.141"
+        app:layout_constraintHorizontal_bias="0.132"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.698">
+        app:layout_constraintVertical_bias="0.731">
 
         <Button
             android:id="@+id/select_model"
@@ -302,5 +335,6 @@
             android:text="模型文件路径"
             android:textSize="12sp" />
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

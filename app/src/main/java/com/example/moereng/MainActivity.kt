@@ -10,8 +10,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.moereng.databinding.ActivityMainBinding
 import com.example.moereng.fragments.TTSViewModel
 import com.example.moereng.fragments.VCViewModel
-import com.example.moereng.utils.PermissionUtils.checkExternalStoragePermission
-import com.example.moereng.utils.PermissionUtils.requestExternalStorage
+import com.example.moereng.utils.PermissionUtils.checkAppPermission
+import com.example.moereng.utils.PermissionUtils.requestAppPermission
 import com.example.moereng.utils.VitsUtils
 import com.example.moereng.utils.VitsUtils.checkThreadsCpp
 import com.example.moereng.utils.VitsUtils.testGpu
@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // dynamic permission
-        if (!checkExternalStoragePermission(this)) {
-            requestExternalStorage(this)
+        if (!checkAppPermission(this)) {
+            requestAppPermission(this)
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -77,11 +77,6 @@ class MainActivity : AppCompatActivity() {
             ttsNav.isVisible = finished
             vcNav.isEnabled = finished
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-
     }
 
     override fun onDestroy() {

@@ -13,6 +13,8 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.text.SimpleDateFormat
+import java.util.*
 
 object WaveUtils {
     // write wave file to storage
@@ -118,6 +120,15 @@ object WaveUtils {
 
         return WavHead(sr, channels, encoding)
     }
+
+    fun audioLenToDuration(length: Int, samplingRate: Int): String{
+        val duration = (length.toFloat() / samplingRate.toFloat()).toLong()
+        val h = duration.div(3600)
+        val m = (duration - h * 3600).div(60)
+        val s = duration - (h * 3600 + m * 60)
+        return "%02d:%02d:%02d".format(h, m, s)
+    }
+
 
     private external fun convertAudioPCMToWaveByteArray(
         jaudio: FloatArray,

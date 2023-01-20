@@ -22,8 +22,8 @@ import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentTtsBinding
 import com.example.moereng.utils.FileUtils
-import com.example.moereng.utils.PermissionUtils.checkExternalStoragePermission
-import com.example.moereng.utils.PermissionUtils.requestExternalStorage
+import com.example.moereng.utils.PermissionUtils.checkAppPermission
+import com.example.moereng.utils.PermissionUtils.requestAppPermission
 import com.example.moereng.utils.PlayerUtils
 import com.example.moereng.utils.TextUtils
 import com.example.moereng.utils.UIUtils.moerengToast
@@ -452,9 +452,10 @@ class TTSFragment : Fragment() {
 
         // select config button
         ttsBinding.selectConfig.setOnClickListener {
-            // check permission
-            if (!checkExternalStoragePermission(requireActivity()))
-                requestExternalStorage(requireActivity())
+            if (!finishFlag){
+                moerengToast("生成中，请稍等...")
+            } else if (!checkAppPermission(requireActivity()))
+                requestAppPermission(requireActivity())
             else {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
@@ -469,9 +470,10 @@ class TTSFragment : Fragment() {
 
         // select model button
         ttsBinding.selectModel.setOnClickListener {
-            // check permission
-            if (!checkExternalStoragePermission(requireActivity()))
-                requestExternalStorage(requireActivity())
+            if (!finishFlag){
+                moerengToast("生成中，请稍等...")
+            }else if (!checkAppPermission(requireActivity()))
+                requestAppPermission(requireActivity())
             else {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.type = "application/octet-stream"
@@ -599,7 +601,6 @@ class TTSFragment : Fragment() {
             }
             REQUEST_CODE_SELECT_MODEL -> {
                 thread {
-                    ttsBinding.selectModel.isClickable = false
                     if (uri != null) {
                         try {
                             val realPath = FileUtils.getPathFromUri(ttsContext, uri)

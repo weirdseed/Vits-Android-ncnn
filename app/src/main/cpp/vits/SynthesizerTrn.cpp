@@ -290,6 +290,7 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     y_mask = expand(y_mask, z_hat.w, z_hat.h, opt);
     auto o_hat = dec_forward(reducedims(matproduct(z_hat, y_mask, opt)), g_tgt, net->dec_net,
                              vulkan, num_threads);
+    o_hat = product(o_hat, 2, opt);
     LOGI("voice converted!\n");
     return o_hat;
 }
