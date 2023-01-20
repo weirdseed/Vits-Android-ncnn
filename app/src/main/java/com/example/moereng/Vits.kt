@@ -2,8 +2,9 @@ package com.example.moereng
 
 import android.content.res.AssetManager
 
-class Vits {
+object Vits {
     external fun init_vits(assetManager: AssetManager, path: String, voice_convert: Boolean, multi: Boolean, num_threads: Int): Boolean
+
     external fun forward(
         x: IntArray,
         vulkan: Boolean,
@@ -20,11 +21,9 @@ class Vits {
         vulkan: Boolean, num_threads: Int
     ): FloatArray
 
-    external fun destroy()
+    external fun clear()
 
-    companion object {
-        init {
-            System.loadLibrary("moereng")
-        }
+    init {
+        System.loadLibrary("moereng")
     }
 }

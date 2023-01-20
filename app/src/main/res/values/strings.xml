@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MoeReng</string>
+    <string name="title_tts">文字转语音</string>
+    <string name="title_vc">声线转换</string>
 </resources>

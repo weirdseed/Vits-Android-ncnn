@@ -21,7 +21,7 @@
 using namespace std;
 typedef unsigned char BYTE;
 
-#define TAG "MoeRengMain" // 这个是自定义的LOG的标识
+#define TAG "Moereng" // 这个是自定义的LOG的标识
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__) // 定义LOGD类型
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG ,__VA_ARGS__) // 定义LOGI类型
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN,TAG ,__VA_ARGS__) // 定义LOGW类型
@@ -31,19 +31,6 @@ typedef unsigned char BYTE;
 
 std::string utf8_encode(const std::wstring& source);
 std::wstring utf8_decode(const std::string& source);
-
-template<typename T> void print_list(T t, int len) {
-    std::cout << "[";
-    for (int i = 0; i < len; i++) {
-        if (i != len - 1) {
-            std::cout << int(t[i]) << ",";
-        }
-        else {
-            std::cout << int(t[i]);
-        }
-    }
-    std::cout << "]" << endl;
-}
 
 struct Feature {
     wstring string;

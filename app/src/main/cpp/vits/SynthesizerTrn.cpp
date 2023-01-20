@@ -75,7 +75,6 @@ SynthesizerTrn::enc_p_forward(const Mat &x, const Net &enc_p,
     ex.input("in0", x);
     ex.input("in1", length);
     Mat out0, out1, out2, out3, test;
-    ex.extract("2", test);
     ex.extract("out0", out0);
     ex.extract("out1", out1);
     ex.extract("out2", out2);
@@ -180,7 +179,14 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec_net, 
 bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
                           AssetJNI *assetJni, Nets *nets, const Option &opt) {
     assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
-    if (multi){
+    if (voice_convert){
+        if (load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
+            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
+            load_model(model_folder, multi, nets->flow, opt, "flow") &&
+            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
+            load_model(model_folder, multi, nets->emb_g, opt, "emb_g"))
+            return true;
+    } else if (multi){
         if (load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
             load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
             load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
@@ -289,11 +295,3 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
 }
 
 SynthesizerTrn::~SynthesizerTrn() = default;
-
-
-
-
-
-
-
-

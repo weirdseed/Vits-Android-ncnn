@@ -1,586 +1,91 @@
 package com.example.moereng
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.AssetManager
-import android.media.AudioTrack
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
-import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.SeekBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.example.moereng.data.Configs
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.moereng.databinding.ActivityMainBinding
-import com.example.moereng.utils.Cleaner
-import com.example.moereng.utils.ModelFileUtils
-import com.example.moereng.utils.ModelFileUtils.getPathFromUri
-import com.example.moereng.utils.Player
-import java.io.IOException
-import java.lang.Integer.min
-import kotlin.concurrent.thread
+import com.example.moereng.fragments.TTSViewModel
+import com.example.moereng.fragments.VCViewModel
+import com.example.moereng.utils.PermissionUtils.checkExternalStoragePermission
+import com.example.moereng.utils.PermissionUtils.requestExternalStorage
+import com.example.moereng.utils.VitsUtils
+import com.example.moereng.utils.VitsUtils.checkThreadsCpp
+import com.example.moereng.utils.VitsUtils.testGpu
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var japanese_cleaner: Cleaner
-
-    private var module: Vits? = null
-
-    private var configs: Configs? = null
-
-    private lateinit var tracker: AudioTrack
-
-    private val audioStream = ArrayList<Float>()
-
-    private var isRefused = true
-
-    // 判断是否处理完毕
-    private var finish_flag = true
-
-    private var vulkan_state = false
-
-    private var voice_convert = false
-
-    private var multi = true
-
-    private var current_threads = 1
-
-    private var max_threads = 1
-
-    private val REQUEST_CODE_GRANT = 0
-
-    private val REQUEST_CODE_SELECT_MODEL = 1
-
-    private val REQUEST_CODE_SELECT_CONFIG = 2
-
-    private var noise_scale: Float = .667f
-
-    private var noise_scale_w: Float = .8f
-
-    private var length_scale: Float = 1f
-
-    private var sid = 0
-
-    private var max_speaker = 1
-
-    private fun initOpenjtalk(assetManager: AssetManager) {
-        InitOpenJtalk(assetManager)
+    private val vcViewModel by lazy {
+        ViewModelProvider(this).get(VCViewModel::class.java)
     }
 
-    private fun clean_inputs(text: String): String {
-        return text.replace("\"", "").replace("\'", "")
-            .replace("\t", " ").replace("\n", "、")
-            .replace("”", "")
-    }
-
-    // check max supported threads
-    private fun check_threads() {
-        max_threads = check_threads_cpp()
-
-    }
-
-    // init speaker spinner
-    private fun init_spinner() {
-        val spinner_array = IntArray(max_threads)
-        for (i in 1..max_threads) {
-            spinner_array[i - 1] = i
-        }
-        val adapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, spinner_array.toList())
-        binding.threadSpinner.adapter = adapter
-        binding.threadSpinner.setSelection(min(current_threads - 1, max_threads - 1))
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun show_tips(type: String) {
-        when (type) {
-            "model" -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    binding.modelPath.text = "加载失败，请把文件放在Android/media/model/文件夹"
-                } else {
-                    binding.modelPath.text = "加载失败，请把文件放在Download文件夹"
-                }
-            }
-            "config" -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    binding.configPath.text = "加载失败，请把文件放在Android/media/model/文件夹"
-                } else {
-                    binding.configPath.text = "加载失败，请把文件放在Download文件夹"
-                }
-            }
-        }
-    }
-
-    private fun init_path(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            binding.configPath.text = "请把文件放在Android/media/model/文件夹"
-            binding.modelPath.text = "请把文件放在Android/media/model/文件夹"
-        } else {
-            binding.configPath.text = "请把文件放在Download文件夹"
-            binding.modelPath.text = "请把文件放在Download文件夹"
-        }
-    }
-
-    // split sentence and clean text
-    private fun sentence_split(text: String): List<List<Int>>? {
-        val outputs = ArrayList<List<Int>>()
-        var sentences = words_split_cpp(clean_inputs(text), assets)
-            .replace("EOS\n", "").split("\n")
-        sentences = sentences.subList(0, sentences.size - 1)
-        var s = ""
-        for (i in sentences.indices) {
-            val sentence = sentences[i]
-            s += sentence.split("\t")[0]
-            if (sentence.contains("記号,読点") ||
-                sentence.contains("記号,句点") ||
-                sentence.contains("記号,一般") ||
-                sentence.contains("記号,空白") ||
-                i == sentences.size - 1
-            ) {
-                if (s.length > 50) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this, "一句话不能超过50个字符！",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return null
-                }
-                val seq = japanese_cleaner.text_to_sequence(
-                    s,
-                    symbols = configs!!.symbols,
-                    cleaner = configs!!.data.text_cleaners[0]
-                )
-                if (seq.isEmpty() || seq.sum() == 0)
-                    continue
-                outputs.add(seq)
-                s = ""
-            }
-        }
-        if (outputs.isEmpty()) {
-            runOnUiThread {
-                Toast.makeText(
-                    this, "解析失败！仅支持日语！请检查是否包含不支持字符！",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            return null
-        }
-        return outputs
-    }
-
-    // inference and play sound
-    @SuppressLint("SetTextI18n")
-    private fun processWords(text: String) {
-        finish_flag = false
-        runOnUiThread {
-            binding.currentProgress.visibility = View.VISIBLE
-            binding.progressText.visibility = View.VISIBLE
-            binding.currentProgress.progress = 0
-            binding.progressText.text = "0/100"
-            binding.showProgressName.visibility = View.VISIBLE
-        }
-        try {
-            val sentences = sentence_split(text)
-            if (sentences != null) {
-                tracker.play()
-                for (i in sentences.indices) {
-                    // start inference
-                    val output =
-                        module?.forward(
-                            sentences[i].toIntArray(),
-                            vulkan_state,
-                            multi,
-                            sid,
-                            noise_scale,
-                            noise_scale_w,
-                            length_scale,
-                            current_threads
-                        )
-                    if (output != null) {
-                        audioStream.addAll(output.toList())
-                    }
-                    runOnUiThread {
-                        val p = (((i.toFloat() + 1.0) / sentences.size.toFloat()) * 100).toInt()
-                        binding.currentProgress.progress = p
-                        binding.progressText.text = "$p/100"
-                    }
-                }
-            }
-            // write audio stream
-            if (audioStream.isNotEmpty())
-                tracker.write(
-                    audioStream.toFloatArray(),
-                    0,
-                    audioStream.size,
-                    AudioTrack.WRITE_BLOCKING
-                )
-
-            runOnUiThread {
-                binding.currentProgress.visibility = View.GONE
-                binding.progressText.visibility = View.GONE
-                binding.showProgressName.visibility = View.GONE
-            }
-            tracker.stop()
-            audioStream.clear()
-
-        } catch (e: Exception) {
-            Log.e("MainActivity", e.message.toString())
-        }
-        finish_flag = true
-    }
-
-    private fun requestExternalStorage() {
-        // 动态申请权限
-        if (Build.VERSION.SDK_INT >= 23) {
-            val read_req = Manifest.permission.READ_EXTERNAL_STORAGE
-            val permission = ContextCompat.checkSelfPermission(this, read_req)
-            if (permission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(read_req), 100)
-            }
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && isRefused) {
-            if (!Environment.isExternalStorageEmulated()) {
-                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                intent.data = Uri.parse("pacakage$packageName")
-                startActivityForResult(intent, 1024)
-            }
-        }
-    }
-
-    // load and initialize models
-    private fun load_model(path: String): Boolean {
-        var folder = ""
-        if (path.endsWith("dec.ncnn.bin")) {
-            folder = path.replace("dec.ncnn.bin", "")
-        }
-        if (path.endsWith("dp.ncnn.bin")) {
-            folder = path.replace("dp.ncnn.bin", "")
-        }
-        if (path.endsWith("flow.ncnn.bin")) {
-            folder = path.replace("flow.ncnn.bin", "")
-        }
-        if (path.endsWith("emb_g.ncnn.bin")) {
-            folder = path.replace("emb_g.ncnn.bin", "")
-        }
-        if (path.endsWith("enc_p.ncnn.bin")) {
-            folder = path.replace("enc_p.ncnn.bin", "")
-        }
-        if (folder == "") return false
-        try {
-            module = Vits()
-            return module!!.init_vits(assets, folder, voice_convert, multi, max_threads)
-        } catch (e: IOException) {
-            return false
-        }
-    }
-
-    // load config file
-    private fun load_configs(path: String): Boolean {
-        configs = ModelFileUtils.parseConfig(this, path)
-        if (configs != null) {
-            if (configs!!.data.n_speakers > 1){
-                multi = true
-                max_speaker = configs!!.data.n_speakers
-                showSid()
-            } else {
-                binding.speakerId.visibility = View.GONE
-                binding.sidText.visibility = View.GONE
-                multi = false
-            }
-        }
-        return configs != null
-    }
-
-    // show speakers' names
-    private fun showSid() {
-        binding.speakerId.visibility = View.VISIBLE
-        binding.sidText.visibility = View.VISIBLE
-        binding.speakerId.maxValue = max_speaker - 1
-        binding.speakerId.displayedValues = configs?.speakers?.toTypedArray()
+    private val ttsViewModel by lazy {
+        ViewModelProvider(this).get(TTSViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // dynamic permission
+        if (!checkExternalStoragePermission(this)) {
+            requestExternalStorage(this)
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 权限申请
-        requestExternalStorage()
+        // test gpu
+        val gpuState = testGpu()
+        ttsViewModel.setVulkanState(gpuState)
+        vcViewModel.setVulkanState(gpuState)
 
-        // detect gpu availability
-        if (testgpu()) {
-            binding.vulkanSwitcher.visibility = View.VISIBLE
-        } else {
-            binding.vulkanSwitcher.visibility = View.GONE
+        // cpu counts
+        val maxThreads = checkThreadsCpp()
+        ttsViewModel.setMaxThreads(maxThreads)
+        vcViewModel.setMaxThreads(maxThreads)
+
+        val navView: BottomNavigationView = binding.navView
+
+        // init bottom view navigation
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.navigation_tts, R.id.navigation_vc
+            )
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
+
+        val menu = navView.menu
+        val vcNav = menu.getItem(1) // vc
+        val ttsNav = menu.getItem(0)
+
+        // observe tts
+        ttsViewModel.generationFinish.observe(this) { finished ->
+            vcNav.isVisible = finished
+            ttsNav.isEnabled = finished
         }
 
-        // get max threads
-        check_threads()
-
-        // init speakers spinner
-        init_spinner()
-
-        // init path string
-        init_path()
-
-        binding.selectModel.setOnClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            intent.type = "*/*"
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            startActivityForResult(intent, REQUEST_CODE_SELECT_MODEL)
-        }
-
-        binding.selectConfig.setOnClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            intent.type = "*/*"
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            startActivityForResult(intent, REQUEST_CODE_SELECT_CONFIG)
-        }
-
-        // vulkan switcher
-        binding.vulkanSwitcher.setOnCheckedChangeListener { bottomview, ischecked ->
-            vulkan_state = ischecked
-        }
-
-        // noise slider
-        binding.noiseScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                noise_scale = p1.toFloat() / 100f
-            }
-
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-                Toast.makeText(this@MainActivity, noise_scale.toString(), Toast.LENGTH_SHORT).show()
-            }
-        })
-
-        // noise w slider
-        binding.noiseScaleW.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                noise_scale_w = p1.toFloat() / 100f
-            }
-
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-                Toast.makeText(this@MainActivity, noise_scale_w.toString(), Toast.LENGTH_SHORT).show()
-            }
-
-        })
-
-        // length slider
-        binding.lengthScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                length_scale = p1.toFloat() / 100f
-            }
-
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-                Toast.makeText(this@MainActivity, length_scale.toString(), Toast.LENGTH_SHORT)
-                    .show()
-            }
-        })
-
-        // speaker ids spinner listener
-        binding.speakerId.setOnValueChangedListener { p0, p1, p2 -> sid = p2 }
-
-        // threads spinner listener
-        binding.threadSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                current_threads = min(p2 + 1, max_threads)
-                Log.i("MainActivity", "current threads = ${current_threads}")
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-            }
-
-        }
-
-        // 初始化openjtalk模型
-        initOpenjtalk(assets)
-
-        // initialize cleaner
-        japanese_cleaner = Cleaner()
-
-        tracker = Player.buildTracker()
-
-        binding.playBtn.setOnClickListener {
-            val inputText = binding.wordsInput.text
-            if (module != null && configs != null) {
-                if (inputText!!.isNotEmpty()) {
-                    // 处理完毕
-                    if (finish_flag) {
-                        thread {
-                            processWords(inputText.toString())
-                        }
-                    } else {
-                        Toast.makeText(
-                            this, "稍等...",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                } else {
-                    Toast.makeText(
-                        this, "请输入文字",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(
-                    this, "请先加载配置文件和模型文件！",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        // observe vc
+        vcViewModel.convertFinish.observe(this) { finished ->
+            ttsNav.isVisible = finished
+            vcNav.isEnabled = finished
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        val uri = data?.data
-        when (requestCode) {
-            REQUEST_CODE_GRANT -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    isRefused = !Environment.isExternalStorageEmulated()
-                }
-            }
-            REQUEST_CODE_SELECT_MODEL -> {
-                thread {
-                    if (uri != null && uri.path != null) {
-                        try {
-                            val realpath = getPathFromUri(this, uri)
-                            if (realpath != null && realpath.endsWith(".bin")) {
-                                if (load_model(realpath) && module != null) {
-                                    runOnUiThread {
-                                        Toast.makeText(
-                                            this, "模型加载成功！",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        binding.modelPath.text = realpath
-                                    }
-                                } else {
-                                    runOnUiThread {
-                                        show_tips("model")
-                                        Toast.makeText(
-                                            this, "模型加载失败！",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                            } else {
-                                runOnUiThread {
-                                    Toast.makeText(
-                                        this, "请选择正确的模型文件,以.bin结尾",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    binding.modelPath.text = "加载失败！"
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.e("MainActivity", e.message.toString())
-                            runOnUiThread {
-                                show_tips("model")
-                                Toast.makeText(
-                                    this, "模型加载失败！",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }
-                }
-            }
-            REQUEST_CODE_SELECT_CONFIG -> {
-                init_path()
-                binding.modelPath.visibility = View.GONE
-                binding.selectModel.visibility = View.GONE
-                if (uri != null) {
-                    try {
-                        val realpath = getPathFromUri(this, uri)!!
-                        if (realpath.endsWith("json")) {
-                            if (load_configs(realpath) && configs != null) {
-                                binding.configPath.text = realpath
-                                Toast.makeText(
-                                    this, "配置加载成功！",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                binding.modelPath.visibility = View.VISIBLE
-                                binding.selectModel.visibility = View.VISIBLE
-                            } else {
-                                show_tips("config")
-                                Toast.makeText(
-                                    this, "配置加载失败！",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                binding.modelPath.visibility = View.GONE
-                                binding.selectModel.visibility = View.GONE
-                            }
-                        } else {
-                            Toast.makeText(
-                                this, "请选择正确的配置文件，以.json结尾",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            binding.configPath.text = "加载失败！"
-                        }
-                    } catch (e: Exception) {
-                        show_tips("config")
-                        Toast.makeText(
-                            this, "配置加载失败！",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        }
+    override fun onStart() {
+        super.onStart()
 
-    }
-
-    override fun onPause() {
-        super.onPause()
-        tracker.pause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        tracker.stop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i("MainActivity", "destroyed!")
-        tracker.release()
-        module = null
-        module?.destroy()
-    }
-
-    /**
-     * A native method that is implemented by the 'moereng' native library,
-     * which is packaged with this application.
-     */
-    private external fun InitOpenJtalk(assetManager: AssetManager)
-    private external fun testgpu(): Boolean
-    private external fun words_split_cpp(text: String, assetManager: AssetManager): String
-    private external fun check_threads_cpp(): Int
-
-    companion object {
-        init {
-            System.loadLibrary("moereng")
-        }
+        VitsUtils.destroyOpenJtalk()
     }
 }

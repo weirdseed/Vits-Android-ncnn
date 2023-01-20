@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation.xml"
+    app:startDestination="@+id/navigation_tts">
+
+    <fragment
+        android:id="@+id/navigation_tts"
+        android:name="com.example.moereng.fragments.TTSFragment"
+        android:label="@string/title_tts"
+        tools:layout="@layout/fragment_tts"/>
+
+    <fragment
+        android:id="@+id/navigation_vc"
+        android:name="com.example.moereng.fragments.VCFragment"
+        android:label="@string/title_vc"
+        tools:layout="@layout/fragment_vc"/>
+</navigation>

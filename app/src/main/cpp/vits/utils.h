@@ -90,8 +90,8 @@ std::vector<Mat> rfft(const Mat& m, Option& opt); // rfft for dim 0
 
 Mat softmax(const Mat& blob, const Option& opt, int axis=-1); // °´ÐÐÇósoftmax
 
-Mat Slice(const Mat& blob, size_t top, size_t bottom, size_t left, size_t right,
-          int stride_w, int stride_h, const Option& opt);
+Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_w, int stride_h,
+          const Option &opt);
 
 void set_column_value(Mat& blob, int column, float value, const Option& opt);
 
