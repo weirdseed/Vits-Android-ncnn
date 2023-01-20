@@ -36,7 +36,7 @@ class VCFragment : Fragment() {
 
     private var player = PlayerUtils()
 
-    private var recoder = RecordingUtils()
+    private var recorder = RecordingUtils()
 
     val audioArray = ArrayList<Float>()
 
@@ -206,10 +206,10 @@ class VCFragment : Fragment() {
                 vcBinding.exportBtn.visibility = View.GONE
         }
         try {
-            recoder.initRecorder()
+            recorder.initRecorder()
             recordData.clear()
-            while (recoder.isRecording) {
-                val audio = recoder.record()
+            while (recorder.isRecording) {
+                val audio = recorder.record()
                 if (audio != null) {
                     recordData.addAll(audio.toList())
                     // set duration
@@ -352,10 +352,10 @@ class VCFragment : Fragment() {
                 moerengToast("转换中，请稍等...")
                 // check permission
             } else if (checkAppPermission(requireActivity())) {
-                if (recoder.isRecording) {
+                if (recorder.isRecording) {
                     // change text
                     vcBinding.recordAudioBtn.text = "开始录制"
-                    recoder.stop()
+                    recorder.stop()
                 } else {
                     // change text
                     vcBinding.recordAudioBtn.text = "停止录制"
@@ -445,7 +445,7 @@ class VCFragment : Fragment() {
                 moerengToast("请加载模型文件！")
             } else if (audioInputs == null && recordData.isEmpty()) {
                 moerengToast("请加载音频文件或录制音频！")
-            } else if (recoder.isRecording){
+            } else if (recorder.isRecording){
                 moerengToast("录制中，请完成录制后转换...")
             }else if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
@@ -630,16 +630,10 @@ class VCFragment : Fragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (player.isPlaying)
-            player.stop(vcBinding, "vc")
-    }
-
     override fun onStop() {
         super.onStop()
-        if (player.isPlaying)
-            player.stop(vcBinding, "vc")
+        recorder.stop()
+        player.stop(vcBinding, "vc")
     }
 
     override fun onDestroyView() {
@@ -649,7 +643,7 @@ class VCFragment : Fragment() {
         modelInitState = false
         config = null
         player.release(vcBinding, "vc")
-        recoder.release()
+        recorder.release()
         recordData.clear()
         Log.i("VCFragment", "cleared")
         binding = null

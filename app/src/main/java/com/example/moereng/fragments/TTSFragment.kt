@@ -632,18 +632,10 @@ class TTSFragment : Fragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (playerUtils.isPlaying) {
-            playerUtils.stop(ttsBinding, "tts")
-        }
-    }
 
     override fun onStop() {
         super.onStop()
-        if (playerUtils.isPlaying) {
-            playerUtils.stop(ttsBinding, "tts")
-        }
+        playerUtils.stop(ttsBinding, "tts")
     }
 
     override fun onDestroyView() {

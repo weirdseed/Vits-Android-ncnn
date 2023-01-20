@@ -78,109 +78,6 @@
 
     <!-- progressing bar -->
     <LinearLayout
-        android:id="@+id/relativeLayout3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.486">
-
-        <Button
-            android:id="@+id/playBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="播放"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/convertBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="45dp"
-            android:layout_marginEnd="45dp"
-            android:text="转换" />
-
-        <Button
-            android:id="@+id/exportBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="导出"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-    <!-- source speaker -->
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.132"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.606">
-
-        <Button
-            android:id="@+id/select_config"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="加载配置"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/config_path"
-            android:layout_width="180dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="20dp"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:maxLines="3"
-            android:text="配置文件路径"
-            android:textSize="12sp" />
-
-    </LinearLayout>
-
-    <!-- target speaker -->
-    <LinearLayout
-        android:id="@+id/src_sid_pick_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.044"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.327">
-
-        <TextView
-            android:id="@+id/src_sid_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="原讲话人"
-            android:textSize="12sp" />
-
-        <NumberPicker
-            android:id="@+id/src_sid_picker"
-            android:layout_width="wrap_content"
-            android:layout_height="70dp"
-            android:scaleX="0.8"
-            android:scaleY="0.8" />
-    </LinearLayout>
-
-    <!-- thread spinner -->
-    <LinearLayout
         android:id="@+id/progressLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -226,7 +123,37 @@
 
     </LinearLayout>
 
-    <!-- gpu switcher-->
+    <!-- source speaker -->
+    <LinearLayout
+        android:id="@+id/src_sid_pick_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.044"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.327">
+
+        <TextView
+            android:id="@+id/src_sid_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="原讲话人"
+            android:textSize="12sp" />
+
+        <NumberPicker
+            android:id="@+id/src_sid_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:scaleX="0.8"
+            android:scaleY="0.8" />
+    </LinearLayout>
+
+    <!-- target speaker -->
     <LinearLayout
         android:id="@+id/tgt_sid_pick_layout"
         android:layout_width="wrap_content"
@@ -256,23 +183,7 @@
             android:scaleY="0.8" />
     </LinearLayout>
 
-    <!-- audio process buttons -->
-    <Switch
-        android:id="@+id/vulkan_switcher"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:text="开启gpu"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.945"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.307"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-    <!-- load config -->
+    <!-- thread spinner -->
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
@@ -302,14 +213,103 @@
 
     </LinearLayout>
 
+    <!-- gpu switcher-->
+    <Switch
+        android:id="@+id/vulkan_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:text="开启gpu"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.945"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.307"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <!-- audio process buttons -->
+    <LinearLayout
+        android:id="@+id/relativeLayout3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.486">
+
+        <Button
+            android:id="@+id/playBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="播放"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/convertBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="45dp"
+            android:layout_marginEnd="45dp"
+            android:text="转换" />
+
+        <Button
+            android:id="@+id/exportBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="导出"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- load config -->
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:scaleX="0.9"
+        android:scaleY="0.9"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.132"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.606">
+
+        <Button
+            android:id="@+id/select_config"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加载配置"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/config_path"
+            android:layout_width="180dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="3"
+            android:text="配置文件路径"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
     <!-- load model -->
     <LinearLayout
         android:id="@+id/load_model_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
+        android:scaleX="0.9"
+        android:scaleY="0.9"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
