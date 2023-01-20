@@ -169,7 +169,7 @@ class VCFragment : Fragment() {
             }
         }
         if (targetFolder == "") targetFolder = folder
-
+        vcViewModel.setConvertFinishValue(false)
         modelInitState = Vits.init_vits(
             requireActivity().assets,
             folder,
@@ -177,6 +177,7 @@ class VCFragment : Fragment() {
             true,
             maxThreads
         )
+        vcViewModel.setConvertFinishValue(true)
         if (modelInitState) {
             requireActivity().runOnUiThread {
                 moerengToast("模型加载成功！")

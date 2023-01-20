@@ -380,6 +380,7 @@ class TTSFragment : Fragment() {
             }
         }
         if (targetFolder == "") targetFolder = folder
+        ttsViewModel.setGenerationFinishValue(false)
 
         modelInitState = Vits.init_vits(
             requireActivity().assets,
@@ -388,7 +389,7 @@ class TTSFragment : Fragment() {
             multi,
             maxThreads
         )
-
+        ttsViewModel.setGenerationFinishValue(true)
         if (modelInitState) {
             requireActivity().runOnUiThread {
                 moerengToast("模型加载成功！")
@@ -400,6 +401,7 @@ class TTSFragment : Fragment() {
                 ttsBinding.modelPath.text = "模型初始化失败！"
             }
         }
+
     }
 
     override fun onCreateView(
