@@ -53,13 +53,11 @@
         <ProgressBar
             android:id="@+id/current_progress"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="300dp"
+            android:layout_width="280dp"
             android:layout_height="20dp"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:progress="0"
-            android:scaleX="1.0"
-            android:scaleY="0.8"
             tools:layout_editor_absoluteX="55dp"
             tools:layout_editor_absoluteY="7dp" />
 
@@ -127,8 +125,8 @@
         android:id="@+id/relativeLayout3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:scaleY="0.8"
-        android:scaleX="0.8"
+        android:scaleY="0.9"
+        android:scaleX="0.9"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -148,8 +146,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="45dp"
             android:layout_marginEnd="45dp"
-            android:scaleX="1.0"
-            android:scaleY="1.0"
             android:text="生成" />
 
         <Button

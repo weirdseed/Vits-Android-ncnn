@@ -48,7 +48,7 @@ class RecordingUtils {
         // begin recording
         recorder?.startRecording()
         recorder?.read(audio!!, 0, minBufferSize, AudioRecord.READ_BLOCKING)
-        return audio?.map { it * 10 }?.toFloatArray()
+        return audio?.map { it * 20 }?.toFloatArray()
     }
 
     fun stop(){
