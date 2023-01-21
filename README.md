@@ -33,17 +33,21 @@
 
 (4) 点击转换按钮即可将声音从原讲话人转换到目标讲话人
 
-**注意：**
-  ** 1、推理速度慢的话请手动增加线程数（默认为1），gpu选项可以选择不开启，由于Vulkan部分代码没有写，所以开启后反而更慢 **
-  ** 2、模型禁止商用！！**
-  ** 3、本项目目前仅支持日语，所以确保输入支持的日文 **
+### 注意
+  **1、推理速度慢的话请手动增加线程数（默认为1），gpu选项可以选择不开启，由于Vulkan部分代码没有写，所以开启后反而更慢**
+
+  **2、模型禁止商用！**
+
+  **3、本项目目前仅支持日语，所以确保输入支持的日文**
 
 ## 三、（可选）自行编译教程
 
 1.将代码下载到指定目录
+
 ```git clone https://github.com/weirdseed/Vits-Android-ncnn.git```
 
 2.下载[Vulkan版本ncnn](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)库，https://github.com/Tencent/ncnn/releases 解压到项目的\app\src\main\cpp\目录下，（需更改目录名称为ncnn），目录结构如下
+
 ```
 ├─asset_manager_api
 ├─audio_process
@@ -70,6 +74,7 @@
 ```
 
 3、下载openjtalk[字典文件](https://sourceforge.net/projects/open-jtalk/files/Dictionary/open_jtalk_dic-1.11/open_jtalk_dic_utf_8-1.11.tar.gz/download)解压到\src\main\assets文件夹，目录结构为
+
 ```
 ├─multi
 ├─open_jtalk_dic_utf_8-1.11
