@@ -567,19 +567,17 @@ class VCFragment : Fragment() {
                                 WaveUtils.loadWav(realPath, config!!.data!!.sampling_rate!!)
                             moerengToast("读取成功！")
                             vcBinding.audioPath.text = realPath
-                            loadingFinish = true
                         } else {
                             moerengToast("读取失败！")
                             showErrorText("audio")
-                            loadingFinish = false
                         }
                     } catch (e: Exception) {
                         Log.e("LoadAudio", e.message.toString())
                         moerengToast("读取失败！")
                         vcBinding.audioPath.text = e.message
-                        loadingFinish = false
                     }
                 }
+                loadingFinish = true
             }
             REQUEST_CODE_SELECT_CONFIG -> {
                 if (vcBinding.exportBtn.visibility == View.VISIBLE)
