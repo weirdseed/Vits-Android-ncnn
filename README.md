@@ -4,55 +4,86 @@
 
 本项目基于[vits](https://github.com/jaywalnut310/vits)训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
 
-日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)
+日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
 
-日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)进行移植部署
-
-# 更新
-- 将pytorch模型转换为ncnn模型，缩小模型体积和安装包体积，实现推理加速
-
-- 优化了一些细节，添加了参数调节
-
-- 使用ncnn Vulkan，增加gpu推理加速
+日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/mecab)日语分词库
 
 # 使用说明
+## 一、确保手机有足够的空间，运行内存不小于1GB
 
-1、确保安装好ndk并配置好相关环境
+## 二、下载发布页的apk文件并安装
 
-2、将编译好的ncnn库放在项目的/app/src/main/cpp/目录下并重命名为ncnn，或者自己在cmake文件修改路径，[ncnn下载地址](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)
+### 文字转语音（tts）
+(1) 将[模型文件](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/v1.2/models.zip)下载之后解压放在手机/sdcard/Download文件夹下。
 
-**或者自行下载Vulkan版本，最好是1126的最新版或者自己编译，编译教程见ncnn项目地址页**
+(2) 点击加载配置（批准权限后），选择/sdcard/Download/[你的模型目录]/config.json加载配置文件。（示例：/sdcard/Download/模型/莲华/config.json）
 
-3、将模型文件（.bin）和配置文件（.json）下载之后解压放在Download文件夹下，点击模型文件加载模型(仅需加载任意一个.bin文件即可），点击加载配置加载以.json为后缀的配置文件
+(3) 点击加载模型（批准权限后），选择/sdcard/Download/[你的模型目录]/*.bin加载模型文件。（示例：/sdcard/Download/模型/莲华/dec.ncnn.bin）
 
-**3.1、如果模型加载失败，或者Android api >= 30（Android 11）在/storage/emulated/0/Android/media下新建model文件夹，将模型和配置文件放入即可**
+(4) 输入日文，点击生成
+
+(5) 点击播放即可播放音频，点击导出即可将生成的音频导出，音频文件会保存在模型目录的上一级目录中
+  
+### 声线转换（voice convert）
+(1) 配置加载和模型加载同上
+
+(2) 点击录制声音将开启手机麦克风录制待转换的声音（请确保录音权限批准）或者点击加载音频将加载您要转换的音频（目前仅支持.wav格式）
+
+(3)分别选择原讲话人和目标讲话人
+
+(4) 点击转换按钮即可将声音从原讲话人转换到目标讲话人
+
+**注意：**
+  ** 1、推理速度慢的话请手动增加线程数（默认为1），gpu选项可以选择不开启，由于Vulkan部分代码没有写，所以开启后反而更慢 **
+  ** 2、模型禁止商用！！**
+  ** 3、本项目目前仅支持日语，所以确保输入支持的日文 **
+
+## 三、（可选）自行编译教程
+
+1.将代码下载到指定目录
+```git clone https://github.com/weirdseed/Vits-Android-ncnn.git```
+
+2.下载[Vulkan版本ncnn](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)库，https://github.com/Tencent/ncnn/releases 解压到项目的\app\src\main\cpp\目录下，（需更改目录名称为ncnn），目录结构如下
+```
+├─asset_manager_api
+├─audio_process
+├─fftpack
+├─jpcommon
+├─mecab
+├─mecab2njd
+├─mecab_api
+├─ncnn
+│  ├─arm64-v8a
+│  ├─armeabi-v7a
+│  ├─x86
+│  └─x86_64
+├─njd
+├─njd2jpcommon
+├─njd_set_accent_phrase
+├─njd_set_accent_type
+├─njd_set_digit
+├─njd_set_long_vowel
+├─njd_set_pronunciation
+├─njd_set_unvoiced_vowel
+├─text2mecab
+└─vits
+```
+
+3、下载openjtalk[字典文件](https://sourceforge.net/projects/open-jtalk/files/Dictionary/open_jtalk_dic-1.11/open_jtalk_dic_utf_8-1.11.tar.gz/download)解压到\src\main\assets文件夹，目录结构为
+```
+├─multi
+├─open_jtalk_dic_utf_8-1.11
+└─single
+```
 
 4、编译并运行项目
 
-5、如果下载apk则仅需进行3即可
-
-# 注意
-
-1、字典下载解压到项目assets的同名文件夹下，模型和配置文件下载到本地后手动导入
-
-2、字典链接:https://pan.baidu.com/s/1H33WODqiRvtaWPsjWE0XVw?pwd=uqo3 
-
-~~模型链接:https://pan.baidu.com/s/1kBlWTQSKPn2TetUfCpA8kw?pwd=584k~~
-
-3、由于更换了推理框架，目前仅支持ncnn多人模型，也是为了以后能够兼容声线转换，模型替换为基于@CjangCjengh大佬的多人模型
-
-4、ncnn模型和配置文件链接：[模型地址](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/ncnn/Nene.+.Meguru.+.Yoshino.+.Mako.+.Murasame.+.Koharu.+.Nanami.zip)
-
-5、本项目主要由c++实现，因此确保安装ndk和配置好环境
-
-6、模型转换工具正在完善，以后也会发布，可以将自己训练好的模型转换成ncnn支持的格式，并且以后也会实现voice convert，总之，敬请期待！！
-
-**模型禁止商用，后果自付！！！**
+# 使用自己训练的模型
+TODO
 
 # 预览图
-![Screenshot_1672929199](https://user-images.githubusercontent.com/57377927/210804484-ca7a3ea6-7878-46a2-9ce7-7bdd42144705.png)
+
+![Screenshot_1674277175](https://user-images.githubusercontent.com/57377927/213844693-ca2a5704-86b1-419f-acfb-f87505867200.png) ![Screenshot_1674277968](https://user-images.githubusercontent.com/57377927/213844708-87bb951d-3c89-4cab-98e2-b127ce28a226.png)
 
 # 鸣谢
-
-再次感谢CjangCjengh大佬的付出，以及@nihui群主提供这么棒的框架，以及各位热心群友帮忙解决模型转换的各种问题
-
+感谢CjangCjengh提供的模型还有Japanese cleaner，@nihui群主提供这么棒的框架，以及各位热心群友帮忙解决模型转换的各种问题
