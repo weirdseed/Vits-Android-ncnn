@@ -14,24 +14,24 @@
 ## 二、下载发布页的apk文件并安装
 
 ### 文字转语音（tts）
-(1) 将[模型文件](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/v1.2/models.zip)下载之后解压放在手机/sdcard/Download文件夹下。
+- 将[模型文件](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/v1.2/models.zip)下载之后解压放在手机/sdcard/Download文件夹下。
 
-(2) 点击加载配置（批准权限后），选择/sdcard/Download/[你的模型目录]/config.json加载配置文件。（示例：/sdcard/Download/模型/莲华/config.json）
+- 点击加载配置（批准权限后），选择/sdcard/Download/[你的模型目录]/config.json加载配置文件。（示例：/sdcard/Download/模型/莲华/config.json）
 
-(3) 点击加载模型（批准权限后），选择/sdcard/Download/[你的模型目录]/*.bin加载模型文件。（示例：/sdcard/Download/模型/莲华/dec.ncnn.bin）
+- 点击加载模型（批准权限后），选择/sdcard/Download/[你的模型目录]/*.bin加载模型文件。（示例：/sdcard/Download/模型/莲华/dec.ncnn.bin）
 
-(4) 输入日文，点击生成
+- 输入日文，点击生成
 
-(5) 点击播放即可播放音频，点击导出即可将生成的音频导出，音频文件会保存在模型目录的上一级目录中
+- 点击播放即可播放音频，点击导出即可将生成- 的音频导出，音频文件会保存在模型目录的上一级目录中
   
 ### 声线转换（voice convert）
-(1) 配置加载和模型加载同上
+- 配置加载和模型加载同上
 
-(2) 点击录制声音将开启手机麦克风录制待转换的声音（请确保录音权限批准）或者点击加载音频将加载您要转换的音频（目前仅支持.wav格式）
+- 点击录制声音将开启手机麦克风录制待转换的声音（请确保录音权限批准）或者点击加载音频将加载您要转换的音频（目前仅支持.wav格式）
 
-(3)分别选择原讲话人和目标讲话人
+- 分别选择原讲话人和目标讲话人
 
-(4) 点击转换按钮即可将声音从原讲话人转换到目标讲话人
+- 点击转换按钮即可将声音从原讲话人转换到目标讲话人
 
 ### 注意
   **1、推理速度慢的话请手动增加线程数（默认为1），gpu选项可以选择不开启，由于Vulkan部分代码没有写，所以开启后反而更慢**
