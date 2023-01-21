@@ -2,11 +2,11 @@
 
 # 介绍
 
-本项目基于[vits](https://github.com/jaywalnut310/vits)训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
+1.本项目基于[vits](https://github.com/jaywalnut310/vits)训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
 
-日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
+2.日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
 
-日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/mecab)日语分词库
+3.日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/mecab)日语分词库
 
 # 使用说明
 ## 一、确保手机有足够的空间，运行内存不小于1GB
