@@ -18,8 +18,10 @@ import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentVcBinding
 import com.example.moereng.utils.FileUtils
-import com.example.moereng.utils.PermissionUtils.checkAppPermission
-import com.example.moereng.utils.PermissionUtils.requestAppPermission
+import com.example.moereng.utils.PermissionUtils.checkStoragePermission
+import com.example.moereng.utils.PermissionUtils.checkRecordPermission
+import com.example.moereng.utils.PermissionUtils.requestStoragePermission
+import com.example.moereng.utils.PermissionUtils.requestRecordPermission
 import com.example.moereng.utils.PlayerUtils
 import com.example.moereng.utils.RecordingUtils
 import com.example.moereng.utils.UIUtils.moerengToast
@@ -361,7 +363,7 @@ class VCFragment : Fragment() {
             } else if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
                 // check permission
-            } else if (checkAppPermission(requireActivity())) {
+            } else if (checkRecordPermission(requireActivity())) {
                 if (recorder.isRecording) {
                     // change text
                     vcBinding.recordAudioBtn.text = "开始录制"
@@ -372,9 +374,8 @@ class VCFragment : Fragment() {
                         record()
                     }
                 }
-
             } else {
-                requestAppPermission(requireActivity())
+                requestRecordPermission(requireActivity())
             }
         }
 
@@ -385,8 +386,8 @@ class VCFragment : Fragment() {
                 moerengToast("转换中，请稍等...")
             } else if (loadingFinish) {
                 // check permission
-                if (!checkAppPermission(requireActivity()))
-                    requestAppPermission(
+                if (!checkStoragePermission(requireActivity()))
+                    requestStoragePermission(
                         requireActivity()
                     )
                 else {
@@ -404,8 +405,8 @@ class VCFragment : Fragment() {
         vcBinding.selectConfig.setOnClickListener {
             if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
-            } else if (!checkAppPermission(requireActivity()))
-                requestAppPermission(
+            } else if (!checkStoragePermission(requireActivity()))
+                requestStoragePermission(
                     requireActivity()
                 )
             else {
@@ -424,8 +425,8 @@ class VCFragment : Fragment() {
         vcBinding.selectModel.setOnClickListener {
             if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
-            } else if (!checkAppPermission(requireActivity()))
-                requestAppPermission(
+            } else if (!checkStoragePermission(requireActivity()))
+                requestStoragePermission(
                     requireActivity()
                 )
             else {

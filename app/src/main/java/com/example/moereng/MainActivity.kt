@@ -10,8 +10,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.moereng.databinding.ActivityMainBinding
 import com.example.moereng.fragments.TTSViewModel
 import com.example.moereng.fragments.VCViewModel
-import com.example.moereng.utils.PermissionUtils.checkAppPermission
-import com.example.moereng.utils.PermissionUtils.requestAppPermission
 import com.example.moereng.utils.VitsUtils
 import com.example.moereng.utils.VitsUtils.checkThreadsCpp
 import com.example.moereng.utils.VitsUtils.testGpu
@@ -32,10 +30,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // dynamic permission
-        if (!checkAppPermission(this)) {
-            requestAppPermission(this)
-        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

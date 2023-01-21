@@ -22,8 +22,8 @@ import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentTtsBinding
 import com.example.moereng.utils.FileUtils
-import com.example.moereng.utils.PermissionUtils.checkAppPermission
-import com.example.moereng.utils.PermissionUtils.requestAppPermission
+import com.example.moereng.utils.PermissionUtils.checkStoragePermission
+import com.example.moereng.utils.PermissionUtils.requestStoragePermission
 import com.example.moereng.utils.PlayerUtils
 import com.example.moereng.utils.TextUtils
 import com.example.moereng.utils.UIUtils.moerengToast
@@ -188,6 +188,8 @@ class TTSFragment : Fragment() {
     // processing inputs
     @SuppressLint("SetTextI18n")
     private fun processWords(text: String) {
+        finishFlag = false
+        ttsViewModel.setGenerationFinishValue(finishFlag)
         if (!openJtalkState) {
             requireActivity().runOnUiThread {
                 moerengToast("初始化openjtalk字典...")
@@ -198,8 +200,6 @@ class TTSFragment : Fragment() {
                 moerengToast("初始化字典完成！")
             }
         }
-        finishFlag = false
-        ttsViewModel.setGenerationFinishValue(finishFlag)
         audioArray.clear()
         if (ttsBinding.playBtn.visibility == View.VISIBLE
             || ttsBinding.exportBtn.visibility == View.VISIBLE
@@ -456,8 +456,8 @@ class TTSFragment : Fragment() {
         ttsBinding.selectConfig.setOnClickListener {
             if (!finishFlag){
                 moerengToast("生成中，请稍等...")
-            } else if (!checkAppPermission(requireActivity()))
-                requestAppPermission(requireActivity())
+            } else if (!checkStoragePermission(requireActivity()))
+                requestStoragePermission(requireActivity())
             else {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
@@ -474,8 +474,8 @@ class TTSFragment : Fragment() {
         ttsBinding.selectModel.setOnClickListener {
             if (!finishFlag){
                 moerengToast("生成中，请稍等...")
-            }else if (!checkAppPermission(requireActivity()))
-                requestAppPermission(requireActivity())
+            }else if (!checkStoragePermission(requireActivity()))
+                requestStoragePermission(requireActivity())
             else {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.type = "application/octet-stream"
