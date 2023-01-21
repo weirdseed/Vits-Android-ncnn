@@ -1,7 +1,6 @@
 package com.example.moereng.utils
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
@@ -11,9 +10,11 @@ import android.util.Log
 class RecordingUtils {
     private var recorder: AudioRecord? = null
 
-    private val channels = AudioFormat.CHANNEL_IN_MONO
-
     private val audioFormat = AudioFormat.ENCODING_PCM_FLOAT
+
+    private val audioSource = MediaRecorder.AudioSource.MIC
+
+    private val channelConfig = AudioFormat.CHANNEL_IN_MONO
 
     private val sampleRate = 22050
 
@@ -23,22 +24,48 @@ class RecordingUtils {
 
     private var minBufferSize = 0
 
-    private var initialized = false
+    var initialized = false
 
     @SuppressLint("MissingPermission")
     fun initRecorder() {
-        if (!initialized){
-            minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channels, audioFormat)
-            if (minBufferSize < 0) throw Exception("AudioRecorder不可用！")
+        if (!initialized) {
+            minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+            if (minBufferSize < 0) {
+                initialized = false
+                throw Exception("AudioRecorder不可用！")
+            }
             Log.d("RecordingUtils", "buffer size = $minBufferSize")
             recorder = AudioRecord(
-                MediaRecorder.AudioSource.DEFAULT,
+                audioSource,
                 sampleRate,
-                channels,
+                channelConfig,
                 audioFormat,
                 minBufferSize
             )
+            if (recorder?.state == AudioRecord.STATE_UNINITIALIZED) {
+                recorder = AudioRecord(
+                    audioSource,
+                    sampleRate,
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                    audioFormat,
+                    minBufferSize
+                )
+                if (recorder?.state == AudioRecord.STATE_UNINITIALIZED){
+                    recorder = AudioRecord(
+                        audioSource,
+                        sampleRate,
+                        AudioFormat.CHANNEL_CONFIGURATION_DEFAULT,
+                        audioFormat,
+                        minBufferSize
+                    )
+                }
+            }
+            if (recorder?.state == AudioRecord.STATE_UNINITIALIZED){
+                initialized = false
+                throw Exception("AudioRecord不可用，请检查麦克风设备是否正常！")
+            }
             initialized = true
+            isRecording = true
         }
         isRecording = true
     }
@@ -51,14 +78,14 @@ class RecordingUtils {
         return audio?.map { it * 20 }?.toFloatArray()
     }
 
-    fun stop(){
-        if (isRecording){
+    fun stop() {
+        if (isRecording) {
             recorder?.stop()
             isRecording = false
         }
     }
 
-    fun release(){
+    fun release() {
         stop()
         recorder?.release()
         recorder = null

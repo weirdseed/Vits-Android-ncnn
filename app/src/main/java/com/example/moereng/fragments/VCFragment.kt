@@ -17,11 +17,14 @@ import com.example.moereng.Vits
 import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentVcBinding
-import com.example.moereng.utils.*
+import com.example.moereng.utils.FileUtils
 import com.example.moereng.utils.PermissionUtils.checkAppPermission
 import com.example.moereng.utils.PermissionUtils.requestAppPermission
+import com.example.moereng.utils.PlayerUtils
+import com.example.moereng.utils.RecordingUtils
 import com.example.moereng.utils.UIUtils.moerengToast
 import com.example.moereng.utils.VitsUtils.checkConfig
+import com.example.moereng.utils.WaveUtils
 import com.example.moereng.utils.WaveUtils.audioLenToDuration
 import java.lang.Integer.min
 import kotlin.concurrent.thread
@@ -195,21 +198,25 @@ class VCFragment : Fragment() {
     // record audio stream
     @SuppressLint("SetTextI18n")
     private fun record() {
-        requireActivity().runOnUiThread {
-            // hide progress bar
-            if (vcBinding.progressLayout.visibility == View.VISIBLE) {
-                vcBinding.progressLayout.visibility = View.GONE
-            }
-            // hide buttons
-            if (vcBinding.playBtn.visibility == View.VISIBLE)
-                vcBinding.playBtn.visibility = View.GONE
-            if (vcBinding.exportBtn.visibility == View.VISIBLE)
-                vcBinding.exportBtn.visibility = View.GONE
-        }
         try {
             recorder.initRecorder()
+            requireActivity().runOnUiThread {
+                // change text
+                vcBinding.recordAudioBtn.text = "停止录制"
+                vcBinding.audioLength.text = "已录制: 00:00:00"
+
+                // hide progress bar
+                if (vcBinding.progressLayout.visibility == View.VISIBLE) {
+                    vcBinding.progressLayout.visibility = View.GONE
+                }
+                // hide buttons
+                if (vcBinding.playBtn.visibility == View.VISIBLE)
+                    vcBinding.playBtn.visibility = View.GONE
+                if (vcBinding.exportBtn.visibility == View.VISIBLE)
+                    vcBinding.exportBtn.visibility = View.GONE
+            }
             recordData.clear()
-            while (recorder.isRecording) {
+            while (recorder.isRecording && recorder.initialized) {
                 val audio = recorder.record()
                 if (audio != null) {
                     recordData.addAll(audio.toList())
@@ -220,6 +227,8 @@ class VCFragment : Fragment() {
                     }
                 }
             }
+
+
         } catch (e: Exception) {
             Log.e("VCFragment", e.message.toString())
             requireActivity().runOnUiThread {
@@ -345,11 +354,11 @@ class VCFragment : Fragment() {
 
         // record voice
         vcBinding.recordAudioBtn.setOnClickListener {
-            if (config == null){
+            if (config == null) {
                 moerengToast("请加载配置文件！")
-            } else if (!modelInitState){
+            } else if (!modelInitState) {
                 moerengToast("请加载模型！")
-            } else if (!convertFinish){
+            } else if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
                 // check permission
             } else if (checkAppPermission(requireActivity())) {
@@ -358,10 +367,6 @@ class VCFragment : Fragment() {
                     vcBinding.recordAudioBtn.text = "开始录制"
                     recorder.stop()
                 } else {
-                    // change text
-                    vcBinding.recordAudioBtn.text = "停止录制"
-                    vcBinding.audioLength.text = "已录制: 00:00:00"
-
                     // start record
                     thread {
                         record()
@@ -376,10 +381,9 @@ class VCFragment : Fragment() {
         // load wave file
         vcBinding.loadAudioBtn.setOnClickListener {
             if (config == null) moerengToast("请先加载配置文件！")
-            else if (!convertFinish){
+            else if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
-            }
-            else if (loadingFinish) {
+            } else if (loadingFinish) {
                 // check permission
                 if (!checkAppPermission(requireActivity()))
                     requestAppPermission(
@@ -398,8 +402,8 @@ class VCFragment : Fragment() {
 
         // select config button
         vcBinding.selectConfig.setOnClickListener {
-            if (!convertFinish){
-              moerengToast("转换中，请稍等...")
+            if (!convertFinish) {
+                moerengToast("转换中，请稍等...")
             } else if (!checkAppPermission(requireActivity()))
                 requestAppPermission(
                     requireActivity()
@@ -418,8 +422,8 @@ class VCFragment : Fragment() {
 
         // select model button
         vcBinding.selectModel.setOnClickListener {
-            if (!convertFinish){
-              moerengToast("转换中，请稍等...")
+            if (!convertFinish) {
+                moerengToast("转换中，请稍等...")
             } else if (!checkAppPermission(requireActivity()))
                 requestAppPermission(
                     requireActivity()
@@ -442,13 +446,13 @@ class VCFragment : Fragment() {
         vcBinding.convertBtn.setOnClickListener {
             if (config == null) {
                 moerengToast("请加载配置文件！")
-            }  else if (!modelInitState) {
+            } else if (!modelInitState) {
                 moerengToast("请加载模型文件！")
             } else if (audioInputs == null && recordData.isEmpty()) {
                 moerengToast("请加载音频文件或录制音频！")
-            } else if (recorder.isRecording){
+            } else if (recorder.isRecording) {
                 moerengToast("录制中，请完成录制后转换...")
-            }else if (!convertFinish) {
+            } else if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
             } else {
                 // init progress bar
@@ -460,12 +464,12 @@ class VCFragment : Fragment() {
                 if (vcBinding.exportBtn.visibility == View.VISIBLE)
                     vcBinding.exportBtn.visibility = View.GONE
                 try {
-                    if (audioInputs != null && recordData.isNotEmpty()){
+                    if (audioInputs != null && recordData.isNotEmpty()) {
                         AlertDialog.Builder(context).apply {
                             setTitle("提示")
                             setMessage("请选择要转换的音频")
                             setCancelable(true)
-                            setPositiveButton("录制的音频"){ dialog, which->
+                            setPositiveButton("录制的音频") { dialog, which ->
                                 // set finish flag
                                 convertFinish = false
                                 vcViewModel.setConvertFinishValue(convertFinish)
@@ -473,7 +477,7 @@ class VCFragment : Fragment() {
                                     convert(recordData)
                                 }
                             }
-                            setNegativeButton("加载的音频"){ dialog, which->
+                            setNegativeButton("加载的音频") { dialog, which ->
                                 // set finish flag
                                 convertFinish = false
                                 vcViewModel.setConvertFinishValue(convertFinish)
@@ -483,7 +487,7 @@ class VCFragment : Fragment() {
                             }
                             show()
                         }
-                    } else if (audioInputs != null){
+                    } else if (audioInputs != null) {
                         convertFinish = false
                         vcViewModel.setConvertFinishValue(convertFinish)
                         thread {
