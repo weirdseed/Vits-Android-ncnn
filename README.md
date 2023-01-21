@@ -89,7 +89,7 @@
 TODO
 
 # 预览图
-![Screenshot_1674277968](https://user-images.githubusercontent.com/57377927/213844980-a664555f-3173-43e0-bbd9-3d15cd2a0cd2.png) ![Screenshot_1674277175](https://user-images.githubusercontent.com/57377927/213844981-b89d203d-a0c6-49fb-bf77-d4ee565f4a09.png)
+![Screenshot_1674308191](https://user-images.githubusercontent.com/57377927/213869491-daef85ca-7ea6-4e1f-b075-a71f415e8fc6.png) ![Screenshot_1674308391](https://user-images.githubusercontent.com/57377927/213869498-61388e28-d52a-439a-b212-43ed3c98469a.png)
 
 
 # 鸣谢
