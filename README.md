@@ -87,8 +87,8 @@
 TODO
 
 # 预览图
+![Screenshot_1674277968](https://user-images.githubusercontent.com/57377927/213844980-a664555f-3173-43e0-bbd9-3d15cd2a0cd2.png) ![Screenshot_1674277175](https://user-images.githubusercontent.com/57377927/213844981-b89d203d-a0c6-49fb-bf77-d4ee565f4a09.png)
 
-![Screenshot_1674277175](https://user-images.githubusercontent.com/57377927/213844693-ca2a5704-86b1-419f-acfb-f87505867200.png) ![Screenshot_1674277968](https://user-images.githubusercontent.com/57377927/213844708-87bb951d-3c89-4cab-98e2-b127ce28a226.png)
 
 # 鸣谢
 感谢CjangCjengh提供的模型还有Japanese cleaner，@nihui群主提供这么棒的框架，以及各位热心群友帮忙解决模型转换的各种问题
