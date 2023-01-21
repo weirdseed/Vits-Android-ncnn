@@ -289,7 +289,7 @@ class VCFragment : Fragment() {
         val tfolder = targetFolder.substring(0..targetFolder.length - 2)
         val path = WaveUtils.writeWav(
             audioArray.toFloatArray(), tfolder, samplingRate,
-            "vc-${config!!.speakers!![tgtSid]}"
+            "vc-${config!!.speakers!![srcSid]}-${config!!.speakers!![tgtSid]}"
         )
         requireActivity().runOnUiThread {
             if (audioArray.isNotEmpty() && path != "") {
