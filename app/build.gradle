@@ -3,6 +3,12 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+static def getDate(){
+    def date = new Date()
+    def formattedDate = date.format("yyyyMMddHHmm", TimeZone.getTimeZone("GMT+08:00"))
+    return formattedDate
+}
+
 android {
     compileSdk 32
 
@@ -10,7 +16,7 @@ android {
         applicationId "com.example.moereng"
         minSdk 24
         targetSdk 29
-        versionCode 2
+        versionCode 3
         versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -25,6 +31,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "Vits-Android-NCNN"+"_"+getDate()+".apk"
+                }
+            }
         }
     }
     compileOptions {

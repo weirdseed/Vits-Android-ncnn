@@ -381,7 +381,8 @@ class VCFragment : Fragment() {
 
         // load wave file
         vcBinding.loadAudioBtn.setOnClickListener {
-            if (config == null) moerengToast("请先加载配置文件！")
+            if (config == null) moerengToast("请加载配置文件！")
+            else if (!modelInitState) moerengToast("请加载模型文件！")
             else if (!convertFinish) {
                 moerengToast("转换中，请稍等...")
             } else if (loadingFinish) {
@@ -566,16 +567,17 @@ class VCFragment : Fragment() {
                                 WaveUtils.loadWav(realPath, config!!.data!!.sampling_rate!!)
                             moerengToast("读取成功！")
                             vcBinding.audioPath.text = realPath
+                            loadingFinish = true
                         } else {
                             moerengToast("读取失败！")
                             showErrorText("audio")
+                            loadingFinish = false
                         }
-                        loadingFinish = true
                     } catch (e: Exception) {
                         Log.e("LoadAudio", e.message.toString())
                         moerengToast("读取失败！")
                         vcBinding.audioPath.text = e.message
-                        loadingFinish = true
+                        loadingFinish = false
                     }
                 }
             }
