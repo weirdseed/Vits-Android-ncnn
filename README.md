@@ -46,7 +46,7 @@
 
 ```git clone https://github.com/weirdseed/Vits-Android-ncnn.git```
 
-2.下载[Vulkan版本ncnn](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)库，https://github.com/Tencent/ncnn/releases 解压到项目的\app\src\main\cpp\目录下，（需更改目录名称为ncnn），目录结构如下
+2.下载[Vulkan版本ncnn](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)库，或者自行到https://github.com/Tencent/ncnn/releases 下载，解压到项目的\app\src\main\cpp\目录下，（需更改目录名称为ncnn），目录结构如下
 
 ```
 ├─asset_manager_api
@@ -72,6 +72,8 @@
 ├─text2mecab
 └─vits
 ```
+
+2.1 自行编译ncnn，请注意，ncnn默认的编译选项中rtti为关闭状态，需要自己手动打开，编译教程见[链接](https://github.com/Tencent/ncnn/wiki/how-to-build)，推荐在linux环境下编译
 
 3、下载openjtalk[字典文件](https://sourceforge.net/projects/open-jtalk/files/Dictionary/open_jtalk_dic-1.11/open_jtalk_dic_utf_8-1.11.tar.gz/download)解压到\src\main\assets文件夹，目录结构为
 
