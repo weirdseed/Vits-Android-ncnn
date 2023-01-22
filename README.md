@@ -86,7 +86,8 @@
 4、编译并运行项目
 
 # 使用自己训练的模型
-参考项目 https://github.com/weirdseed/vits-ncnn-convert-tool
+
+ https://github.com/weirdseed/vits-ncnn-convert-tool
 
 # 预览图
 ![Screenshot_1674308191](https://user-images.githubusercontent.com/57377927/213869491-daef85ca-7ea6-4e1f-b075-a71f415e8fc6.png) ![Screenshot_1674308391](https://user-images.githubusercontent.com/57377927/213869498-61388e28-d52a-439a-b212-43ed3c98469a.png)
