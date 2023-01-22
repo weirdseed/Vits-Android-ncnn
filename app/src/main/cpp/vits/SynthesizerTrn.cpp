@@ -74,7 +74,7 @@ SynthesizerTrn::enc_p_forward(const Mat &x, const Net &enc_p,
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", length);
-    Mat out0, out1, out2, out3, test;
+    Mat out0, out1, out2, out3;
     ex.extract("out0", out0);
     ex.extract("out1", out1);
     ex.extract("out2", out2);
