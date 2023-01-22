@@ -216,15 +216,15 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
     opt.num_threads = num_threads;
     // enc_p
     auto enc_p_out = enc_p_forward(data, nets->enc_p, vulkan, num_threads);
-    Mat x = reducedims(enc_p_out[0]);
+    Mat x = enc_p_out[0];
     Mat m_p = enc_p_out[1];
     Mat logs_p = enc_p_out[2];
-    Mat x_mask = reducedims(enc_p_out[3]);
+    Mat x_mask = enc_p_out[3];
 
     Mat g;
     if (multi) g = reducedims(mattranspose(emb_g_forward(sid, nets->emb_g, vulkan, num_threads), opt));
 
-    Mat z = randn(x.w, 2, opt);
+    Mat z = randn(x.w, 2, opt, 1);
 
     Mat logw = dp_forward(x, x_mask, z, g, noise_scale_w, nets->dp, vulkan, num_threads);
 
@@ -265,7 +265,6 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
 
     Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g), nets->dec_net,
                         vulkan, num_threads);
-    o = product(o, 2, opt);
     LOGI("finished!\n");
     return o;
 }
@@ -290,7 +289,6 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     y_mask = expand(y_mask, z_hat.w, z_hat.h, opt);
     auto o_hat = dec_forward(reducedims(matproduct(z_hat, y_mask, opt)), g_tgt, net->dec_net,
                              vulkan, num_threads);
-    o_hat = product(o_hat, 2, opt);
     LOGI("voice converted!\n");
     return o_hat;
 }

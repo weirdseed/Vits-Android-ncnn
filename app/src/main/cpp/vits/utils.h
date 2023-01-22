@@ -72,7 +72,7 @@ Mat matmul(const Mat& m1, const Mat& m2, const Option& opt);
 
 void mask_fill(Mat& m, const Mat& mask, const char* condition, float condition_value, float value, const Option& opt);
 
-void pretty_print(const ncnn::Mat& m, const Option& opt, const char* name = "", int precision = 4);
+void pretty_print(const ncnn::Mat& m, const Option& opt, const char* name);
 
 Mat pad(const Mat& blob, int pad_top, int pad_bottom, int pad_left, int pad_right, float pad_value, const Option& opt); // ∫·œÚ”“≤øÃÓ≥‰
 
