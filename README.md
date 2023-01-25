@@ -14,7 +14,7 @@
 ## 二、下载发布页的apk文件并安装
 
 ### 文字转语音（tts）
-- 将[模型文件](https://github.com/weirdseed/Vits-Android-ncnn/releases/download/v1.2/models.zip)下载之后解压放在手机/sdcard/Download文件夹下。
+- 将模型文件下载之后解压放在手机/sdcard/Download文件夹下。
 
 - 点击加载配置（批准权限后），选择/sdcard/Download/[你的模型目录]/config.json加载配置文件。（示例：/sdcard/Download/模型/莲华/config.json）
 
