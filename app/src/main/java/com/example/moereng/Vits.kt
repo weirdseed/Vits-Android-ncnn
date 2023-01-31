@@ -3,7 +3,7 @@ package com.example.moereng
 import android.content.res.AssetManager
 
 object Vits {
-    external fun init_vits(assetManager: AssetManager, path: String, voice_convert: Boolean, multi: Boolean, num_threads: Int): Boolean
+    external fun init_vits(assetManager: AssetManager, path: String, voice_convert: Boolean, multi: Boolean, n_vocab: Int, num_threads: Int): Boolean
 
     external fun forward(
         x: IntArray,

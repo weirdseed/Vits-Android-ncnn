@@ -88,6 +88,8 @@ class TTSFragment : Fragment() {
 
     private var modelInitState: Boolean = false
 
+    private var n_vocab: Int = 0
+
     // init thread spinner
     private fun initSpinner() {
         val spinnerArray = IntArray(maxThreads)
@@ -336,6 +338,7 @@ class TTSFragment : Fragment() {
         if (config != null && config!!.speakers != null) type = "multi"
         if (checkConfig(config, type)) {
             samplingRate = config!!.data!!.sampling_rate!!
+            n_vocab = config!!.symbols!!.size
             if (config!!.data!!.n_speakers!! > 1) {
                 multi = true
                 maxSpeaker = config!!.data!!.n_speakers!!
@@ -387,6 +390,7 @@ class TTSFragment : Fragment() {
             folder,
             voiceConvert,
             multi,
+            n_vocab,
             maxThreads
         )
         ttsViewModel.setGenerationFinishValue(true)

@@ -4,29 +4,18 @@
 #include "../mecab_api/api.h"
 
 DEFINE_LAYER_CREATOR(expand_as)
-
 DEFINE_LAYER_CREATOR(flip)
-
 DEFINE_LAYER_CREATOR(Transpose)
-
 DEFINE_LAYER_CREATOR(PRQTransform)
-
 DEFINE_LAYER_CREATOR(ResidualReverse)
-
 DEFINE_LAYER_CREATOR(Embedding)
-
+DEFINE_LAYER_CREATOR(TextEmbedding)
 DEFINE_LAYER_CREATOR(SequenceMask)
-
 DEFINE_LAYER_CREATOR(Attention)
-
 DEFINE_LAYER_CREATOR(ExpandDim)
-
 DEFINE_LAYER_CREATOR(SamePadding)
-
 DEFINE_LAYER_CREATOR(ReduceDim)
-
 DEFINE_LAYER_CREATOR(ZerosLike)
-
 DEFINE_LAYER_CREATOR(RandnLike)
 
 bool SynthesizerTrn::load_model(const std::string &folder, bool multi,Net &net, const Option &opt,
@@ -35,6 +24,7 @@ bool SynthesizerTrn::load_model(const std::string &folder, bool multi,Net &net, 
     net.register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
     net.register_custom_layer("modules.Transpose", Transpose_layer_creator);
     net.register_custom_layer("Embedding", Embedding_layer_creator);
+    net.register_custom_layer("modules.TextEmbedding", TextEmbedding_layer_creator);
     net.register_custom_layer("modules.SequenceMask", SequenceMask_layer_creator);
     net.register_custom_layer("attentions.Attention", Attention_layer_creator);
     net.register_custom_layer("attentions.ExpandDim", ExpandDim_layer_creator);
@@ -64,8 +54,30 @@ bool SynthesizerTrn::load_model(const std::string &folder, bool multi,Net &net, 
     return false;
 }
 
+bool SynthesizerTrn::load_weight(const string &folder, Mat &weight, const int n_vocab) {
+    LOGI("loading %s...\n", "text embedding");
+    std::string path = join_path(folder, "emb_t.bin");
+    FILE* fp = fopen(path.c_str(), "rb");
+    if (fp != nullptr){
+        fseek(fp, 0, SEEK_END);
+        auto file_size = ftell(fp);
+        auto emb_length = file_size / sizeof(float);
+        if (emb_length % 192 != 0) return false;
+        int h = int(emb_length / 192);
+        if (h != n_vocab) return false;
+        fseek(fp, 0, SEEK_SET);
+        weight.create(192, int(emb_length / 192));
+        fread(weight, sizeof(float), emb_length, fp);
+        fclose(fp);
+        LOGE("text embedding loaded!");
+        return true;
+    }
+    LOGE("text embedding load fail");
+    return false;
+}
+
 std::vector<Mat>
-SynthesizerTrn::enc_p_forward(const Mat &x, const Net &enc_p,
+SynthesizerTrn::enc_p_forward(const Mat &x, const Mat& weight, const Net &enc_p,
                               bool vulkan, const int num_threads) {
     Mat length(1);
     length[0] = x.w;
@@ -74,6 +86,7 @@ SynthesizerTrn::enc_p_forward(const Mat &x, const Net &enc_p,
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", length);
+    ex.input("in2", weight);
     Mat out0, out1, out2, out3;
     ex.extract("out0", out0);
     ex.extract("out1", out1);
@@ -124,14 +137,14 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
     ex.input("in0", x);
     ex.input("in1", x_mask);
     ex.input("in2", z);
-    Mat nsc;
-    nsc.create_like(z);
-    nsc.fill(noise_scale);
+    Mat noise;
+    noise.create_like(z);
+    noise.fill(noise_scale);
     if (!g.empty()) {
-        ex.input("in3", nsc);
+        ex.input("in3", noise);
         ex.input("in4", g);
     } else {
-        ex.input("in3", nsc);
+        ex.input("in3", noise);
     }
     ex.extract("out0", out);
     return out;
@@ -176,18 +189,20 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec_net, 
     return out;
 }
 
-bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
+bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi, const int n_vocab,
                           AssetJNI *assetJni, Nets *nets, const Option &opt) {
     assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
     if (voice_convert){
-        if (load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
+        if (load_weight(model_folder, nets->emb_t, n_vocab) &&
+            load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
             load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
             load_model(model_folder, multi, nets->flow, opt, "flow") &&
             load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
             load_model(model_folder, multi, nets->emb_g, opt, "emb_g"))
             return true;
     } else if (multi){
-        if (load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
+        if (load_weight(model_folder, nets->emb_t, n_vocab) &&
+            load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
             load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
             load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
             load_model(model_folder, multi, nets->flow, opt, "flow") &&
@@ -196,7 +211,8 @@ bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, b
             load_model(model_folder, multi, nets->emb_g, opt, "emb_g"))
             return true;
     } else {
-        if (load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
+        if (load_weight(model_folder, nets->emb_t, n_vocab) &&
+            load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
             load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
             load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
             load_model(model_folder, multi, nets->dp, opt, "dp"))
@@ -215,7 +231,7 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
     Option opt;
     opt.num_threads = num_threads;
     // enc_p
-    auto enc_p_out = enc_p_forward(data, nets->enc_p, vulkan, num_threads);
+    auto enc_p_out = enc_p_forward(data, nets->emb_t, nets->enc_p, vulkan, num_threads);
     Mat x = enc_p_out[0];
     Mat m_p = enc_p_out[1];
     Mat logs_p = enc_p_out[2];
@@ -292,5 +308,7 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     LOGI("voice converted!\n");
     return o_hat;
 }
+
+
 
 SynthesizerTrn::~SynthesizerTrn() = default;

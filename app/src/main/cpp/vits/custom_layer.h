@@ -363,7 +363,7 @@ public:
         num_embeddings = pd.get(0, 0);
         embedding_dim = pd.get(1, 0);
         bias_term = pd.get(2, 0);
-        weight_data_size = pd.get(3, 0);
+        weight_data_size = num_embeddings * embedding_dim;
         return 0;
     }
 
@@ -385,6 +385,32 @@ public:
             float word_index = ((const float *) bottom_blob)[i];
             const float *weight_row = weight_data.row((int) word_index);
             float *out_row = top_blob.row(i);
+            memcpy(out_row, weight_row, weight_data.w * sizeof(float));
+        }
+        return 0;
+    }
+};
+
+class TextEmbedding : public Layer {
+
+public:
+    TextEmbedding() {
+    }
+
+    virtual int forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const {
+        const Mat& x = bottom_blobs[1];
+        const Mat& weight_data = bottom_blobs[0];
+        Mat& top_blob = top_blobs[0];
+
+        int size = x.total();
+        top_blob.create(weight_data.w, size);
+        if (top_blob.empty()) return -100;
+
+#pragma omp parallel for num_threads(opt.num_threads)
+        for (int i = 0; i < size; i++) {
+            float word_index = ((const float*)x)[i];
+            const float* weight_row = weight_data.row((int)word_index);
+            float* out_row = top_blob.row(i);
             memcpy(out_row, weight_row, weight_data.w * sizeof(float));
         }
         return 0;

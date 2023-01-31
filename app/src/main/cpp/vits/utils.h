@@ -8,6 +8,7 @@
 #include <string>
 #include <iomanip>
 #include <random>
+#include <cstdio>
 
 // ncnn
 #include "layer.h"

@@ -47,6 +47,8 @@ class VCFragment : Fragment() {
 
     private var targetFolder: String = ""
 
+    private var n_vocab: Int = 0
+
     private var maxThreads = 1
 
     private var currentThreads = 1
@@ -131,6 +133,7 @@ class VCFragment : Fragment() {
         config = FileUtils.parseConfig(vcContext, path)
         if (checkConfig(config, "vc")) {
             samplingRate = config!!.data!!.sampling_rate!!
+            n_vocab = config!!.symbols!!.size
             if (config!!.data!!.n_speakers!! <= 1) {
                 vcBinding.configPath.text = "仅支持多人模型！"
                 moerengToast("配置加载失败！")
@@ -180,6 +183,7 @@ class VCFragment : Fragment() {
             folder,
             true,
             true,
+            n_vocab,
             maxThreads
         )
         vcViewModel.setConvertFinishValue(true)

@@ -95,6 +95,7 @@ Java_com_example_moereng_utils_TextUtils_extract_1labels(JNIEnv *env, jobject th
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
                                          jstring path, jboolean voice_convert, jboolean multi,
+                                         jint n_vocab,
                                          jint num_threads) {
     clear_nets();
     nets = new Nets();
@@ -110,7 +111,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
     if (ncnn::get_gpu_count() != 0)
         opt.use_vulkan_compute = true;
 
-    bool ret = net_g.init(_path, voice_convert, multi, assetJni, nets, opt);
+    bool ret = net_g.init(_path, voice_convert, multi, n_vocab, assetJni, nets, opt);
     delete assetJni;
     if (ret) return JNI_TRUE;
     else return JNI_FALSE;

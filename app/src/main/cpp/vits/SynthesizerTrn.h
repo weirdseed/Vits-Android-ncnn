@@ -5,6 +5,7 @@
 #include "../asset_manager_api/manager.h"
 
 struct Nets {
+    Mat emb_t;
     Net enc_p;
     Net enc_q;
     Net dec_net;
@@ -19,11 +20,13 @@ private:
 
     AAssetManager *assetManager{};
 
+    static bool load_weight(const std::string &folder, Mat &weight, const int n_vocab);
+
     bool load_model(const std::string &folder, bool multi, Net &net, const Option &opt,
                     const string name);
 
     static std::vector<Mat>
-    enc_p_forward(const Mat &x, const Net &enc_p, bool vulkan, const int num_threads);
+    enc_p_forward(const Mat &x, const Mat& weight, const Net &enc_p, bool vulkan, const int num_threads);
 
     static std::vector<Mat>
     enc_q_forward(const Mat &x, const Mat &g, const Net &enc_q, bool vulkan, const int num_threads);
@@ -45,7 +48,7 @@ private:
 
 public:
 
-    bool init(const std::string &model_folder, bool voice_convert, bool multi, AssetJNI *assetJni, Nets *nets, const Option &opt);
+    bool init(const std::string &model_folder, bool voice_convert, bool multi, const int n_vocab, AssetJNI *assetJni, Nets *nets, const Option &opt);
 
     SynthesizerTrn();
 
