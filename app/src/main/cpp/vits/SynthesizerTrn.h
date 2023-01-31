@@ -6,6 +6,7 @@
 
 struct Nets {
     Mat emb_t;
+    Mat emb_g_weight;
     Net enc_p;
     Net enc_q;
     Net dec_net;
@@ -20,7 +21,7 @@ private:
 
     AAssetManager *assetManager{};
 
-    static bool load_weight(const std::string &folder, Mat &weight, const int n_vocab);
+    static bool load_weight(const std::string &folder, const std::string &name, const int w, Mat &weight, const int n);
 
     bool load_model(const std::string &folder, bool multi, Net &net, const Option &opt,
                     const string name);
@@ -31,7 +32,7 @@ private:
     static std::vector<Mat>
     enc_q_forward(const Mat &x, const Mat &g, const Net &enc_q, bool vulkan, const int num_threads);
 
-    static Mat emb_g_forward(int sid, const Net &emb_g, bool vulkan, const int num_threads);
+    static Mat emb_g_forward(int sid, const Net &emb_g, const Mat& weight, bool vulkan, const int num_threads);
 
     static Mat
     dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g, float noise_scale, const Net &dp,

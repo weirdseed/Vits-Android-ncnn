@@ -3,7 +3,7 @@
 Input                    in0                      0 1 in0
 Input                    in1                      0 1 in1
 Input                    in2                      0 1 in2
-modules.TextEmbedding    text_emb                 2 1 in2 in0 3
+Embedding                text_emb                 2 1 in2 in0 3
 BinaryOp                 mul_0                    1 1 3 4 0=2 1=1 2=1.385641e+01
 modules.Transpose        transepose               1 1 4 5
 Split                    splitncnn_0              1 3 5 6 7 8

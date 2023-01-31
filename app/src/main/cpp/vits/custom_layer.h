@@ -342,59 +342,8 @@ public:
 };
 
 class Embedding : public Layer {
-private:
-    // param
-    int num_embeddings = 1;
-    int embedding_dim = 1;
-    int bias_term = 0;
-
-    int weight_data_size = 0;
-
-    // model
-    Mat weight_data;
-    Mat bias_data;
-
 public:
     Embedding() {
-        one_blob_only = true;
-    }
-
-    virtual int load_param(const ParamDict &pd) {
-        num_embeddings = pd.get(0, 0);
-        embedding_dim = pd.get(1, 0);
-        bias_term = pd.get(2, 0);
-        weight_data_size = num_embeddings * embedding_dim;
-        return 0;
-    }
-
-    virtual int load_model(const ModelBin &mb) {
-        weight_data = mb.load(weight_data_size, 0);
-        if (weight_data.empty())
-            return -100;
-        weight_data = weight_data.reshape(num_embeddings, embedding_dim);
-        return 0;
-    }
-
-    virtual int forward(const Mat &bottom_blob, Mat &top_blob, const Option &opt) const {
-        int size = bottom_blob.total();
-        top_blob.create(weight_data.w, size);
-        if (top_blob.empty()) return -100;
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int i = 0; i < size; i++) {
-            float word_index = ((const float *) bottom_blob)[i];
-            const float *weight_row = weight_data.row((int) word_index);
-            float *out_row = top_blob.row(i);
-            memcpy(out_row, weight_row, weight_data.w * sizeof(float));
-        }
-        return 0;
-    }
-};
-
-class TextEmbedding : public Layer {
-
-public:
-    TextEmbedding() {
     }
 
     virtual int forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const {
