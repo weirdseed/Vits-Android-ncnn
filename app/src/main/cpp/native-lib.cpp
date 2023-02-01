@@ -70,27 +70,27 @@ Java_com_example_moereng_utils_VitsUtils_destroyOpenJtalk(JNIEnv *env, jobject t
 }
 
 JNIEXPORT jobject JNICALL
-Java_com_example_moereng_utils_TextUtils_extract_1labels(JNIEnv *env, jobject thiz, jstring text) {
-    char *ctext = (char *) env->GetStringUTFChars(text, nullptr);
-    // 转换编码
-    string stext(ctext);
-    wstring wtext = utf8_decode(stext);
-    jclass array_list_class = env->FindClass("java/util/ArrayList");
-    jmethodID array_list_constructor = env->GetMethodID(array_list_class, "<init>", "()V");
-    jobject array_list = env->NewObject(array_list_class, array_list_constructor);
-    jmethodID array_list_add = env->GetMethodID(array_list_class, "add", "(Ljava/lang/Object;)Z");
-    auto features = openJtalk->run_frontend(wtext);
-    auto labels = openJtalk->make_label(features);
+Java_com_example_moereng_utils_cleaners_JapaneseCleaners_extract_1labels(JNIEnv *env, jobject thiz,
+        jstring text) {
+char *ctext = (char *) env->GetStringUTFChars(text, nullptr);
+// 转换编码
+string stext(ctext);
+wstring wtext = utf8_decode(stext);
+jclass array_list_class = env->FindClass("java/util/ArrayList");
+jmethodID array_list_constructor = env->GetMethodID(array_list_class, "<init>", "()V");
+jobject array_list = env->NewObject(array_list_class, array_list_constructor);
+jmethodID array_list_add = env->GetMethodID(array_list_class, "add", "(Ljava/lang/Object;)Z");
+auto features = openJtalk->run_frontend(wtext);
+auto labels = openJtalk->make_label(features);
 
-    // vector到列表
-    for (const wstring &label: labels) {
-        jstring str = env->NewStringUTF(utf8_encode(label).c_str());
-        env->CallBooleanMethod(array_list, array_list_add, str);
-        env->DeleteLocalRef(str);
-    }
-    return array_list;
+// vector到列表
+for (const wstring &label: labels) {
+jstring str = env->NewStringUTF(utf8_encode(label).c_str());
+env->CallBooleanMethod(array_list, array_list_add, str);
+env->DeleteLocalRef(str);
 }
-
+return array_list;
+}
 // vits model
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
