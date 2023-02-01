@@ -133,7 +133,7 @@ object FileUtils {
             configStream.close()
             val config = Gson().fromJson(configBuffer, Config::class.java)
             for (cleaner in config.data!!.text_cleaners!!) {
-                if (cleaner !in listOf("japanese_cleaners", "japanese_cleaners2")) {
+                if (cleaner !in listOf("japanese_cleaners", "japanese_cleaners2","chinese_cleaners")) {
                     Toast.makeText(context, "抱歉，目前还不支持此模型！", Toast.LENGTH_SHORT).show()
                     return null
                 }

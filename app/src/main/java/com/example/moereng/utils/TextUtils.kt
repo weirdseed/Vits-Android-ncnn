@@ -115,6 +115,11 @@ class TextUtils {
             cleaned_text = japanese_clean_text1(text)
         } else if (cleaner == "japanese_cleaners2") {
             cleaned_text = japanese_clean_text2(text)
+        } else if (cleaner == "chinese_cleaners"){
+            val bpmf = BopomofoUtils();
+            cleaned_text=bpmf.no_punctuation(text)
+            cleaned_text=bpmf.latin_to_bopomofo(cleaned_text)
+            cleaned_text=bpmf.chinese_to_bopomofo(cleaned_text)
         }
         for (symbol in cleaned_text) {
             if (!symbols.contains(symbol.toString())) {
