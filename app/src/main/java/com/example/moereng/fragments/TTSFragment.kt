@@ -28,10 +28,6 @@ import com.example.moereng.utils.PlayerUtils
 import com.example.moereng.utils.TextUtils
 import com.example.moereng.utils.UIUtils.moerengToast
 import com.example.moereng.utils.VitsUtils.checkConfig
-import com.example.moereng.utils.VitsUtils.checkThreadsCpp
-import com.example.moereng.utils.VitsUtils.initOpenJtalk
-import com.example.moereng.utils.VitsUtils.testGpu
-import com.example.moereng.utils.VitsUtils.words_split_cpp
 import com.example.moereng.utils.WaveUtils.writeWav
 import kotlin.concurrent.thread
 
@@ -42,8 +38,6 @@ class TTSFragment : Fragment() {
     private var binding: FragmentTtsBinding? = null
 
     private val ttsBinding get() = binding!!
-
-    private lateinit var japaneseTextUtils: TextUtils
 
     private var config: Config? = null
 
@@ -78,8 +72,6 @@ class TTSFragment : Fragment() {
 
     private var vulkanState = false
 
-    private var openJtalkState = false
-
     private val REQUEST_CODE_SELECT_MODEL = 1
 
     private val REQUEST_CODE_SELECT_CONFIG = 2
@@ -102,67 +94,10 @@ class TTSFragment : Fragment() {
         ttsBinding.threadSpinner.setSelection(Integer.min(currentThreads - 1, maxThreads - 1))
     }
 
-    private fun cleanInputs(text: String): String {
-        return text.replace("\"", "").replace("\'", "")
-            .replace("\t", " ").replace("\n", "、")
-            .replace("”", "")
-    }
-
     @SuppressLint("SetTextI18n")
     private fun initPath() {
         ttsBinding.configPath.text = "请把文件放在\"Download\"文件夹"
         ttsBinding.modelPath.text = "请把文件放在\"Download\"文件夹"
-    }
-
-    // split sentence and clean text
-    private fun sentenceSplit(text: String): List<List<Int>>? {
-        val outputs = ArrayList<List<Int>>()
-        var sentences = listOf(text)
-        if(config!!.data!!.text_cleaners!![0] in listOf("japanese_cleaners", "japanese_cleaners2")) {
-            sentences = words_split_cpp(cleanInputs(text), requireActivity().assets)
-                .replace("EOS\n", "").split("\n")
-            sentences = sentences.subList(0, sentences.size - 1)
-        }
-        var s = ""
-        for (i in sentences.indices) {
-            val sentence = sentences[i]
-            s += sentence.split("\t")[0]
-            if (sentence.contains("記号,読点") ||
-                sentence.contains("記号,句点") ||
-                sentence.contains("記号,一般") ||
-                sentence.contains("記号,空白") ||
-                i == sentences.size - 1
-            ) {
-                if (s.length > 50) {
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(
-                            ttsContext, "一句话不能超过50个字符！",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return null
-                }
-                val seq = japaneseTextUtils.textToSequence(
-                    s,
-                    symbols = config!!.symbols!!,
-                    cleaner = config!!.data!!.text_cleaners!![0]
-                )
-                if (seq.isEmpty() || seq.sum() == 0)
-                    continue
-                outputs.add(seq)
-                s = ""
-            }
-        }
-        if (outputs.isEmpty()) {
-            requireActivity().runOnUiThread {
-                Toast.makeText(
-                    ttsContext, "解析失败！仅支持日语！请检查是否包含不支持字符！",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            return null
-        }
-        return outputs
     }
 
     // hide progress bar
@@ -192,40 +127,35 @@ class TTSFragment : Fragment() {
 
     // processing inputs
     @SuppressLint("SetTextI18n")
-    private fun processWords(text: String) {
+    private fun generate(text: String) {
         finishFlag = false
         ttsViewModel.setGenerationFinishValue(finishFlag)
-        if (!openJtalkState &&
-        config!!.data!!.text_cleaners!![0] in listOf("japanese_cleaners", "japanese_cleaners2")) {
-            requireActivity().runOnUiThread {
-                moerengToast("初始化openjtalk字典...")
-            }
-            // initialize openjtalk
-            openJtalkState = initOpenJtalk(requireActivity().assets)
-            requireActivity().runOnUiThread {
-                moerengToast("初始化字典完成！")
-            }
-        }
+
         audioArray.clear()
+
         if (ttsBinding.playBtn.visibility == View.VISIBLE
             || ttsBinding.exportBtn.visibility == View.VISIBLE
         ) {
             hideButtons(true)
         }
         try {
-            // split inputs
-            val sentences = sentenceSplit(text)
+            val cleanerName = config!!.data!!.text_cleaners!![0]
+            val symbols = config!!.symbols!!
+            val assetManager = requireActivity().assets
 
-            if (sentences != null) {
+            // convert inputs
+            val inputs = TextUtils.processInputs(text, cleanerName, symbols, assetManager)
+
+            if (inputs != null && inputs.isNotEmpty()) {
                 // progress visibility
-                hideProgressBar(false, sentences.size)
+                hideProgressBar(false, inputs.size)
 
                 // inference for each sentence
-                for (i in sentences.indices) {
+                for (i in inputs.indices) {
                     // start inference
                     val output =
                         Vits.forward(
-                            sentences[i].toIntArray(),
+                            inputs[i],
                             vulkanState,
                             multi,
                             sid,
@@ -241,9 +171,9 @@ class TTSFragment : Fragment() {
 
                     // set current progress
                     requireActivity().runOnUiThread {
-                        val p = (((i.toFloat() + 1.0) / sentences.size.toFloat()) * 100).toInt()
+                        val p = (((i.toFloat() + 1.0) / inputs.size.toFloat()) * 100).toInt()
                         ttsBinding.currentProgress.progress = p
-                        ttsBinding.progressText.text = "${i + 1}/${sentences.size}"
+                        ttsBinding.progressText.text = "${i + 1}/${inputs.size}"
                     }
                 }
 
@@ -540,9 +470,6 @@ class TTSFragment : Fragment() {
         // speakers' id picker's listener
         ttsBinding.speakerId.setOnValueChangedListener { p0, p1, p2 -> sid = p2 }
 
-        // initialize cleaner
-        japaneseTextUtils = TextUtils()
-
         // generateButton listener
         ttsBinding.generateBtn.setOnClickListener {
             val inputMethodManager =
@@ -560,7 +487,7 @@ class TTSFragment : Fragment() {
                 moerengToast("稍等...")
             } else {
                 thread {
-                    processWords(inputText.toString())
+                    generate(inputText.toString())
                 }
             }
         }

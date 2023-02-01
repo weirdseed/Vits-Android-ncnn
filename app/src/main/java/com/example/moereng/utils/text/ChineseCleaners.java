@@ -1,4 +1,4 @@
-package com.example.moereng.utils.cleaners;
+package com.example.moereng.utils.text;
 
 import android.util.Log;
 
@@ -134,10 +134,27 @@ public class ChineseCleaners {
         return sb.toString();
     }
 
+//    public String bopomofotest(String text){
+//        String cleaned_text = no_punctuation(text);
+//        cleaned_text = latin_to_bopomofo(cleaned_text);
+//        cleaned_text = chinese_to_bopomofo(cleaned_text);
+//        return cleaned_text;
+//    }
+
     public String chinese_clean_text1(String text){
-        String cleaned_text = no_punctuation(text);
-        cleaned_text = latin_to_bopomofo(cleaned_text);
-        cleaned_text = chinese_to_bopomofo(cleaned_text);
-        return cleaned_text;
+        HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
+        format.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);
+        StringBuilder sb = new StringBuilder();
+        String pinyin;
+        for (int i = 0; i < text.length(); ++i) {
+            pinyin = null;
+            try {
+                pinyin = PinyinHelper.toHanyuPinyinStringArray(text.charAt(i))[0];
+            } catch (Exception ignore) {
+            }
+            sb.append(pinyin);
+            if (debug_flag) sb.append(' ');
+        }
+        return sb.toString();
     }
 }

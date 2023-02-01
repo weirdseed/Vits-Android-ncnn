@@ -1,4 +1,4 @@
-package com.example.moereng.utils.cleaners
+package com.example.moereng.utils.text
 
 import java.text.Normalizer
 
@@ -29,14 +29,14 @@ class JapaneseCleaners {
             marks.add(it.value)
         }
         text = ""
-        for (i in 0..sentences.size - 1) {
+        for (i in sentences.indices) {
             val sentence = sentences[i]
             if (_japanese_characters.find(sentence)?.value != null) {
                 if (text != "") {
                     text += " "
                 }
                 val labels = extract_labels(sentence)
-                for (n in 0..labels.size - 1) {
+                for (n in labels.indices) {
                     val label = labels[n]
                     val phoneme = Regex("\\-([^\\+]*)\\+").find(label)!!.groups[1]!!.value
                     if (phoneme != "sil" && phoneme != "pau") {

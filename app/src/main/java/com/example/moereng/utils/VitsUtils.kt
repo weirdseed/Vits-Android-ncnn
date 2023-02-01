@@ -24,10 +24,6 @@ object VitsUtils {
 
     external fun checkThreadsCpp(): Int
 
-    external fun initOpenJtalk(assetManager: AssetManager): Boolean
-
-    external fun words_split_cpp(text: String, assetManager: AssetManager): String
-
     external fun destroyOpenJtalk()
 
     init {

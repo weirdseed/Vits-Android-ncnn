@@ -1,55 +1,44 @@
 package com.example.moereng.utils
 
-import com.example.moereng.utils.cleaners.ChineseCleaners
-import com.example.moereng.utils.cleaners.JapaneseCleaners
+import android.content.res.AssetManager
+import com.example.moereng.utils.text.ChineseTextUtils
+import com.example.moereng.utils.text.JapaneseTextUtils
 
-class TextUtils {
+object TextUtils {
 
-    fun textToSequence(
+    private val supportedCleaners = listOf(
+        "chinese_cleaners",
+        "japanese_cleaners",
+        "japanese_cleaners2"
+    )
+
+    fun processInputs(
         text: String,
-        addblank: Boolean = true,
+        cleanerName: String,
         symbols: List<String>,
-        cleaner: String
-    ): List<Int> {
-        val sequence = ArrayList<Int>()
-        if (addblank) {
-            sequence.add(0)
+        assetManager: AssetManager
+    ): List<IntArray>? {
+        // check cleaner
+        if (cleanerName !in supportedCleaners) {
+            throw RuntimeException("暂不支持${cleanerName}!")
         }
-        val _symbol_to_id = HashMap<String, Int>()
-        for (i in symbols.indices) {
-            _symbol_to_id[symbols[i]] = i
-        }
-        var cleaned_text = ""
 
-        // check cleaners
-        when(cleaner){
-            "japanese_cleaners"->{
-                val japaneseCleaners = JapaneseCleaners()
-                cleaned_text = japaneseCleaners.japanese_clean_text1(text)
+        var result: List<IntArray>? = null
+
+        // convert inputs
+        when (cleanerName) {
+            "japanese_cleaners" -> {
+                result = JapaneseTextUtils.convertText(text, cleanerName, symbols, assetManager)
             }
-            "japanese_cleaners2"->{
-                val japaneseCleaners = JapaneseCleaners()
-                cleaned_text = japaneseCleaners.japanese_clean_text2(text)
+            "japanese_cleaners2" -> {
+                result = JapaneseTextUtils.convertText(text, cleanerName, symbols, assetManager)
             }
-            "chinese_cleaners"->{
-                val chineseCleaners = ChineseCleaners()
-                cleaned_text = chineseCleaners.chinese_clean_text1(text)
+            "chinese_cleaners" -> {
+                result = ChineseTextUtils.convertText(text, cleanerName, symbols)
             }
         }
 
-        for (symbol in cleaned_text) {
-            if (!symbols.contains(symbol.toString())) {
-                continue
-            }
-            val symbol_id = _symbol_to_id[symbol.toString()]
-            if (symbol_id != null) {
-                sequence.add(symbol_id)
-                if (addblank) sequence.add(0)
-            }
-        }
-
-        return sequence
+        return result
     }
-
 
 }
