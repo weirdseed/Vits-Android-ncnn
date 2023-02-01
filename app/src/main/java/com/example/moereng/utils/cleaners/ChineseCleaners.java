@@ -11,19 +11,19 @@ import java.util.Arrays;
 
 public class ChineseCleaners {
 
-    boolean debug_flag=true;
+    boolean debug_flag = true;
 
-    public String no_punctuation(String s){
-        String ans=s;
-        String[] punctuation_list= new String[]{"，","、","；","：","。","？",",",".","?","\"","'"};
-        for(String i:punctuation_list){
-            ans=ans.replace(i," ");
+    public String no_punctuation(String s) {
+        String ans = s;
+        String[] punctuation_list = new String[]{"，", "、", "；", "：", "。", "？", ",", ".", "?", "\"", "'"};
+        for (String i : punctuation_list) {
+            ans = ans.replace(i, " ");
         }
         return ans;
     }
 
 
-    ArrayList<ArrayList<String>> latin_map= new ArrayList<ArrayList<String>>() {{
+    ArrayList<ArrayList<String>> latin_map = new ArrayList<ArrayList<String>>() {{
         add(new ArrayList<>(Arrays.asList("a", "ㄟˉ")));
         add(new ArrayList<>(Arrays.asList("b", "ㄅㄧˋ")));
         add(new ArrayList<>(Arrays.asList("c", "ㄙㄧˉ")));
@@ -61,17 +61,17 @@ public class ChineseCleaners {
         add(new ArrayList<>(Arrays.asList("9", "ㄐㄧㄡˇ")));
         add(new ArrayList<>(Arrays.asList("0", "ㄌㄧㄥˊ")));
     }};
-    public String latin_to_bopomofo(String s){
-        String ans=s;
-        for(ArrayList<String>i:latin_map){
-            ans=ans.replaceAll(i.get(0),i.get(1));
+
+    public String latin_to_bopomofo(String s) {
+        String ans = s;
+        for (ArrayList<String> i : latin_map) {
+            ans = ans.replaceAll(i.get(0), i.get(1));
         }
         return ans;
     }
 
 
-
-    ArrayList<ArrayList<String>> pinyin_map=new ArrayList<ArrayList<String>>(){{
+    ArrayList<ArrayList<String>> pinyin_map = new ArrayList<ArrayList<String>>() {{
         add(new ArrayList<>(Arrays.asList("^m(\\d)$", "mu$1")));
         add(new ArrayList<>(Arrays.asList("^n(\\d)$", "N$1")));
         add(new ArrayList<>(Arrays.asList("^r5$", "er5")));
@@ -101,35 +101,43 @@ public class ChineseCleaners {
         add(new ArrayList<>(Arrays.asList("([^0-4])$", "$g<1>0")));
     }};
 
-    String[] bopomofo_table=new String[]{"bpmfdtnlgkhjqxZCSrzcsiuvaoeEAIOUMNKGR12340",
+    String[] bopomofo_table = new String[]{"bpmfdtnlgkhjqxZCSrzcsiuvaoeEAIOUMNKGR12340",
             "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˉˊˇˋ˙"};
-    int bopomofo_table_len=42;
-    public String chinese_to_bopomofo(String s){
+    int bopomofo_table_len = 42;
+
+    public String chinese_to_bopomofo(String s) {
         HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
         format.setToneType(HanyuPinyinToneType.WITH_TONE_NUMBER);
         StringBuilder sb = new StringBuilder();
         String pinyin;
-        for(int i = 0; i < s.length(); ++i){
+        for (int i = 0; i < s.length(); ++i) {
             pinyin = null;
             try {
                 pinyin = PinyinHelper.toHanyuPinyinStringArray(s.charAt(i))[0];
-            }catch(Exception ignore){}
-            if(pinyin == null){  //无法转拼音，直接拷贝
+            } catch (Exception ignore) {
+            }
+            if (pinyin == null) {  //无法转拼音，直接拷贝
                 sb.append(s.charAt(i));
-            }else{
-                String bopomofo=pinyin;
-                for(ArrayList<String>j:pinyin_map){
-                    bopomofo=bopomofo.replaceAll(j.get(0),j.get(1));
-                    Log.e("tmp",bopomofo+" "+j.get(0)+" "+j.get(1));
+            } else {
+                String bopomofo = pinyin;
+                for (ArrayList<String> j : pinyin_map) {
+                    bopomofo = bopomofo.replaceAll(j.get(0), j.get(1));
+                    Log.e("tmp", bopomofo + " " + j.get(0) + " " + j.get(1));
                 }
-                Log.e("tmp",bopomofo);
-                for(int j=0;j<bopomofo_table_len;j++)
-                    bopomofo=bopomofo.replace(bopomofo_table[0].charAt(j),bopomofo_table[1].charAt(j));
+                Log.e("tmp", bopomofo);
+                for (int j = 0; j < bopomofo_table_len; j++)
+                    bopomofo = bopomofo.replace(bopomofo_table[0].charAt(j), bopomofo_table[1].charAt(j));
                 sb.append(bopomofo);
             }
-            if(debug_flag) sb.append(' ');
+            if (debug_flag) sb.append(' ');
         }
         return sb.toString();
     }
 
+    public String chinese_clean_text1(String text){
+        String cleaned_text = no_punctuation(text);
+        cleaned_text = latin_to_bopomofo(cleaned_text);
+        cleaned_text = chinese_to_bopomofo(cleaned_text);
+        return cleaned_text;
+    }
 }

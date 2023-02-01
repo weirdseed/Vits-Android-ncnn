@@ -32,12 +32,11 @@ class TextUtils {
                 cleaned_text = japaneseCleaners.japanese_clean_text2(text)
             }
             "chinese_cleaners"->{
-                val bpmf = ChineseCleaners();
-                cleaned_text = bpmf.no_punctuation(text)
-                cleaned_text = bpmf.latin_to_bopomofo(cleaned_text)
-                cleaned_text = bpmf.chinese_to_bopomofo(cleaned_text)
+                val chineseCleaners = ChineseCleaners()
+                cleaned_text = chineseCleaners.chinese_clean_text1(text)
             }
         }
+
         for (symbol in cleaned_text) {
             if (!symbols.contains(symbol.toString())) {
                 continue
