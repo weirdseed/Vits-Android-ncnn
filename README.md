@@ -4,7 +4,7 @@
 
 1.本项目基于[vits](https://github.com/jaywalnut310/vits)训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
 
-2.日语cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
+2.日语及中文cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
 
 3.日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/mecab)日语分词库
 
@@ -36,7 +36,7 @@
 ### 注意：
   **1、推理速度慢的话请手动增加线程数（默认为1），gpu选项可以选择不开启，由于Vulkan部分代码没有写，所以开启后反而更慢**
   
-  **2、本项目目前仅支持日语，所以确保输入支持的日文**
+  **2、本项目目前仅支持日语和中文，所以确保输入支持的文本**
 
 ## 三、（可选）自行编译教程
 
