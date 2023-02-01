@@ -5,7 +5,7 @@ import com.example.moereng.utils.cleaners.JapaneseCleaners
 
 class TextUtils {
 
-    fun text_to_sequence(
+    fun textToSequence(
         text: String,
         addblank: Boolean = true,
         symbols: List<String>,

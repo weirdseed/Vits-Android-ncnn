@@ -142,7 +142,7 @@ class TTSFragment : Fragment() {
                     }
                     return null
                 }
-                val seq = japaneseTextUtils.text_to_sequence(
+                val seq = japaneseTextUtils.textToSequence(
                     s,
                     symbols = config!!.symbols!!,
                     cleaner = config!!.data!!.text_cleaners!![0]
