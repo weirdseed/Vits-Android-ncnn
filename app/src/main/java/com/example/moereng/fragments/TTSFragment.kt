@@ -117,9 +117,12 @@ class TTSFragment : Fragment() {
     // split sentence and clean text
     private fun sentenceSplit(text: String): List<List<Int>>? {
         val outputs = ArrayList<List<Int>>()
-        var sentences = words_split_cpp(cleanInputs(text), requireActivity().assets)
-            .replace("EOS\n", "").split("\n")
-        sentences = sentences.subList(0, sentences.size - 1)
+        var sentences = listOf(text)
+        if(config!!.data!!.text_cleaners!![0] in listOf("japanese_cleaners", "japanese_cleaners2")) {
+            sentences = words_split_cpp(cleanInputs(text), requireActivity().assets)
+                .replace("EOS\n", "").split("\n")
+            sentences = sentences.subList(0, sentences.size - 1)
+        }
         var s = ""
         for (i in sentences.indices) {
             val sentence = sentences[i]
@@ -192,7 +195,8 @@ class TTSFragment : Fragment() {
     private fun processWords(text: String) {
         finishFlag = false
         ttsViewModel.setGenerationFinishValue(finishFlag)
-        if (!openJtalkState) {
+        if (!openJtalkState &&
+        config!!.data!!.text_cleaners!![0] in listOf("japanese_cleaners", "japanese_cleaners2")) {
             requireActivity().runOnUiThread {
                 moerengToast("初始化openjtalk字典...")
             }
