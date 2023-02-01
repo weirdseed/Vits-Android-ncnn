@@ -16,7 +16,7 @@ class TextUtils {
             sequence.add(0)
         }
         val _symbol_to_id = HashMap<String, Int>()
-        for (i in 0..symbols.size - 1) {
+        for (i in symbols.indices) {
             _symbol_to_id[symbols[i]] = i
         }
         var cleaned_text = ""
