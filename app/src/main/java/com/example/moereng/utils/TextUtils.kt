@@ -1,6 +1,6 @@
 package com.example.moereng.utils
 
-import com.example.moereng.utils.cleaners.BopomofoUtils
+import com.example.moereng.utils.cleaners.ChineseCleaners
 import com.example.moereng.utils.cleaners.JapaneseCleaners
 
 class TextUtils {
@@ -32,7 +32,7 @@ class TextUtils {
                 cleaned_text = japaneseCleaners.japanese_clean_text2(text)
             }
             "chinese_cleaners"->{
-                val bpmf = BopomofoUtils();
+                val bpmf = ChineseCleaners();
                 cleaned_text = bpmf.no_punctuation(text)
                 cleaned_text = bpmf.latin_to_bopomofo(cleaned_text)
                 cleaned_text = bpmf.chinese_to_bopomofo(cleaned_text)

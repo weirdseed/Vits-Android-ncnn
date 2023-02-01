@@ -9,7 +9,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class BopomofoUtils {
+public class ChineseCleaners {
 
     boolean debug_flag=true;
 
