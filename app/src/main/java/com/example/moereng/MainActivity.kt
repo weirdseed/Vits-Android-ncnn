@@ -72,9 +72,4 @@ class MainActivity : AppCompatActivity() {
             vcNav.isEnabled = finished
         }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        VitsUtils.destroyOpenJtalk()
-    }
 }

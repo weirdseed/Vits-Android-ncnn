@@ -221,7 +221,7 @@ class TTSFragment : Fragment() {
                 setTitle("导出成功！")
                 setMessage("成功导出到$path")
                 setCancelable(false)
-                setPositiveButton("好的") { dialog, which ->
+                setPositiveButton("好的") { _, _ ->
                 }
                 show()
             }
@@ -487,7 +487,7 @@ class TTSFragment : Fragment() {
         })
 
         // speakers' id picker's listener
-        ttsBinding.speakerId.setOnValueChangedListener { p0, p1, p2 -> sid = p2 }
+        ttsBinding.speakerId.setOnValueChangedListener { _, _, p2 -> sid = p2 }
 
         // generateButton listener
         ttsBinding.generateBtn.setOnClickListener {
