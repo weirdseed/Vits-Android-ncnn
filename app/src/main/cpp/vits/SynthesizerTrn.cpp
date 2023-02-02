@@ -163,9 +163,6 @@ Mat SynthesizerTrn::emb_g_forward(int sid, const Mat &weight,
     Mat sid_mat(1);
     sid_mat[0] = (float) sid;
     Mat out = embedding(sid_mat, weight, opt);
-    pretty_print(sid_mat, "sid");
-    pretty_print(weight, "weight");
-    pretty_print(out, "out");
     return out;
 }
 
