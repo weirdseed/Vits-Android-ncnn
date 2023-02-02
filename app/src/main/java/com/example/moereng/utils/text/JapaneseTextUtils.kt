@@ -47,11 +47,11 @@ class JapaneseTextUtils(
         // clean text
         var cleanedText = ""
         val cleaner = JapaneseCleaners()
-        when(cleanerName){
-            "japanese_cleaners" -> {
+        when{
+            (cleanerName == "japanese_cleaners" || cleanerName == "japanese_cleaners1")-> {
                 cleanedText = cleaner.japanese_clean_text1(text)
             }
-            "japanese_cleaners2" -> {
+            cleanerName == "japanese_cleaners2" -> {
                 cleanedText = cleaner.japanese_clean_text2(text)
             }
         }

@@ -123,13 +123,6 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
                                       jfloat noise_scale_w,
                                       jfloat length_scale,
                                       jint num_threads) {
-    if (vulkan && get_gpu_count() == 0) {
-        jclass exception_class = env->FindClass("java/lang/RuntimeException");
-        if (exception_class) {
-            env->ThrowNew(exception_class, "Vulkan is not supported!");
-        }
-        env->DeleteLocalRef(exception_class);
-    }
     // jarray to ncnn mat
     int *x_ = env->GetIntArrayElements(x, nullptr);
     jsize x_size = env->GetArrayLength(x);
