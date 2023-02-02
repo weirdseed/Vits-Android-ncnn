@@ -1,4 +1,4 @@
-package com.example.moereng.utils
+package com.example.moereng.utils.permission
 
 import android.Manifest
 import android.app.Activity

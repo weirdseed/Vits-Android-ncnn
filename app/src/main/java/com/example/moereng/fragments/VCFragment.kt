@@ -17,17 +17,17 @@ import com.example.moereng.Vits
 import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentVcBinding
-import com.example.moereng.utils.FileUtils
-import com.example.moereng.utils.PermissionUtils.checkStoragePermission
-import com.example.moereng.utils.PermissionUtils.checkRecordPermission
-import com.example.moereng.utils.PermissionUtils.requestStoragePermission
-import com.example.moereng.utils.PermissionUtils.requestRecordPermission
-import com.example.moereng.utils.PlayerUtils
-import com.example.moereng.utils.RecordingUtils
-import com.example.moereng.utils.UIUtils.moerengToast
+import com.example.moereng.utils.file.FileUtils
+import com.example.moereng.utils.permission.PermissionUtils.checkStoragePermission
+import com.example.moereng.utils.permission.PermissionUtils.checkRecordPermission
+import com.example.moereng.utils.permission.PermissionUtils.requestStoragePermission
+import com.example.moereng.utils.permission.PermissionUtils.requestRecordPermission
+import com.example.moereng.utils.audio.PlayerUtils
+import com.example.moereng.utils.audio.RecordingUtils
+import com.example.moereng.utils.ui.UIUtils.moerengToast
 import com.example.moereng.utils.VitsUtils.checkConfig
-import com.example.moereng.utils.WaveUtils
-import com.example.moereng.utils.WaveUtils.audioLenToDuration
+import com.example.moereng.utils.audio.WaveUtils
+import com.example.moereng.utils.audio.WaveUtils.audioLenToDuration
 import java.lang.Integer.min
 import kotlin.concurrent.thread
 

@@ -1,4 +1,4 @@
-package com.example.moereng.utils
+package com.example.moereng.utils.audio
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -13,8 +13,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.text.SimpleDateFormat
-import java.util.*
 
 object WaveUtils {
     // write wave file to storage

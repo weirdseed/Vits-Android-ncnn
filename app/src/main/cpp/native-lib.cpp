@@ -193,9 +193,10 @@ Java_com_example_moereng_Vits_clear(JNIEnv *env, jobject thiz) {
 
 // wave utils
 JNIEXPORT jbyteArray JNICALL
-Java_com_example_moereng_utils_WaveUtils_convertAudioPCMToWaveByteArray(JNIEnv *env, jobject thiz,
-                                                                        jfloatArray jaudio,
-                                                                        jint sampling_rate) {
+Java_com_example_moereng_utils_audio_WaveUtils_convertAudioPCMToWaveByteArray(JNIEnv *env,
+                                                                              jobject thiz,
+                                                                              jfloatArray jaudio,
+                                                                              jint sampling_rate) {
     float *audio = env->GetFloatArrayElements(jaudio, nullptr);
     jsize audio_size = env->GetArrayLength(jaudio);
     // convert audio
@@ -207,4 +208,3 @@ Java_com_example_moereng_utils_WaveUtils_convertAudioPCMToWaveByteArray(JNIEnv *
     return out;
 }
 }
-

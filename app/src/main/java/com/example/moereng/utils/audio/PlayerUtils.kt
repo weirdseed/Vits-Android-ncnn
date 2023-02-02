@@ -1,15 +1,12 @@
-package com.example.moereng.utils
+package com.example.moereng.utils.audio
 
 import android.app.Activity
 import android.media.AudioAttributes
 import android.media.AudioFormat
-import android.media.AudioManager
 import android.media.AudioTrack
 import android.util.Log
 import com.example.moereng.databinding.FragmentTtsBinding
 import com.example.moereng.databinding.FragmentVcBinding
-import com.example.moereng.fragments.TTSFragment
-import java.lang.Integer.max
 import java.lang.Math.min
 import kotlin.concurrent.thread
 

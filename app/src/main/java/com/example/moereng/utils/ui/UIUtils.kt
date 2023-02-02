@@ -1,4 +1,4 @@
-package com.example.moereng.utils
+package com.example.moereng.utils.ui
 
 import android.widget.Toast
 import com.example.moereng.application.MoeRengApplication
