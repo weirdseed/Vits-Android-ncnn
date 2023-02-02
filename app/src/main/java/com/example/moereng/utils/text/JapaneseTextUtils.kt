@@ -46,13 +46,14 @@ class JapaneseTextUtils(
 
         // clean text
         var cleanedText = ""
-
-        if (cleanerName == "japanese_cleaners") {
-            val cleaner = JapaneseCleaners()
-            cleanedText = cleaner.japanese_clean_text1(text)
-        } else if (cleanerName == "japanese_cleaners2") {
-            val cleaner = JapaneseCleaners()
-            cleanedText = cleaner.japanese_clean_text2(text)
+        val cleaner = JapaneseCleaners()
+        when(cleanerName){
+            "japanese_cleaners" -> {
+                cleanedText = cleaner.japanese_clean_text1(text)
+            }
+            "japanese_cleaners2" -> {
+                cleanedText = cleaner.japanese_clean_text2(text)
+            }
         }
 
         // symbol to label
@@ -115,6 +116,8 @@ class JapaneseTextUtils(
     external fun initOpenJtalk(assetManager: AssetManager): Boolean
 
     external fun splitSentenceCpp(text: String): String
+
+    external fun releaseOpenJtalk()
 
     init {
         System.loadLibrary("moereng")

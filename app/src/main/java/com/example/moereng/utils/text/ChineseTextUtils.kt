@@ -36,12 +36,14 @@ class ChineseTextUtils(
 
         // clean text
         var cleanedText = ""
-
-        if (cleanerName == "chinese_cleaners") {
-            val cleaner = ChineseCleaners()
-            cleanedText = cleaner.chinese_clean_text1(text)
-        } else if (cleanerName == "chinese_cleaners2") {
-            // TODO
+        val cleaner = ChineseCleaners()
+        when(cleanerName){
+            "chinese_cleaners"->{
+                cleanedText = cleaner.chinese_clean_text1(text)
+            }
+            "chinese_cleaners2"->{
+                cleanedText = cleaner.chinese_clean_text2(text)
+            }
         }
 
         // symbol to label

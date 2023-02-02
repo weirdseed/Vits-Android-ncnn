@@ -1,6 +1,5 @@
 package com.example.moereng.utils
 
-import android.content.res.AssetManager
 import com.example.moereng.data.Config
 
 object VitsUtils {
@@ -23,8 +22,6 @@ object VitsUtils {
     external fun testGpu(): Boolean
 
     external fun checkThreadsCpp(): Int
-
-    external fun destroyOpenJtalk()
 
     init {
         System.loadLibrary("moereng")

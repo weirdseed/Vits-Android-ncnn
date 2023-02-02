@@ -598,6 +598,10 @@ class TTSFragment : Fragment() {
         super.onDestroyView()
         ttsBinding.wordsInput.setText("")
         playerUtils.release(ttsBinding, "tts")
+        val cleanerName = config?.data?.text_cleaners?.get(0)
+        if (cleanerName != null && cleanerName.contains("japanese")){
+            (textUtils as JapaneseTextUtils).releaseOpenJtalk()
+        }
         modelInitState = false
         config = null
         audioArray.clear()

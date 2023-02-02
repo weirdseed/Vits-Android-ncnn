@@ -6,6 +6,8 @@ import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -156,5 +158,11 @@ public class ChineseCleaners {
             if (debug_flag) sb.append(' ');
         }
         return sb.toString();
+    }
+
+    @NotNull
+    public String chinese_clean_text2(@NotNull String text) {
+        // TODO
+        return null;
     }
 }

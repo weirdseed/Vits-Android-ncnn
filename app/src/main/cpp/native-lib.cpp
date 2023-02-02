@@ -5,11 +5,11 @@
 
 SynthesizerTrn net_g;
 static Nets *nets = nullptr;
-static OpenJtalk* openJtalk;
+static OpenJtalk *openJtalk;
 
 static
 void clear_nets() {
-    if (nets != nullptr){
+    if (nets != nullptr) {
         delete nets;
         nets = nullptr;
         LOGI("all nets cleared");
@@ -31,7 +31,7 @@ JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
 extern "C" {
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_utils_text_JapaneseTextUtils_initOpenJtalk(JNIEnv *env, jobject thiz,
-        jobject asset_manager) {
+                                                                    jobject asset_manager) {
     AssetJNI assetJni(env, thiz, asset_manager);
     openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", &assetJni);
     return JNI_TRUE;
@@ -53,17 +53,18 @@ Java_com_example_moereng_utils_text_JapaneseTextUtils_splitSentenceCpp(JNIEnv *e
     return env->NewStringUTF(res.c_str());
 }
 
-JNIEXPORT jint JNICALL
-Java_com_example_moereng_utils_VitsUtils_checkThreadsCpp(JNIEnv *env, jobject thiz) {
-    return ncnn::get_physical_big_cpu_count();
-}
-
 JNIEXPORT void JNICALL
-Java_com_example_moereng_utils_VitsUtils_destroyOpenJtalk(JNIEnv *env, jobject thiz) {
+Java_com_example_moereng_utils_text_JapaneseTextUtils_releaseOpenJtalk(JNIEnv *env, jobject thiz) {
     if (openJtalk != nullptr){
         delete openJtalk;
         openJtalk = nullptr;
+        LOGI("openjtalk released!");
     }
+}
+
+JNIEXPORT jint JNICALL
+Java_com_example_moereng_utils_VitsUtils_checkThreadsCpp(JNIEnv *env, jobject thiz) {
+    return ncnn::get_physical_big_cpu_count();
 }
 
 JNIEXPORT jobject JNICALL
@@ -122,7 +123,7 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
                                       jfloat noise_scale_w,
                                       jfloat length_scale,
                                       jint num_threads) {
-    if (vulkan && get_gpu_count() == 0){
+    if (vulkan && get_gpu_count() == 0) {
         jclass exception_class = env->FindClass("java/lang/RuntimeException");
         if (exception_class) {
             env->ThrowNew(exception_class, "Vulkan is not supported!");
@@ -186,7 +187,7 @@ Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatAr
 
 JNIEXPORT void JNICALL
 Java_com_example_moereng_Vits_clear(JNIEnv *env, jobject thiz) {
-    if (nets != nullptr){
+    if (nets != nullptr) {
         clear_nets();
     }
 }
@@ -194,9 +195,9 @@ Java_com_example_moereng_Vits_clear(JNIEnv *env, jobject thiz) {
 // wave utils
 JNIEXPORT jbyteArray JNICALL
 Java_com_example_moereng_utils_audio_WaveUtils_convertAudioPCMToWaveByteArray(JNIEnv *env,
-                                                                              jobject thiz,
-                                                                              jfloatArray jaudio,
-                                                                              jint sampling_rate) {
+                                      jobject thiz,
+                                      jfloatArray jaudio,
+                                      jint sampling_rate) {
     float *audio = env->GetFloatArrayElements(jaudio, nullptr);
     jsize audio_size = env->GetArrayLength(jaudio);
     // convert audio
