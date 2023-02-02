@@ -604,13 +604,4 @@ class TTSFragment : Fragment() {
         Log.i("TTSFragment", "cleared!")
         binding = null
     }
-
-    companion object{
-        // define supported cleaners
-        val supportedCleaners = listOf(
-        "chinese_cleaners",
-        "japanese_cleaners",
-        "japanese_cleaners2"
-        )
-    }
 }
