@@ -25,10 +25,12 @@ import com.example.moereng.utils.FileUtils
 import com.example.moereng.utils.PermissionUtils.checkStoragePermission
 import com.example.moereng.utils.PermissionUtils.requestStoragePermission
 import com.example.moereng.utils.PlayerUtils
-import com.example.moereng.utils.TextUtils
+import com.example.moereng.utils.text.TextUtils
 import com.example.moereng.utils.UIUtils.moerengToast
 import com.example.moereng.utils.VitsUtils.checkConfig
 import com.example.moereng.utils.WaveUtils.writeWav
+import com.example.moereng.utils.text.ChineseTextUtils
+import com.example.moereng.utils.text.JapaneseTextUtils
 import kotlin.concurrent.thread
 
 class TTSFragment : Fragment() {
@@ -36,6 +38,8 @@ class TTSFragment : Fragment() {
     private val ttsViewModel: TTSViewModel by activityViewModels()
 
     private var binding: FragmentTtsBinding? = null
+
+    private var textUtils: TextUtils? = null
 
     private val ttsBinding get() = binding!!
 
@@ -139,12 +143,8 @@ class TTSFragment : Fragment() {
             hideButtons(true)
         }
         try {
-            val cleanerName = config!!.data!!.text_cleaners!![0]
-            val symbols = config!!.symbols!!
-            val assetManager = requireActivity().assets
-
             // convert inputs
-            val inputs = TextUtils.processInputs(text, cleanerName, symbols, assetManager)
+            val inputs = textUtils?.convertText(text)
 
             if (inputs != null && inputs.isNotEmpty()) {
                 // progress visibility
@@ -269,7 +269,8 @@ class TTSFragment : Fragment() {
     private fun loadConfigs(path: String) {
         config = FileUtils.parseConfig(ttsContext, path)
         var type = "single"
-        if (config != null && config!!.speakers != null) type = "multi"
+        if (config != null && config!!.speakers != null)
+            type = "multi"
         if (checkConfig(config, type)) {
             samplingRate = config!!.data!!.sampling_rate!!
             n_vocab = config!!.symbols!!.size
@@ -281,6 +282,24 @@ class TTSFragment : Fragment() {
                 multi = false
                 showSid(multi)
             }
+            val cleanerName = config!!.data!!.text_cleaners!![0]
+            val symbols = config!!.symbols!!
+            val assetManager = requireActivity().assets
+
+            // init textUtils
+            when{
+                cleanerName.contains("chinese") ->{
+                    textUtils = ChineseTextUtils(symbols, cleanerName, assetManager)
+                }
+                cleanerName.contains("japanese") -> {
+                    textUtils = JapaneseTextUtils(symbols, cleanerName, assetManager)
+                }
+            }
+
+            if (textUtils == null){
+                throw RuntimeException("暂不支持${cleanerName}")
+            }
+
             ttsBinding.configPath.text = path
             ttsBinding.loadModelLayout.visibility = View.VISIBLE
             playerUtils.setTrackData(config!!.data!!.sampling_rate!!, 1)
@@ -584,5 +603,14 @@ class TTSFragment : Fragment() {
         audioArray.clear()
         Log.i("TTSFragment", "cleared!")
         binding = null
+    }
+
+    companion object{
+        // define supported cleaners
+        val supportedCleaners = listOf(
+        "chinese_cleaners",
+        "japanese_cleaners",
+        "japanese_cleaners2"
+        )
     }
 }

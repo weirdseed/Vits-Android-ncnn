@@ -1,11 +1,18 @@
 package com.example.moereng.utils.text
 
-object ChineseTextUtils {
+import android.content.res.AssetManager
+
+class ChineseTextUtils(
+    override val symbols: List<String>,
+    override val cleanerName: String,
+    override val assetManager: AssetManager
+) : TextUtils {
+
     private val splitSymbols = listOf(
-        ".", "。", "…",",","，"
+        ".", "。", "…", ",", "，"
     )
 
-    private fun cleanInputs(text: String): String {
+    override fun cleanInputs(text: String): String {
         var tempText = text
         splitSymbols.forEach {
             tempText = tempText.replace(it, "\n")
@@ -13,11 +20,11 @@ object ChineseTextUtils {
         return tempText
     }
 
-    private fun splitSentence(text: String): List<String> {
+    override fun splitSentence(text: String): List<String> {
         return text.split("\n").filter { it.isNotEmpty() }
     }
 
-    private fun wordsToLabels(text: String, symbols: List<String>, cleanerName: String): IntArray {
+    override fun wordsToLabels(text: String): IntArray {
         val labels = ArrayList<Int>()
         labels.add(0)
 
@@ -51,26 +58,26 @@ object ChineseTextUtils {
         return labels.toIntArray()
     }
 
-    private fun convertSentenceToLabels(
-        text: String,
-        symbols: List<String>,
-        cleanerName: String
+    override fun convertSentenceToLabels(
+        text: String
     ): List<IntArray> {
         val outputs = ArrayList<IntArray>()
         val sentences = splitSentence(text)
         for (sentence in sentences) {
-            val labels = wordsToLabels(sentence, symbols, cleanerName)
+            val labels = wordsToLabels(sentence)
             outputs.add(labels)
         }
         return outputs
     }
 
-    fun convertText(text: String, cleanerName: String, symbols: List<String>): List<IntArray> {
+    override fun convertText(
+        text: String
+    ): List<IntArray> {
         // clean inputs
         val cleanedInputs = cleanInputs(text)
 
         // convert inputs
-        return convertSentenceToLabels(cleanedInputs, symbols, cleanerName)
+        return convertSentenceToLabels(cleanedInputs)
     }
 }
 

@@ -3,7 +3,11 @@ package com.example.moereng.utils.text
 import android.content.res.AssetManager
 import android.util.Log
 
-object JapaneseTextUtils {
+class JapaneseTextUtils(
+    override val symbols: List<String>,
+    override val cleanerName: String,
+    override val assetManager: AssetManager
+) : TextUtils {
     private var openJtalkInitialized = false
 
     private fun initDictionary(assetManager: AssetManager) {
@@ -17,13 +21,20 @@ object JapaneseTextUtils {
         }
     }
 
-    private fun cleanInputs(text: String): String {
+    override fun cleanInputs(text: String): String {
         return text.replace("\"", "").replace("\'", "")
             .replace("\t", " ").replace("\n", "、")
             .replace("”", "")
     }
 
-    private fun wordsToLabels(text: String, symbols: List<String>, cleanerName: String): IntArray {
+    override fun splitSentence(text: String): List<String> {
+        val splittedSentence = splitSentenceCpp(text)
+        var sentences = splittedSentence.replace("EOS\n", "").split("\n")
+        sentences = sentences.subList(0, sentences.size - 1)
+        return sentences
+    }
+
+    override fun wordsToLabels(text: String): IntArray {
         val labels = ArrayList<Int>()
         labels.add(0)
 
@@ -58,14 +69,10 @@ object JapaneseTextUtils {
         return labels.toIntArray()
     }
 
-    private fun convertSentenceToLabels(
-        text: String,
-        symbols: List<String>,
-        cleanerName: String
+    override fun convertSentenceToLabels(
+        text: String
     ): List<IntArray> {
-        val sentenceSplitted = splitSentenceCpp(text)
-        var sentences = sentenceSplitted.replace("EOS\n", "").split("\n")
-        sentences = sentences.subList(0, sentences.size - 1)
+        val sentences = splitSentence(text)
 
         val outputs = ArrayList<IntArray>()
 
@@ -82,7 +89,7 @@ object JapaneseTextUtils {
                 if (sentence.length > 100) {
                     throw RuntimeException("句子过长")
                 }
-                val labels = wordsToLabels(sentence, symbols, cleanerName)
+                val labels = wordsToLabels(sentence)
                 if (labels.isEmpty() || labels.sum() == 0)
                     continue
                 outputs.add(labels)
@@ -92,11 +99,8 @@ object JapaneseTextUtils {
         return outputs
     }
 
-    fun convertText(
-        text: String,
-        cleanerName: String,
-        symbols: List<String>,
-        assetManager: AssetManager
+    override fun convertText(
+        text: String
     ): List<IntArray> {
         // init dict
         initDictionary(assetManager)
@@ -105,7 +109,7 @@ object JapaneseTextUtils {
         val cleanedInputs = cleanInputs(text)
 
         // convert inputs
-        return convertSentenceToLabels(cleanedInputs, symbols, cleanerName)
+        return convertSentenceToLabels(cleanedInputs)
     }
 
     external fun initOpenJtalk(assetManager: AssetManager): Boolean
