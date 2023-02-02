@@ -308,30 +308,32 @@ private:
 public:
     ResidualReverse() {
     }
-    virtual int load_param(const ParamDict& pd) {
+
+    virtual int load_param(const ParamDict &pd) {
         reverse = bool(pd.get(0, 0));
         return 0;
     }
-    virtual int forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const {
-        Mat& top_blob = top_blobs[0];
+
+    virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
+                        const Option &opt) const {
+        Mat &top_blob = top_blobs[0];
         // reverse
         if (reverse) {
-            const Mat& _x0 = reducedims(bottom_blobs[3]);
-            const Mat& _x1 = reducedims(bottom_blobs[2]);
-            const Mat& _stats = bottom_blobs[1];
-            const Mat& _x_mask = reducedims(bottom_blobs[0]);
+            const Mat &_x0 = reducedims(bottom_blobs[3]);
+            const Mat &_x1 = reducedims(bottom_blobs[2]);
+            const Mat &_stats = bottom_blobs[1];
+            const Mat &_x_mask = reducedims(bottom_blobs[0]);
 
             auto x_mask = expand(_x_mask, _stats.w, _stats.h, opt);
             auto stats = matproduct(_stats, x_mask, opt);
             auto x1 = matminus(_x1, stats, opt);
             x1 = matproduct(x1, x_mask, opt);
             top_blob = expanddims(concat(_x0, x1, opt));
-        }
-        else {
-            const Mat& _x0 = reducedims(bottom_blobs[3]);
-            const Mat& _x1 = reducedims(bottom_blobs[1]);
-            const Mat& _stats = bottom_blobs[0];
-            const Mat& _x_mask = reducedims(bottom_blobs[2]);
+        } else {
+            const Mat &_x0 = reducedims(bottom_blobs[3]);
+            const Mat &_x1 = reducedims(bottom_blobs[1]);
+            const Mat &_stats = bottom_blobs[0];
+            const Mat &_x_mask = reducedims(bottom_blobs[2]);
 
             auto x1 = matplus(_stats, _x1, opt);
             top_blob = expanddims(concat(_x0, x1, opt));
@@ -346,22 +348,13 @@ public:
     Embedding() {
     }
 
-    virtual int forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const {
-        const Mat& x = bottom_blobs[1];
-        const Mat& weight_data = bottom_blobs[0];
-        Mat& top_blob = top_blobs[0];
-
-        int size = x.total();
-        top_blob.create(weight_data.w, size);
+    virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
+                        const Option &opt) const {
+        const Mat &x = bottom_blobs[1];
+        const Mat &weight_data = bottom_blobs[0];
+        Mat &top_blob = top_blobs[0];
+        top_blob = embedding(x, weight_data, opt);
         if (top_blob.empty()) return -100;
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int i = 0; i < size; i++) {
-            float word_index = ((const float*)x)[i];
-            const float* weight_row = weight_data.row((int)word_index);
-            float* out_row = top_blob.row(i);
-            memcpy(out_row, weight_row, weight_data.w * sizeof(float));
-        }
         return 0;
     }
 };
@@ -503,7 +496,8 @@ public:
     RandnLike() {
         one_blob_only = true;
     }
-    virtual int forward(const Mat& bottom_blob, Mat& top_blob, const Option& opt) const {
+
+    virtual int forward(const Mat &bottom_blob, Mat &top_blob, const Option &opt) const {
         top_blob = randn(bottom_blob.w, bottom_blob.h, opt);
         if (top_blob.empty()) return -100;
         return 0;
@@ -515,11 +509,13 @@ public:
     ZerosLike() {
         one_blob_only = true;
     }
-    virtual int forward(const Mat& bottom_blob, Mat& top_blob, const Option& opt) const {
+
+    virtual int forward(const Mat &bottom_blob, Mat &top_blob, const Option &opt) const {
         top_blob = zeros_like(bottom_blob, opt);
         if (top_blob.empty()) return -100;
         return 0;
     }
 };
+
 #endif
 #pragma once

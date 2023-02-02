@@ -5,10 +5,12 @@
 #include <math.h>
 #include <numeric>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <iomanip>
 #include <random>
 #include <cstdio>
+#include <android/log.h>
 
 // ncnn
 #include "layer.h"
@@ -22,6 +24,13 @@
 
 #define PI 3.14159265358979323846
 #define MAX_MEM_BLOCK 262144
+
+#define TAG "Moereng" // 这个是自定义的LOG的标识
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG ,__VA_ARGS__) // 定义LOGD类型
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,TAG ,__VA_ARGS__) // 定义LOGI类型
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,TAG ,__VA_ARGS__) // 定义LOGW类型
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,TAG ,__VA_ARGS__) // 定义LOGE类型
+#define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,TAG ,__VA_ARGS__) // 定义LOGF类型
 
 using namespace ncnn;
 
@@ -40,6 +49,8 @@ void drop(Mat& m, float scale, const Option& opt);
 Mat expanddims(const Mat& m);
 
 Mat expand(const Mat& m, int w, int h, const Option& opt);
+
+Mat embedding(const Mat& x, const Mat& weight, const Option& opt);
 
 Mat frame(const Mat& x, const int frame_length, const int hop_length, Option& opt);
 
@@ -73,7 +84,7 @@ Mat matmul(const Mat& m1, const Mat& m2, const Option& opt);
 
 void mask_fill(Mat& m, const Mat& mask, const char* condition, float condition_value, float value, const Option& opt);
 
-void pretty_print(const ncnn::Mat& m, const Option& opt, const char* name);
+void pretty_print(const ncnn::Mat& m, const char* name);
 
 Mat pad(const Mat& blob, int pad_top, int pad_bottom, int pad_left, int pad_right, float pad_value, const Option& opt); // 横向右部填充
 

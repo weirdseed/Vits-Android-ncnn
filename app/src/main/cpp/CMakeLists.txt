@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 # build configuration
 project(moereng)
 set(ncnn_DIR ${CMAKE_SOURCE_DIR}/ncnn/${ANDROID_ABI}/lib/cmake/ncnn)
+
 find_package(ncnn REQUIRED)
 aux_source_directory(mecab_api libmecabapi_source)
 aux_source_directory(asset_manager_api libassetmanager_source)
@@ -36,7 +37,7 @@ add_library(moereng SHARED ${libassetmanager_source} ${libmecab_source} ${libjpc
                       ${libnjd_set_digit_source} ${libnjd_set_long_vowel_source}
                       ${libnjd_set_pronunciation_source} ${libnjd_set_unvoiced_vowel_source}
                       ${libtext2mecab_source} ${libmecabapi_source} ${fft_pack_source} ${audio_process_source}
-                      ${ncnn_vits_source} native-lib.cpp )
+                      ${ncnn_vits_source}  native-lib.cpp )
 
 find_library( # Sets the name of the path variable.
         android-lib

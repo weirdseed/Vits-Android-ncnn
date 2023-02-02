@@ -1,101 +1,106 @@
 #include "utils.h"
 
-void pretty_print(const ncnn::Mat &m, const Option &opt, const char *name) {
+void pretty_print(const ncnn::Mat& m, const char* name) {
+    std::stringstream ss;
+    ss << std::setiosflags(std::ios::fixed);
+    ss << std::setprecision(4);
+    std::string output;
+    ss << "\n";
     if (strlen(name) > 0) {
-        std::cout << name << ":\n";
+        ss << name << ":\n";
     }
     if (m.dims == 1)
-        std::cout << "shape is: " << "(" << m.w << ")" << std::endl;
+        ss << "shape is: " << "(" << m.w << ")\n";
     if (m.dims == 2)
-        std::cout << "shape is:" << "(" << m.h << "x" << m.w << ")" << std::endl;
+        ss << "shape is:" << "(" << m.h << "x" << m.w << ")\n";
     if (m.dims == 3)
-        std::cout << "shape is:" << "(" << m.c << "x" << m.h << "x" << m.w << ")" << std::endl;
+        ss << "shape is:" << "(" << m.c << "x" << m.h << "x" << m.w << ")\n";
     if (m.dims == 4)
-        std::cout << "shape is:" << "(" << m.c << "x" << m.c << "x" << m.h << "x" << m.w << ")"
-                  << std::endl;
-    std::cout << std::setiosflags(std::ios::fixed);
-    std::cout << std::setprecision(4);
+        ss << "shape is:" << "(" << m.c << "x" << m.c << "x" << m.h << "x" << m.w << ")\n";
+
     if (m.h * m.w * m.c <= 300) {
-#pragma omp parallel for num_threads(opt.num_threads)
         for (int q = 0; q < m.c; q++) {
-            if (m.c > 1) std::cout << "\n\nchannel " << q + 1 << ":" << std::endl;
-            const float *ptr = m.channel(q);
+            if (m.c > 1) ss << "\n\nchannel " << q + 1 << ":\n";
+            const float* ptr = m.channel(q);
             for (int y = 0; y < m.h; y++) {
                 for (int x = 0; x < m.w; x++) {
-                    std::cout << ptr[x] << "\t";
+                    ss << ptr[x] << "\t";
                 }
-                std::cout << "\n";
+                ss << "\n";
                 ptr += m.w;
             }
         }
-        std::cout << "\n------------------------\n";
+        output = ss.str();
+        LOGI("%s", output.c_str());
         return;
     }
-#pragma omp parallel for num_threads(opt.num_threads)
     for (int q = 0; q < m.c; q++) {
-        if (m.c > 1) std::cout << "\n\nchannel " << q + 1 << ":" << std::endl;
-        const float *ptr = m.channel(q);
+        if (m.c > 1) ss << "\n\nchannel " << q + 1 << ":\n";
+        const float* ptr = m.channel(q);
         if (m.h > 10) {
             for (int y = 0; y < 3; y++) {
                 if (m.w <= 20) {
                     for (int x = 0; x < m.w; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
-                } else {
+                }
+                else {
                     for (int x = 0; x < 3; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
-                    std::cout << "...\t";
+                    ss << "...\t";
                     for (int x = m.w - 3; x < m.w; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
                 }
                 ptr += m.w;
-                std::cout << "\n";
+                ss << "\n";
             }
-            std::cout << "...\n";
+            ss << "...\n";
             ptr += m.w * (m.h - 6);
             for (int y = 0; y < 3; y++) {
                 if (m.w <= 20) {
                     for (int x = 0; x < m.w; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
-                } else {
+                }
+                else {
                     for (int x = 0; x < 3; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
-                    std::cout << "...\t";
+                    ss << "...\t";
                     for (int x = m.w - 3; x < m.w; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
                 }
                 ptr += m.w;
-                std::cout << "\n";
+                ss << "\n";
             }
 
-        } else {
+        }
+        else {
             for (int y = 0; y < m.h; y++) {
                 if (m.w <= 20) {
                     for (int x = 0; x < m.w; x++) {
-                        std::cout << ptr[x] << "\t";
-                    }
-                } else {
-                    for (int x = 0; x < 3; x++) {
-                        std::cout << ptr[x] << "\t";
-                    }
-                    std::cout << "...\t";
-                    for (int x = m.w - 3; x < m.w; x++) {
-                        std::cout << ptr[x] << "\t";
+                        ss << ptr[x] << "\t";
                     }
                 }
-                std::cout << "\n";
+                else {
+                    for (int x = 0; x < 3; x++) {
+                        ss << ptr[x] << "\t";
+                    }
+                    ss << "...\t";
+                    for (int x = m.w - 3; x < m.w; x++) {
+                        ss << ptr[x] << "\t";
+                    }
+                }
+                ss << "\n";
                 ptr += m.w;
             }
         }
-
     }
-    std::cout << "\n------------------------\n";
-
+    output = ss.str();
+    LOGI("%s", output.c_str());
 }
 
 Mat softmax(const Mat &m, const Option &opt, int axis) {
@@ -1183,4 +1188,21 @@ Mat Plus(const Mat &m, float value, const Option &opt) {
         }
     }
     return res;
+}
+
+Mat embedding(const Mat &x, const Mat &weight, const Option& opt) {
+    if (x.empty() || weight.empty()) return {};
+    Mat output;
+    int size = x.total();
+    output.create(weight.w, size);
+    if (output.empty()) return output;
+
+#pragma omp parallel for num_threads(opt.num_threads)
+    for (int i = 0; i < size; i++) {
+        float word_index = ((const float*)x)[i];
+        const float* weight_row = weight.row((int)word_index);
+        float* out_row = output.row(i);
+        memcpy(out_row, weight_row, weight.w * sizeof(float));
+    }
+    return output;
 }

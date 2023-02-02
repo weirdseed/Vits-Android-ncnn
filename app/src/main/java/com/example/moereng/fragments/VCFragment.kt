@@ -163,8 +163,10 @@ class VCFragment : Fragment() {
                 folder = path.replace("flow.ncnn.bin", "")
             path.endsWith("flow.reverse.ncnn.bin") ->
                 folder = path.replace("flow.ncnn.bin", "")
-            path.endsWith("emb_g.ncnn.bin") ->
-                folder = path.replace("emb_g.ncnn.bin", "")
+            path.endsWith("emb_g.bin") ->
+                folder = path.replace("emb_g.bin", "")
+            path.endsWith("emb_t.bin") ->
+                folder = path.replace("emb_t.bin", "")
             path.endsWith("enc_p.ncnn.bin") ->
                 folder = path.replace("enc_p.ncnn.bin", "")
             path.endsWith("enc_q.ncnn.bin") ->

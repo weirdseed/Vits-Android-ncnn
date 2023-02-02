@@ -52,12 +52,7 @@ bool SynthesizerTrn::load_model(const std::string &folder, bool multi, Net &net,
     if (multi) param_path = "multi/" + param_path;
     else param_path = "single/" + param_path;
     bool param_success = !net.load_param(assetManager, param_path.c_str());
-    bool bin_success;
-    if (name != "emb_g"){
-        bin_success = !net.load_model(bin_path.c_str());
-    } else {
-        bin_success = true;
-    }
+    bool bin_success = !net.load_model(bin_path.c_str());
     if (param_success && bin_success) {
         LOGI("%s loaded!", name.c_str());
         return true;
@@ -77,7 +72,7 @@ bool SynthesizerTrn::load_weight(const std::string &folder, const std::string &n
         auto file_size = ftell(fp);
         auto emb_length = file_size / sizeof(float);
         if (emb_length % w != 0) return false;
-        int h = int(emb_length / 192);
+        int h = int(emb_length / w);
         if (n != -1 && h != n) return false;
         fseek(fp, 0, SEEK_SET);
         weight.create(w, h);
@@ -87,6 +82,40 @@ bool SynthesizerTrn::load_weight(const std::string &folder, const std::string &n
         return true;
     }
     LOGE("text embedding load fail");
+    return false;
+}
+
+bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
+                          const int n_vocab,
+                          AssetJNI *assetJni, Nets *nets, const Option &opt) {
+    assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
+    if (voice_convert) {
+        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
+            load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
+            load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
+            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
+            load_model(model_folder, multi, nets->flow, opt, "flow") &&
+            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse"))
+            return true;
+    } else if (multi) {
+        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
+            load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
+            load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
+            load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
+            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
+            load_model(model_folder, multi, nets->flow, opt, "flow") &&
+            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
+            load_model(model_folder, multi, nets->dp, opt, "dp"))
+            return true;
+    } else {
+        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
+            load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
+            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
+            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
+            load_model(model_folder, multi, nets->dp, opt, "dp"))
+            return true;
+    }
+
     return false;
 }
 
@@ -129,17 +158,14 @@ SynthesizerTrn::enc_q_forward(const Mat &x, const Mat &g, const Net &enc_q, bool
     return std::vector<Mat>{out0, out1};
 }
 
-Mat SynthesizerTrn::emb_g_forward(int sid, const Net &emb_g, const Mat &weight,
-                                  bool vulkan, const int num_threads) {
+Mat SynthesizerTrn::emb_g_forward(int sid, const Mat &weight,
+                                  bool vulkan, const int num_threads, const Option &opt) {
     Mat sid_mat(1);
     sid_mat[0] = (float) sid;
-    Mat out;
-    Extractor ex = emb_g.create_extractor();
-    ex.set_num_threads(num_threads);
-    ex.set_vulkan_compute(vulkan);
-    ex.input("in0", sid_mat);
-    ex.input("in1", weight);
-    ex.extract("out0", out);
+    Mat out = embedding(sid_mat, weight, opt);
+    pretty_print(sid_mat, "sid");
+    pretty_print(weight, "weight");
+    pretty_print(out, "out");
     return out;
 }
 
@@ -153,9 +179,11 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
     ex.input("in0", x);
     ex.input("in1", x_mask);
     ex.input("in2", z);
+
     Mat noise;
     noise.create_like(z);
     noise.fill(noise_scale);
+
     if (!g.empty()) {
         ex.input("in3", noise);
         ex.input("in4", g);
@@ -205,42 +233,6 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec_net, 
     return out;
 }
 
-bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
-                          const int n_vocab,
-                          AssetJNI *assetJni, Nets *nets, const Option &opt) {
-    assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
-    if (voice_convert) {
-        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
-            load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
-            load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
-            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
-            load_model(model_folder, multi, nets->flow, opt, "flow") &&
-            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
-            load_model(model_folder, multi, nets->emb_g, opt, "emb_g"))
-            return true;
-    } else if (multi) {
-        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
-            load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
-            load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
-            load_model(model_folder, multi, nets->enc_q, opt, "enc_q") &&
-            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
-            load_model(model_folder, multi, nets->flow, opt, "flow") &&
-            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
-            load_model(model_folder, multi, nets->dp, opt, "dp") &&
-            load_model(model_folder, multi, nets->emb_g, opt, "emb_g"))
-            return true;
-    } else {
-        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
-            load_model(model_folder, multi, nets->enc_p, opt, "enc_p") &&
-            load_model(model_folder, multi, nets->dec_net, opt, "dec") &&
-            load_model(model_folder, multi, nets->flow_reverse, opt, "flow.reverse") &&
-            load_model(model_folder, multi, nets->dp, opt, "dp"))
-            return true;
-    }
-
-    return false;
-}
-
 SynthesizerTrn::SynthesizerTrn() = default;
 
 // c++ implementation of SynthesizerTrn
@@ -257,8 +249,9 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, int num_threads, bool v
     Mat x_mask = enc_p_out[3];
 
     Mat g;
-    if (multi)
-        g = reducedims(mattranspose(emb_g_forward(sid, nets->emb_g, nets->emb_g_weight, vulkan, num_threads), opt));
+    if (multi){
+        g = reducedims(mattranspose(emb_g_forward(sid, nets->emb_g_weight, vulkan, num_threads, opt), opt));
+    }
 
     Mat z = randn(x.w, 2, opt, 1);
 
@@ -317,8 +310,8 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     spec = matsqrt(Plus(matpow(spec, 2, opt), 1e-6, opt), opt);
 
     // voice conversion
-    auto g_src = mattranspose(emb_g_forward(raw_sid, net->emb_g, net->emb_g_weight, vulkan, num_threads), opt);
-    auto g_tgt = mattranspose(emb_g_forward(target_sid, net->emb_g, net->emb_g_weight, vulkan, num_threads), opt);
+    auto g_src = mattranspose(emb_g_forward(raw_sid, net->emb_g_weight, vulkan, num_threads, opt), opt);
+    auto g_tgt = mattranspose(emb_g_forward(target_sid, net->emb_g_weight, vulkan, num_threads, opt), opt);
     auto enc_q_out = enc_q_forward(spec, g_src, net->enc_q, vulkan, num_threads);
     auto z = expanddims(enc_q_out[0]);
     auto y_mask = enc_q_out[1];
