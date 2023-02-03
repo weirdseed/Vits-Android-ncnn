@@ -16,6 +16,15 @@ void clear_nets() {
     }
 }
 
+static
+void release_openjtalk(){
+    if (openJtalk != nullptr){
+        delete openJtalk;
+        openJtalk = nullptr;
+        LOGI("openjtalk released");
+    }
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnLoad");
     ncnn::create_gpu_instance();
@@ -25,6 +34,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnUnload");
     ncnn::destroy_gpu_instance();
+    release_openjtalk();
+    clear_nets();
 }
 
 // vits utils
@@ -51,15 +62,6 @@ Java_com_example_moereng_utils_text_JapaneseTextUtils_splitSentenceCpp(JNIEnv *e
     string stext(ctext);
     string res = openJtalk->words_split(stext.c_str());
     return env->NewStringUTF(res.c_str());
-}
-
-JNIEXPORT void JNICALL
-Java_com_example_moereng_utils_text_JapaneseTextUtils_releaseOpenJtalk(JNIEnv *env, jobject thiz) {
-    if (openJtalk != nullptr){
-        delete openJtalk;
-        openJtalk = nullptr;
-        LOGI("openjtalk released!");
-    }
 }
 
 JNIEXPORT jint JNICALL

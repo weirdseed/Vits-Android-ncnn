@@ -588,6 +588,7 @@ class VCFragment : Fragment() {
             REQUEST_CODE_SELECT_CONFIG -> {
                 if (vcBinding.exportBtn.visibility == View.VISIBLE)
                     vcBinding.exportBtn.visibility = View.GONE
+                modelInitState = false
                 if (uri != null) {
                     try {
                         val realPath = FileUtils.getPathFromUri(vcContext, uri)

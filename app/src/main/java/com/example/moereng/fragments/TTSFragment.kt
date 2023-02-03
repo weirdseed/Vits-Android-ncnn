@@ -541,6 +541,7 @@ class TTSFragment : Fragment() {
                 ttsBinding.playBtn.visibility = View.GONE
                 ttsBinding.progressLayout.visibility = View.GONE
                 ttsBinding.exportBtn.visibility = View.GONE
+                modelInitState = false
                 if (uri != null) {
                     try {
                         val realPath = FileUtils.getPathFromUri(ttsContext, uri)
@@ -600,10 +601,6 @@ class TTSFragment : Fragment() {
         super.onDestroyView()
         ttsBinding.wordsInput.setText("")
         playerUtils.release(ttsBinding, "tts")
-        val cleanerName = config?.data?.text_cleaners?.get(0)
-        if (cleanerName != null && cleanerName.contains("japanese")){
-            (textUtils as JapaneseTextUtils).releaseOpenJtalk()
-        }
         modelInitState = false
         config = null
         audioArray.clear()

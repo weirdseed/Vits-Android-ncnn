@@ -117,8 +117,6 @@ class JapaneseTextUtils(
 
     external fun splitSentenceCpp(text: String): String
 
-    external fun releaseOpenJtalk()
-
     init {
         System.loadLibrary("moereng")
     }

@@ -78,7 +78,7 @@ bool SynthesizerTrn::load_weight(const std::string &folder, const std::string &n
         weight.create(w, h);
         fread(weight, sizeof(float), emb_length, fp);
         fclose(fp);
-        LOGE("text embedding loaded!");
+        LOGI("text embedding loaded!");
         return true;
     }
     LOGE("text embedding load fail");
