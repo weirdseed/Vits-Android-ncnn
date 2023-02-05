@@ -6,6 +6,7 @@
 SynthesizerTrn net_g;
 static Nets *nets = nullptr;
 static OpenJtalk *openJtalk;
+static Option opt;
 
 static
 void clear_nets() {
@@ -43,9 +44,11 @@ extern "C" {
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_utils_text_JapaneseTextUtils_initOpenJtalk(JNIEnv *env, jobject thiz,
                                                                     jobject asset_manager) {
-    AssetJNI assetJni(env, thiz, asset_manager);
-    openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", &assetJni);
-    return JNI_TRUE;
+    if (openJtalk == nullptr){
+        AssetJNI assetJni(env, thiz, asset_manager);
+        openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", &assetJni);
+    }
+    return openJtalk != nullptr;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -96,21 +99,11 @@ Java_com_example_moereng_utils_text_JapaneseCleaners_extract_1labels(JNIEnv *env
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
                                          jstring path, jboolean voice_convert, jboolean multi,
-                                         jint n_vocab,
-                                         jint num_threads) {
+                                         jint n_vocab) {
     clear_nets();
     nets = new Nets();
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *assetJni = new AssetJNI(env, thiz, asset_manager);
-
-    Option opt;
-    opt.lightmode = true;
-    opt.num_threads = num_threads;
-    opt.use_packing_layout = true;
-
-    // use vulkan compute
-    if (ncnn::get_gpu_count() != 0)
-        opt.use_vulkan_compute = true;
 
     bool ret = net_g.init(_path, voice_convert, multi, n_vocab, assetJni, nets, opt);
     delete assetJni;
@@ -140,8 +133,11 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
     if (vulkan) LOGI("vulkan on");
     else
         LOGI("vulkan off");
+
+    opt.num_threads = num_threads;
+    LOGD("threads = %d", opt.num_threads);
     auto start = get_current_time();
-    auto output = SynthesizerTrn::forward(data, nets, num_threads, vulkan, multi, sid,
+    auto output = SynthesizerTrn::forward(data, nets, opt, vulkan, multi, sid,
                                           noise_scale, noise_scale_w, length_scale);
     auto end = get_current_time();
     LOGI("time cost: %f ms", end - start);
@@ -169,8 +165,11 @@ Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatAr
     if (vulkan) LOGI("vulkan on");
     else
         LOGI("vulkan off");
+
+    opt.num_threads = num_threads;
+    LOGD("threads = %d", opt.num_threads);
     auto start = get_current_time();
-    auto output = SynthesizerTrn::voice_convert(audio_mat, raw_sid, target_sid, nets, num_threads,
+    auto output = SynthesizerTrn::voice_convert(audio_mat, raw_sid, target_sid, nets, opt,
                                                 vulkan);
     auto end = get_current_time();
     LOGI("time cost: %f ms", end - start);

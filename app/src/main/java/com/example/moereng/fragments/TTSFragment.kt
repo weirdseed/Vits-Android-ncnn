@@ -345,8 +345,7 @@ class TTSFragment : Fragment() {
             folder,
             voiceConvert,
             multi,
-            n_vocab,
-            maxThreads
+            n_vocab
         )
         ttsViewModel.setGenerationFinishValue(true)
         if (modelInitState) {

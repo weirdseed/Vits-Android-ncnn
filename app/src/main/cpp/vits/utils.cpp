@@ -876,23 +876,24 @@ void mask_fill(Mat &m, const Mat &mask, const char *condition, float condition_v
         float *ptr = m.channel(i);
         const float *m_ptr = mask.channel(i);
         for (int j = 0; j < m.w * m.h; j++) {
-            if (condition == "=" && m_ptr[i] == condition_value) {
+
+            if (!strcmp(condition,"=") && m_ptr[i] == condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (condition == ">" && m_ptr[i] > condition_value) {
+            if (!strcmp(condition,">") && m_ptr[i] > condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (condition == "<" && m_ptr[i] < condition_value) {
+            if (!strcmp(condition,"<") && m_ptr[i] < condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (condition == ">=" && m_ptr[i] >= condition_value) {
+            if (!strcmp(condition,">=") && m_ptr[i] >= condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (condition == "<=" && m_ptr[i] <= condition_value) {
+            if (!strcmp(condition,"<=") && m_ptr[i] <= condition_value) {
                 ptr[i] = value;
                 continue;
             }
@@ -900,7 +901,7 @@ void mask_fill(Mat &m, const Mat &mask, const char *condition, float condition_v
     }
 }
 
-Mat _get_relative_embeddings(const Mat &relative_embeddings, int length, int window_size,
+Mat get_relative_embeddings(const Mat &relative_embeddings, int length, int window_size,
                              const Option &opt) {
     int pad_length = std::max(length - window_size - 1, 0);
     int slice_start_position = std::max(window_size + 1 - length, 0);
@@ -918,7 +919,7 @@ Mat _get_relative_embeddings(const Mat &relative_embeddings, int length, int win
     return used_relative_embeddings;
 }
 
-Mat _matmul_with_relative_keys(const Mat &x, const Mat &y, const Option &opt) {
+Mat matmul_with_relative_keys(const Mat &x, const Mat &y, const Option &opt) {
     if (x.empty() || y.empty()) return {};
     // concat
     Mat y_;
@@ -933,7 +934,7 @@ Mat _matmul_with_relative_keys(const Mat &x, const Mat &y, const Option &opt) {
     return matmul(x, y_t, opt);
 }
 
-Mat _relative_position_to_absolute_position(const Mat &x, const Option &opt) {
+Mat relative_position_to_absolute_position(const Mat &x, const Option &opt) {
     if (x.empty()) return x;
     int heads = x.c;
     int length = x.h;
@@ -949,7 +950,7 @@ Mat _relative_position_to_absolute_position(const Mat &x, const Option &opt) {
     return x_final;
 }
 
-Mat _absolute_position_to_relative_position(const Mat &x, const Option &opt) {
+Mat absolute_position_to_relative_position(const Mat &x, const Option &opt) {
     if (x.empty()) return {};
     int heads = x.c;
     int length = x.h;
@@ -962,7 +963,7 @@ Mat _absolute_position_to_relative_position(const Mat &x, const Option &opt) {
     return x_final;
 }
 
-Mat _matmul_with_relative_values(const Mat &x, const Mat &y, const Option &opt) {
+Mat matmul_with_relative_values(const Mat &x, const Mat &y, const Option &opt) {
     if (x.empty() || y.empty()) return {};
     // concat
     Mat y_;
@@ -1016,7 +1017,7 @@ std::string join_path(const std::string& folder, const std::string& file)
     }
 }
 
-std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const size_t size, Option& opt)
+std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const size_t size, const Option& opt)
 {
     std::vector<std::complex<float>> res;
 
@@ -1044,7 +1045,7 @@ std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const s
     return res;
 }
 
-std::vector<Mat> rfft(const Mat& m, Option& opt)
+std::vector<Mat> rfft(const Mat& m, const Option& opt)
 {
     if (m.empty()) return {};
     Mat real, image;
@@ -1093,7 +1094,7 @@ std::vector<Mat> rfft(const Mat& m, Option& opt)
     return std::vector<Mat>{real, image};
 }
 
-Mat hanning_window(const int n, Option& opt)
+Mat hanning_window(const int n, const Option& opt)
 {
     Mat res(n, 1);
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -1106,7 +1107,7 @@ Mat hanning_window(const int n, Option& opt)
     return res;
 }
 
-Mat as_strides(const Mat& x, const int h, const int w, Option& opt)
+Mat as_strides(const Mat& x, const int h, const int w, const Option& opt)
 {
     if (x.empty()) return {};
     Mat res(h, w);
@@ -1123,7 +1124,7 @@ Mat as_strides(const Mat& x, const int h, const int w, Option& opt)
     return res;
 }
 
-Mat frame(const Mat& x, const int frame_length, const int hop_length, Option& opt)
+Mat frame(const Mat& x, const int frame_length, const int hop_length, const Option& opt)
 {
     if (x.empty()) return {};
     // x: [1,n]
@@ -1134,7 +1135,7 @@ Mat frame(const Mat& x, const int frame_length, const int hop_length, Option& op
     return reducedims(xw);
 }
 
-std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_length, const int win_length, Option& opt)
+std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_length, const int win_length, const Option& opt)
 {
     if (y.empty()) return {};
     // hann window
@@ -1203,6 +1204,37 @@ Mat embedding(const Mat &x, const Mat &weight, const Option& opt) {
         const float* weight_row = weight.row((int)word_index);
         float* out_row = output.row(i);
         memcpy(out_row, weight_row, weight.w * sizeof(float));
+    }
+    return output;
+}
+
+Mat flip(const Mat &x, const Option &opt, int dim) {
+    Mat output;
+    output.create_like(x);
+#pragma omp parallel for num_threads(opt.num_threads)
+    for (int i = 0; i < x.c; i++) {
+        const float *p = x.channel(i);
+        float *t = output.channel(i);
+        if (dim == 1){
+            p += x.w * x.h;
+            for (int j = 0; j < x.h; j++) {
+                memcpy(t, p - x.w, sizeof(float) * x.w);
+                p -= x.w;
+                t+=x.w;
+            }
+        } else {
+            for (int j = 0; j < x.h; j++) {
+                // reverse
+                for (int k = 0; k < x.w / 2; ++k){
+                    float tmp = p[x.w - k - 1];
+                    t[x.w - k - 1] = p[k];
+                    t[k] = tmp;
+                }
+                t[x.w / 2] = p[x.w / 2];
+                p += x.w;
+                t+=x.w;
+            }
+        }
     }
     return output;
 }

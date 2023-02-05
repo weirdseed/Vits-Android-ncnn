@@ -34,7 +34,7 @@
 
 using namespace ncnn;
 
-Mat as_strides(const Mat& x, const int h, const int w, Option& opt); // dummy array
+Mat as_strides(const Mat& x, const int h, const int w, const Option& opt); // dummy array
 
 Mat cumsum(const Mat& blob, const Option& opt);
 
@@ -52,13 +52,15 @@ Mat expand(const Mat& m, int w, int h, const Option& opt);
 
 Mat embedding(const Mat& x, const Mat& weight, const Option& opt);
 
-Mat frame(const Mat& x, const int frame_length, const int hop_length, Option& opt);
+Mat frame(const Mat& x, const int frame_length, const int hop_length, const Option& opt);
+
+Mat flip(const Mat& x, const Option& opt, int dim = 1);
 
 Mat gather(Mat& blob, Mat& index, const Option& opt);
 
 Mat generate_path(const Mat& duration, const Mat mask, const Option& opt);
 
-Mat hanning_window(const int n, Option& opt);
+Mat hanning_window(const int n, const Option& opt);
 
 std::string join_path(const std::string& folder, const std::string& file);
 
@@ -96,9 +98,9 @@ Mat reducedims(const Mat& m);
 
 Mat randn(int w, int h, const Option& opt, int c = 0);
 
-std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const size_t size, Option& opt);
+std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const size_t size, const Option& opt);
 
-std::vector<Mat> rfft(const Mat& m, Option& opt); // rfft for dim 0
+std::vector<Mat> rfft(const Mat& m, const Option& opt); // rfft for dim 0
 
 Mat softmax(const Mat& blob, const Option& opt, int axis=-1); // °´ÐÐÇósoftmax
 
@@ -116,18 +118,18 @@ Mat sum(const Mat& m, const Option& opt);
 Mat sequence_mask(const Mat& length,  const Option& opt, float max_length_ = 0);
 
 std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_length,
-                      const int win_length, Option& opt); // short time Fourier transform
+                      const int win_length, const Option& opt); // short time Fourier transform
 
 Mat zeros_like(const Mat& x, const Option& opt);
 
-Mat _get_relative_embeddings(const Mat& relative_embeddings, int length, int window_size, const Option& opt);
+Mat get_relative_embeddings(const Mat& relative_embeddings, int length, int window_size, const Option& opt);
 
-Mat _matmul_with_relative_keys(const Mat& x, const Mat& y, const Option& opt);
+Mat matmul_with_relative_keys(const Mat& x, const Mat& y, const Option& opt);
 
-Mat _relative_position_to_absolute_position(const Mat& x, const Option& opt);
+Mat relative_position_to_absolute_position(const Mat& x, const Option& opt);
 
-Mat _absolute_position_to_relative_position(const Mat& x, const Option& opt);
+Mat absolute_position_to_relative_position(const Mat& x, const Option& opt);
 
-Mat _matmul_with_relative_values(const Mat& x, const Mat& y, const Option& opt);
+Mat matmul_with_relative_values(const Mat& x, const Mat& y, const Option& opt);
 
 #endif

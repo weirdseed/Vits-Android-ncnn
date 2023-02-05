@@ -185,8 +185,7 @@ class VCFragment : Fragment() {
             folder,
             true,
             true,
-            n_vocab,
-            maxThreads
+            n_vocab
         )
         vcViewModel.setConvertFinishValue(true)
         if (modelInitState) {

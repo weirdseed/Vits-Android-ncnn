@@ -64,32 +64,17 @@ public:
     }
 };
 
-class flip : public Layer {
+class Flip : public Layer {
 public:
-    flip() {
+    Flip() {
+        one_blob_only = true;
     }
 
-    virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
+    virtual int forward(const Mat &bottom_blob, Mat &top_blob,
                         const Option &opt) const {
-        const Mat &bottom_blob = bottom_blobs[0];
-        Mat &top_blob = top_blobs[0];
-        top_blob.create_like(bottom_blob);
-        if (top_blob.empty()) return -100;
-        int c = bottom_blob.c;
-        int w = bottom_blob.w;
-        int h = bottom_blob.h;
 
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int i = 0; i < c; i++) {
-            const float *ptr = bottom_blob.channel(i);
-            ptr += w * h;
-            float *out_ptr = top_blob.channel(i);
-            for (int j = 0; j < h; j++) {
-                memcpy(out_ptr, ptr - w, w * sizeof(float));
-                out_ptr += w;
-                ptr -= w;
-            }
-        }
+        top_blob = flip(bottom_blob, opt);
+        if (top_blob.empty()) return -100;
         return 0;
     }
 };
@@ -413,12 +398,12 @@ public:
 
         Mat scores = matmul(div(query, sqrt(k_channels), opt), mattranspose(key, opt), opt);
 
-        Mat key_relative_embeddings = _get_relative_embeddings(emb_rel_k, t_s, window_size, opt);
+        Mat key_relative_embeddings = get_relative_embeddings(emb_rel_k, t_s, window_size, opt);
 
-        Mat rel_logits = _matmul_with_relative_keys(div(query, sqrt(k_channels), opt),
+        Mat rel_logits = matmul_with_relative_keys(div(query, sqrt(k_channels), opt),
                                                     key_relative_embeddings, opt);
 
-        Mat scores_local = _relative_position_to_absolute_position(rel_logits, opt);
+        Mat scores_local = relative_position_to_absolute_position(rel_logits, opt);
 
         scores = matplus(scores, scores_local, opt);
 
@@ -428,10 +413,10 @@ public:
 
         //dropout(p_attn);
         Mat output = matmul(p_attn, value, opt);
-        Mat relative_weights = _absolute_position_to_relative_position(p_attn, opt);
-        Mat value_relative_embeddings = _get_relative_embeddings(emb_rel_v, t_s, window_size, opt);
+        Mat relative_weights = absolute_position_to_relative_position(p_attn, opt);
+        Mat value_relative_embeddings = get_relative_embeddings(emb_rel_v, t_s, window_size, opt);
         output = matplus(output,
-                         _matmul_with_relative_values(relative_weights, value_relative_embeddings,
+                         matmul_with_relative_values(relative_weights, value_relative_embeddings,
                                                       opt), opt);
         output = mattranspose(output, opt);
         Mat &top_blob = top_blobs[0];
