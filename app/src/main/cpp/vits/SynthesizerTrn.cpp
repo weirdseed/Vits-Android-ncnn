@@ -92,6 +92,7 @@ bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, b
 
     opt.lightmode = true;
     opt.use_packing_layout = true;
+    opt.use_bf16_storage = true;
 
     // use vulkan compute
     if (ncnn::get_gpu_count() != 0)
@@ -101,7 +102,7 @@ bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, b
         if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
             load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
             load_model(model_folder, multi, nets->enc_q, "enc_q", opt) &&
-            load_model(model_folder, multi, nets->dec_net, "dec", opt) &&
+            load_model(model_folder, multi, nets->dec, "dec", opt) &&
             load_model(model_folder, multi, nets->flow, "flow", opt) &&
             load_model(model_folder, multi, nets->flow_reverse, "flow.reverse", opt))
             return true;
@@ -110,7 +111,7 @@ bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, b
             load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
             load_model(model_folder, multi, nets->enc_p, "enc_p", opt) &&
             load_model(model_folder, multi, nets->enc_q, "enc_q", opt) &&
-            load_model(model_folder, multi, nets->dec_net, "dec", opt) &&
+            load_model(model_folder, multi, nets->dec, "dec", opt) &&
             load_model(model_folder, multi, nets->flow, "flow", opt) &&
             load_model(model_folder, multi, nets->flow_reverse, "flow.reverse", opt) &&
             load_model(model_folder, multi, nets->dp, "dp", opt))
@@ -118,7 +119,7 @@ bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, b
     } else {
         if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
             load_model(model_folder, multi, nets->enc_p, "enc_p", opt) &&
-            load_model(model_folder, multi, nets->dec_net, "dec", opt) &&
+            load_model(model_folder, multi, nets->dec, "dec", opt) &&
             load_model(model_folder, multi, nets->flow_reverse, "flow.reverse", opt) &&
             load_model(model_folder, multi, nets->dp, "dp", opt))
             return true;
@@ -225,9 +226,9 @@ Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, 
     return out;
 }
 
-Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec_net, bool vulkan,
+Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec, bool vulkan,
                                 const Option &opt) {
-    Extractor ex = dec_net.create_extractor();
+    Extractor ex = dec.create_extractor();
     ex.set_num_threads(opt.num_threads);
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
@@ -296,7 +297,7 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, const Option &opt, bool
 
     y_mask = expand(y_mask, z.w, z.h, opt);
 
-    Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g), nets->dec_net,
+    Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g), nets->dec,
                         vulkan, opt);
     LOGI("finished!\n");
     return o;
@@ -319,7 +320,7 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     auto z_p = flow_forward(z, y_mask, g_src, net->flow, vulkan, opt);
     auto z_hat = flow_reverse_forward(z_p, y_mask, g_tgt, net->flow_reverse, vulkan, opt);
     y_mask = expand(y_mask, z_hat.w, z_hat.h, opt);
-    auto o_hat = dec_forward(reducedims(matproduct(z_hat, y_mask, opt)), g_tgt, net->dec_net,
+    auto o_hat = dec_forward(reducedims(matproduct(z_hat, y_mask, opt)), g_tgt, net->dec,
                              vulkan, opt);
     LOGI("voice converted!\n");
     return o_hat;

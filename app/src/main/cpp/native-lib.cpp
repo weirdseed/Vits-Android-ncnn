@@ -28,13 +28,11 @@ void release_openjtalk(){
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnLoad");
-    ncnn::create_gpu_instance();
     return JNI_VERSION_1_4;
 }
 
 JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnUnload");
-    ncnn::destroy_gpu_instance();
     release_openjtalk();
     clear_nets();
 }

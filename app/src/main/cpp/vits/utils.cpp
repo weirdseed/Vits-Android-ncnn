@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void pretty_print(const ncnn::Mat& m, const char* name) {
+void pretty_print(const ncnn::Mat &m, const char *name) {
     std::stringstream ss;
     ss << std::setiosflags(std::ios::fixed);
     ss << std::setprecision(4);
@@ -21,7 +21,7 @@ void pretty_print(const ncnn::Mat& m, const char* name) {
     if (m.h * m.w * m.c <= 300) {
         for (int q = 0; q < m.c; q++) {
             if (m.c > 1) ss << "\n\nchannel " << q + 1 << ":\n";
-            const float* ptr = m.channel(q);
+            const float *ptr = m.channel(q);
             for (int y = 0; y < m.h; y++) {
                 for (int x = 0; x < m.w; x++) {
                     ss << ptr[x] << "\t";
@@ -36,15 +36,14 @@ void pretty_print(const ncnn::Mat& m, const char* name) {
     }
     for (int q = 0; q < m.c; q++) {
         if (m.c > 1) ss << "\n\nchannel " << q + 1 << ":\n";
-        const float* ptr = m.channel(q);
+        const float *ptr = m.channel(q);
         if (m.h > 10) {
             for (int y = 0; y < 3; y++) {
                 if (m.w <= 20) {
                     for (int x = 0; x < m.w; x++) {
                         ss << ptr[x] << "\t";
                     }
-                }
-                else {
+                } else {
                     for (int x = 0; x < 3; x++) {
                         ss << ptr[x] << "\t";
                     }
@@ -63,8 +62,7 @@ void pretty_print(const ncnn::Mat& m, const char* name) {
                     for (int x = 0; x < m.w; x++) {
                         ss << ptr[x] << "\t";
                     }
-                }
-                else {
+                } else {
                     for (int x = 0; x < 3; x++) {
                         ss << ptr[x] << "\t";
                     }
@@ -77,15 +75,13 @@ void pretty_print(const ncnn::Mat& m, const char* name) {
                 ss << "\n";
             }
 
-        }
-        else {
+        } else {
             for (int y = 0; y < m.h; y++) {
                 if (m.w <= 20) {
                     for (int x = 0; x < m.w; x++) {
                         ss << ptr[x] << "\t";
                     }
-                }
-                else {
+                } else {
                     for (int x = 0; x < 3; x++) {
                         ss << ptr[x] << "\t";
                     }
@@ -103,227 +99,35 @@ void pretty_print(const ncnn::Mat& m, const char* name) {
     LOGI("%s", output.c_str());
 }
 
-Mat softmax(const Mat &m, const Option &opt, int axis) {
+Mat softmax(const Mat &m, const Option &opt) {
     if (m.empty()) return m;
     Mat blob = m.clone();
-    int dims = blob.dims;
-    size_t elemsize = blob.elemsize;
-    int positive_axis = axis < 0 ? dims + axis : axis;
 
-    if (dims == 1) // positive_axis == 0
-    {
-        int w = blob.w;
+    int w = blob.w;
+    int h = blob.h;
+    int channels = blob.c;
 
-        float *ptr = blob;
-
-        float flt_max = -FLT_MAX;
-        for (int i = 0; i < w; i++) {
-            flt_max = std::max(flt_max, ptr[i]);
-        }
-
-        float sum = 0.f;
-        for (int i = 0; i < w; i++) {
-            ptr[i] = static_cast<float>(exp(ptr[i] - flt_max));
-            sum += ptr[i];
-        }
-
-        for (int i = 0; i < w; i++) {
-            ptr[i] /= sum;
-        }
-    }
-
-    if (dims == 2 && positive_axis == 0) {
-        int w = blob.w;
-        int h = blob.h;
-
-        Mat max;
-        max.create(w, elemsize, opt.workspace_allocator);
-        if (max.empty())
-            return {};
-        max.fill(-FLT_MAX);
+#pragma omp parallel for num_threads(opt.num_threads)
+    for (int q = 0; q < channels; q++) {
+        float *ptr = blob.channel(q);
 
         for (int i = 0; i < h; i++) {
-            const float *ptr = blob.row(i);
-            for (int j = 0; j < w; j++) {
-                max[j] = std::max(max[j], ptr[j]);
-            }
-        }
-
-        Mat sum;
-        sum.create(w, elemsize, opt.workspace_allocator);
-        if (sum.empty())
-            return {};
-        sum.fill(0.f);
-
-        for (int i = 0; i < h; i++) {
-            float *ptr = blob.row(i);
-            for (int j = 0; j < w; j++) {
-                ptr[j] = static_cast<float>(exp(ptr[j] - max[j]));
-                sum[j] += ptr[j];
-            }
-        }
-
-        for (int i = 0; i < h; i++) {
-            float *ptr = blob.row(i);
-            for (int j = 0; j < w; j++) {
-                ptr[j] /= sum[j];
-            }
-        }
-    }
-
-    if (dims == 2 && positive_axis == 1) {
-        int w = blob.w;
-        int h = blob.h;
-
-        for (int i = 0; i < h; i++) {
-            float *ptr = blob.row(i);
-            float m = -FLT_MAX;
-            for (int j = 0; j < w; j++) {
-                m = std::max(m, ptr[j]);
+            float max = ptr[0];
+            for (int j = 1; j < w; j++) {
+                max = std::max(max, ptr[j]);
             }
 
-            float s = 0.f;
+            float sum = 0.f;
             for (int j = 0; j < w; j++) {
-                ptr[j] = static_cast<float>(exp(ptr[j] - m));
-                s += ptr[j];
+                ptr[j] = static_cast<float>(exp(ptr[j] - max));
+                sum += ptr[j];
             }
 
             for (int j = 0; j < w; j++) {
-                ptr[j] /= s;
+                ptr[j] /= sum;
             }
-        }
-    }
 
-    if (dims == 3 && positive_axis == 0) {
-        int w = blob.w;
-        int h = blob.h;
-        int channels = blob.c;
-        int size = w * h;
-
-        Mat max;
-        max.create(w, h, elemsize, opt.workspace_allocator);
-        if (max.empty())
-            return {};
-        max.fill(-FLT_MAX);
-        for (int q = 0; q < channels; q++) {
-            const float *ptr = blob.channel(q);
-
-            for (int i = 0; i < size; i++) {
-                max[i] = std::max(max[i], ptr[i]);
-            }
-        }
-
-        Mat sum;
-        sum.create(w, h, elemsize, opt.workspace_allocator);
-        if (sum.empty())
-            return {};
-        sum.fill(0.f);
-        for (int q = 0; q < channels; q++) {
-            float *ptr = blob.channel(q);
-
-            for (int i = 0; i < size; i++) {
-                ptr[i] = static_cast<float>(exp(ptr[i] - max[i]));
-                sum[i] += ptr[i];
-            }
-        }
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int q = 0; q < channels; q++) {
-            float *ptr = blob.channel(q);
-
-            for (int i = 0; i < size; i++) {
-                ptr[i] /= sum[i];
-            }
-        }
-    }
-
-    if (dims == 3 && positive_axis == 1) {
-        int w = blob.w;
-        int h = blob.h;
-        int channels = blob.c;
-
-        Mat max;
-        max.create(w, channels, elemsize, opt.workspace_allocator);
-        if (max.empty())
-            return {};
-        max.fill(-FLT_MAX);
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int q = 0; q < channels; q++) {
-            const float *ptr = blob.channel(q);
-            float *maxptr = max.row(q);
-
-            for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                    maxptr[j] = std::max(maxptr[j], ptr[j]);
-                }
-
-                ptr += w;
-            }
-        }
-
-        Mat sum;
-        sum.create(w, channels, elemsize, opt.workspace_allocator);
-        if (sum.empty())
-            return {};
-        sum.fill(0.f);
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int q = 0; q < channels; q++) {
-            float *ptr = blob.channel(q);
-            float *maxptr = max.row(q);
-            float *sumptr = sum.row(q);
-
-            for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                    ptr[j] = static_cast<float>(exp(ptr[j] - maxptr[j]));
-                    sumptr[j] += ptr[j];
-                }
-
-                ptr += w;
-            }
-        }
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int q = 0; q < channels; q++) {
-            float *ptr = blob.channel(q);
-            float *sumptr = sum.row(q);
-
-            for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                    ptr[j] /= sumptr[j];
-                }
-
-                ptr += w;
-            }
-        }
-    }
-
-    if (dims == 3 && positive_axis == 2) {
-        int w = blob.w;
-        int h = blob.h;
-        int channels = blob.c;
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int q = 0; q < channels; q++) {
-            float *ptr = blob.channel(q);
-
-            for (int i = 0; i < h; i++) {
-                float max = -FLT_MAX;
-                for (int j = 0; j < w; j++) {
-                    max = std::max(max, ptr[j]);
-                }
-
-                float sum = 0.f;
-                for (int j = 0; j < w; j++) {
-                    ptr[j] = static_cast<float>(exp(ptr[j] - max));
-                    sum += ptr[j];
-                }
-
-                for (int j = 0; j < w; j++) {
-                    ptr[j] /= sum;
-                }
-
-                ptr += w;
-            }
+            ptr += w;
         }
     }
     return blob;
@@ -367,8 +171,8 @@ Mat pad(const Mat &blob, int pad_top, int pad_bottom, int pad_left, int pad_righ
     res.fill(pad_value);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < blob.c; i++) {
-        const float* ptr = blob.channel(i);
-        float* out = res.channel(i);
+        const float *ptr = blob.channel(i);
+        float *out = res.channel(i);
         out += pad_top * res.w;
         for (int j = 0; j < blob.h; j++) {
             memcpy(out + pad_left, ptr, blob.w * sizeof(float));
@@ -394,13 +198,13 @@ Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_
     if (stride_w == 1) {
 #pragma omp parallel for num_threads(opt.num_threads)
         for (int i = 0; i < blob.c; i++) {
-            const float* ptr = blob.channel(i);
-            float* out = res.channel(i);
+            const float *ptr = blob.channel(i);
+            float *out = res.channel(i);
             ptr += top * blob.w;
-            for (int j = 0; j < bottom - top; j+=stride_h) {
+            for (int j = 0; j < bottom - top; j += stride_h) {
                 memcpy(out, ptr + left, (right - left) * sizeof(float));
                 out += res.w;
-                ptr += blob.w * std::min(stride_h, bottom-top-1);
+                ptr += blob.w * std::min(stride_h, bottom - top - 1);
             }
         }
         return res;
@@ -408,10 +212,10 @@ Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_
 
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < blob.c; i++) {
-        const float* ptr = blob.channel(i);
-        float* out = res.channel(i);
+        const float *ptr = blob.channel(i);
+        float *out = res.channel(i);
         ptr += top * blob.w;
-        for (int j = 0; j < bottom - top; j+=stride_h) {
+        for (int j = 0; j < bottom - top; j += stride_h) {
             for (int k = left, m = 0; k < right; k += stride_w, m++) {
                 out[m] = ptr[std::min(k, right - 1)];
             }
@@ -425,9 +229,9 @@ Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_
 Mat reducedims(const Mat &m) {
     if (m.empty()) return m;
     if (m.dims == 1) return m;
-    if (m.dims == 2) return m.reshape(m.w*m.h);
+    if (m.dims == 2) return m.reshape(m.w * m.h);
     if (m.dims == 3) {
-        if (m.c > 1) return m.reshape(m.w*m.c,m.h);
+        if (m.c > 1) return m.reshape(m.w * m.c, m.h);
         else return m.reshape(m.w, m.h);
     }
     if (m.dims == 4) {
@@ -440,7 +244,7 @@ Mat expanddims(const Mat &m) {
     if (m.empty()) return m;
     if (m.dims == 1) return m.reshape(m.w, 1);
     if (m.dims == 2) return m.reshape(m.w, m.h, 1);
-	return m;
+    return m;
 }
 
 void set_column_value(Mat &blob, int column, float value, const Option &opt) {
@@ -736,8 +540,8 @@ Mat expand(const Mat &m, int w, int h, const Option &opt) {
     else res.create(w, h);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < m.c; i++) {
-        const float* p = m.channel(i);
-        float* out = res.channel(i);
+        const float *p = m.channel(i);
+        float *out = res.channel(i);
         if (m.w == 1 && h == m.h) {
             for (int j = 0; j < m.h; j++) {
                 for (int k = 0; k < w; k++) {
@@ -877,23 +681,23 @@ void mask_fill(Mat &m, const Mat &mask, const char *condition, float condition_v
         const float *m_ptr = mask.channel(i);
         for (int j = 0; j < m.w * m.h; j++) {
 
-            if (!strcmp(condition,"=") && m_ptr[i] == condition_value) {
+            if (!strcmp(condition, "=") && m_ptr[i] == condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (!strcmp(condition,">") && m_ptr[i] > condition_value) {
+            if (!strcmp(condition, ">") && m_ptr[i] > condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (!strcmp(condition,"<") && m_ptr[i] < condition_value) {
+            if (!strcmp(condition, "<") && m_ptr[i] < condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (!strcmp(condition,">=") && m_ptr[i] >= condition_value) {
+            if (!strcmp(condition, ">=") && m_ptr[i] >= condition_value) {
                 ptr[i] = value;
                 continue;
             }
-            if (!strcmp(condition,"<=") && m_ptr[i] <= condition_value) {
+            if (!strcmp(condition, "<=") && m_ptr[i] <= condition_value) {
                 ptr[i] = value;
                 continue;
             }
@@ -902,7 +706,7 @@ void mask_fill(Mat &m, const Mat &mask, const char *condition, float condition_v
 }
 
 Mat get_relative_embeddings(const Mat &relative_embeddings, int length, int window_size,
-                             const Option &opt) {
+                            const Option &opt) {
     int pad_length = std::max(length - window_size - 1, 0);
     int slice_start_position = std::max(window_size + 1 - length, 0);
     int slice_end_position = slice_start_position + 2 * length - 1;
@@ -986,18 +790,17 @@ Mat zeros_like(const Mat &x, const Option &opt) {
 
 Mat concat(const Mat &m1, const Mat &m2, const Option &opt) {
     if (m1.empty() || m2.empty()) return {};
-    Mat res(m1.w, m1.h+m2.h);
+    Mat res(m1.w, m1.h + m2.h);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < m1.c; i++) {
-        const float* p1 = m1.channel(i);
-        const float* p2 = m2.channel(i);
-        float* out = res.channel(i);
+        const float *p1 = m1.channel(i);
+        const float *p2 = m2.channel(i);
+        float *out = res.channel(i);
         for (int j = 0; j < res.h; j++) {
             if (j < m1.h) {
                 memcpy(out, p1, m1.w * sizeof(float));
                 p1 += m1.w;
-            }
-            else {
+            } else {
                 memcpy(out, p2, m2.w * sizeof(float));
                 p2 += m2.w;
             }
@@ -1007,25 +810,23 @@ Mat concat(const Mat &m1, const Mat &m2, const Option &opt) {
     return res;
 }
 
-std::string join_path(const std::string& folder, const std::string& file)
-{
+std::string join_path(const std::string &folder, const std::string &file) {
     if (folder.find_last_of('/') || folder.find_last_of('\\')) {
         return folder + file;
-    }
-    else {
+    } else {
         return folder + "/" + file;
     }
 }
 
-std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const size_t size, const Option& opt)
-{
+std::vector<std::complex<fftpack_real>>
+rfft1d(const fftpack_real *data, const size_t size, const Option &opt) {
     std::vector<std::complex<float>> res;
 
-    auto* rfin = new fftpack_real[size];
+    auto *rfin = new fftpack_real[size];
 
     memcpy(rfin, data, size * sizeof(fftpack_real));
 
-    auto* wsave = new fftpack_real[size * 3];
+    auto *wsave = new fftpack_real[size * 3];
 
     rffti(size, wsave);
     rfftf(size, rfin, wsave);
@@ -1045,8 +846,7 @@ std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const s
     return res;
 }
 
-std::vector<Mat> rfft(const Mat& m, const Option& opt)
-{
+std::vector<Mat> rfft(const Mat &m, const Option &opt) {
     if (m.empty()) return {};
     Mat real, image;
     if (m.dims == 2) {
@@ -1059,11 +859,11 @@ std::vector<Mat> rfft(const Mat& m, const Option& opt)
     }
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < m.c; i++) {
-        const float* ptr = m.channel(i);
-        float* real_ptr = real.channel(i);
-        float* imag_ptr = image.channel(i);
+        const float *ptr = m.channel(i);
+        float *real_ptr = real.channel(i);
+        float *imag_ptr = image.channel(i);
         for (int j = 0; j < m.h; j++) {
-            auto* input = new float[m.w];
+            auto *input = new float[m.w];
 
             memcpy(input, ptr, m.w * sizeof(float));
             auto rfft_out = rfft1d(input, m.w, opt);
@@ -1071,7 +871,7 @@ std::vector<Mat> rfft(const Mat& m, const Option& opt)
             // get real
             std::vector<float> real_v;
             std::transform(rfft_out.begin(), rfft_out.end(), std::back_inserter(real_v),
-                           [](const std::complex<float>& c) { return c.real(); });
+                           [](const std::complex<float> &c) { return c.real(); });
 
             // assign real
             memcpy(real_ptr, real_v.data(), real_v.size() * sizeof(float));
@@ -1079,7 +879,7 @@ std::vector<Mat> rfft(const Mat& m, const Option& opt)
             // get image
             std::vector<float> image_v;
             std::transform(rfft_out.begin(), rfft_out.end(), std::back_inserter(image_v),
-                           [](const std::complex<float>& c) { return c.imag(); });
+                           [](const std::complex<float> &c) { return c.imag(); });
 
             // assign image
             memcpy(imag_ptr, image_v.data(), image_v.size() * sizeof(float));
@@ -1094,12 +894,11 @@ std::vector<Mat> rfft(const Mat& m, const Option& opt)
     return std::vector<Mat>{real, image};
 }
 
-Mat hanning_window(const int n, const Option& opt)
-{
+Mat hanning_window(const int n, const Option &opt) {
     Mat res(n, 1);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < res.c; i++) {
-        float* ptr = res.channel(i);
+        float *ptr = res.channel(i);
         for (int j = 0; j < n; j++) {
             res[j] = 0.5 - 0.5 * cos(2 * PI * j / (float(n - 1)));
         }
@@ -1107,14 +906,13 @@ Mat hanning_window(const int n, const Option& opt)
     return res;
 }
 
-Mat as_strides(const Mat& x, const int h, const int w, const Option& opt)
-{
+Mat as_strides(const Mat &x, const int h, const int w, const Option &opt) {
     if (x.empty()) return {};
     Mat res(h, w);
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < x.c; i++) {
-        const float* x_ptr = x.channel(i);
-        float* ptr = res.channel(i);
+        const float *x_ptr = x.channel(i);
+        float *ptr = res.channel(i);
         for (int j = 0; j < w; j++) {
             memcpy(ptr, x_ptr + j, res.w * sizeof(float));
             ptr += res.w;
@@ -1124,8 +922,7 @@ Mat as_strides(const Mat& x, const int h, const int w, const Option& opt)
     return res;
 }
 
-Mat frame(const Mat& x, const int frame_length, const int hop_length, const Option& opt)
-{
+Mat frame(const Mat &x, const int frame_length, const int hop_length, const Option &opt) {
     if (x.empty()) return {};
     // x: [1,n]
     int x_w_trimmed = x.w - (frame_length - 1);
@@ -1135,8 +932,9 @@ Mat frame(const Mat& x, const int frame_length, const int hop_length, const Opti
     return reducedims(xw);
 }
 
-std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_length, const int win_length, const Option& opt)
-{
+std::vector<Mat>
+stft(const Mat &y, const int filter_length, const int hop_length, const int win_length,
+     const Option &opt) {
     if (y.empty()) return {};
     // hann window
     auto fft_window = hanning_window(win_length, opt);
@@ -1154,7 +952,7 @@ std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_lengt
     auto y_frames = frame(y_padded, filter_length, hop_length, opt);
 
     int n_columns = MAX_MEM_BLOCK / (2 * sizeof(float) * (y_frames.h / 2 + 1));
-    n_columns = std::max(n_columns,1);
+    n_columns = std::max(n_columns, 1);
 
     Mat real, imag;
 
@@ -1173,17 +971,17 @@ std::vector<Mat> stft(const Mat& y, const int filter_length, const int hop_lengt
     }
     real = reducedims(mattranspose(real, opt));
     imag = reducedims(mattranspose(imag, opt));
-    return std::vector<Mat> { real, imag };
+    return std::vector<Mat>{real, imag};
 }
 
 Mat Plus(const Mat &m, float value, const Option &opt) {
     if (m.empty()) return m;
     Mat res;
     res.create_like(m);
-    #pragma omp parallel for num_threads(opt.num_threads)
+#pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < res.c; i++) {
-        const float* p = m.channel(i);
-        float* out = res.channel(i);
+        const float *p = m.channel(i);
+        float *out = res.channel(i);
         for (int j = 0; j < res.w * res.h; j++) {
             out[j] = p[j] + value;
         }
@@ -1191,7 +989,7 @@ Mat Plus(const Mat &m, float value, const Option &opt) {
     return res;
 }
 
-Mat embedding(const Mat &x, const Mat &weight, const Option& opt) {
+Mat embedding(const Mat &x, const Mat &weight, const Option &opt) {
     if (x.empty() || weight.empty()) return {};
     Mat output;
     int size = x.total();
@@ -1200,9 +998,9 @@ Mat embedding(const Mat &x, const Mat &weight, const Option& opt) {
 
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < size; i++) {
-        float word_index = ((const float*)x)[i];
-        const float* weight_row = weight.row((int)word_index);
-        float* out_row = output.row(i);
+        float word_index = ((const float *) x)[i];
+        const float *weight_row = weight.row((int) word_index);
+        float *out_row = output.row(i);
         memcpy(out_row, weight_row, weight.w * sizeof(float));
     }
     return output;
@@ -1215,24 +1013,24 @@ Mat flip(const Mat &x, const Option &opt, int dim) {
     for (int i = 0; i < x.c; i++) {
         const float *p = x.channel(i);
         float *t = output.channel(i);
-        if (dim == 1){
+        if (dim == 1) {
             p += x.w * x.h;
             for (int j = 0; j < x.h; j++) {
                 memcpy(t, p - x.w, sizeof(float) * x.w);
                 p -= x.w;
-                t+=x.w;
+                t += x.w;
             }
         } else {
             for (int j = 0; j < x.h; j++) {
                 // reverse
-                for (int k = 0; k < x.w / 2; ++k){
+                for (int k = 0; k < x.w / 2; ++k) {
                     float tmp = p[x.w - k - 1];
                     t[x.w - k - 1] = p[k];
                     t[k] = tmp;
                 }
                 t[x.w / 2] = p[x.w / 2];
                 p += x.w;
-                t+=x.w;
+                t += x.w;
             }
         }
     }

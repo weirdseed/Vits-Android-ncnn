@@ -102,7 +102,7 @@ std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const s
 
 std::vector<Mat> rfft(const Mat& m, const Option& opt); // rfft for dim 0
 
-Mat softmax(const Mat& blob, const Option& opt, int axis=-1); // 按行求softmax
+Mat softmax(const Mat &m, const Option &opt); // 按行求softmax
 
 Mat Slice(const Mat &blob, int top, int bottom, int left, int right, int stride_w, int stride_h,
           const Option &opt);

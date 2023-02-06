@@ -9,7 +9,7 @@ struct Nets {
     Mat emb_g_weight;
     Net enc_p;
     Net enc_q;
-    Net dec_net;
+    Net dec;
     Net flow_reverse;
     Net flow;
     Net dp;
