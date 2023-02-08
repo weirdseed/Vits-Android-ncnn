@@ -3,19 +3,11 @@
 #include "vits/SynthesizerTrn.h"
 #include "audio_process/audio.h"
 
-SynthesizerTrn net_g;
-static Nets *nets = nullptr;
+static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
+static ncnn::PoolAllocator g_workspace_pool_allocator;
+static SynthesizerTrn net_g;
 static OpenJtalk *openJtalk;
 static Option opt;
-
-static
-void clear_nets() {
-    if (nets != nullptr) {
-        delete nets;
-        nets = nullptr;
-        LOGI("all nets cleared");
-    }
-}
 
 static
 void release_openjtalk(){
@@ -28,13 +20,14 @@ void release_openjtalk(){
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnLoad");
+    ncnn::create_gpu_instance();
     return JNI_VERSION_1_4;
 }
 
 JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnUnload");
     release_openjtalk();
-    clear_nets();
+    ncnn::destroy_gpu_instance();
 }
 
 // vits utils
@@ -98,12 +91,20 @@ JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asset_manager,
                                          jstring path, jboolean voice_convert, jboolean multi,
                                          jint n_vocab) {
-    clear_nets();
-    nets = new Nets();
+
     const char *_path = env->GetStringUTFChars(path, nullptr);
     auto *assetJni = new AssetJNI(env, thiz, asset_manager);
 
-    bool ret = net_g.init(_path, voice_convert, multi, n_vocab, assetJni, nets, opt);
+    opt.lightmode = true;
+    opt.use_packing_layout = true;
+    opt.blob_allocator = &g_blob_pool_allocator;
+    opt.workspace_allocator = &g_workspace_pool_allocator;
+
+    // use vulkan compute
+    if (ncnn::get_gpu_count() != 0)
+        opt.use_vulkan_compute = true;
+
+    bool ret = net_g.init(_path, voice_convert, multi, n_vocab, assetJni, opt);
     delete assetJni;
     if (ret) return JNI_TRUE;
     else return JNI_FALSE;
@@ -135,7 +136,7 @@ Java_com_example_moereng_Vits_forward(JNIEnv *env, jobject thiz, jintArray x, jb
     opt.num_threads = num_threads;
     LOGD("threads = %d", opt.num_threads);
     auto start = get_current_time();
-    auto output = SynthesizerTrn::forward(data, nets, opt, vulkan, multi, sid,
+    auto output = net_g.forward(data, opt, vulkan, multi, sid,
                                           noise_scale, noise_scale_w, length_scale);
     auto end = get_current_time();
     LOGI("time cost: %f ms", end - start);
@@ -167,7 +168,7 @@ Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatAr
     opt.num_threads = num_threads;
     LOGD("threads = %d", opt.num_threads);
     auto start = get_current_time();
-    auto output = SynthesizerTrn::voice_convert(audio_mat, raw_sid, target_sid, nets, opt,
+    auto output = net_g.voice_convert(audio_mat, raw_sid, target_sid, opt,
                                                 vulkan);
     auto end = get_current_time();
     LOGI("time cost: %f ms", end - start);
@@ -175,13 +176,6 @@ Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatAr
     env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
     return res;
 
-}
-
-JNIEXPORT void JNICALL
-Java_com_example_moereng_Vits_clear(JNIEnv *env, jobject thiz) {
-    if (nets != nullptr) {
-        clear_nets();
-    }
 }
 
 // wave utils

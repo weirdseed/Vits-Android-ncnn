@@ -10,8 +10,7 @@
 
 class expand_as : public Layer {
 public:
-    expand_as() {
-    }
+    expand_as() = default;
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
                         const Option &opt) const {
@@ -94,8 +93,7 @@ public:
 
 class PRQTransform : public Layer {
 public:
-    PRQTransform() {
-    }
+    PRQTransform() = default;
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
                         const Option &opt) const {
@@ -133,7 +131,6 @@ public:
 
         Mat cumwidths = cumsum(widths, opt);
 
-        //cumwidths = pad(cumwidths, opt);
         cumwidths = pad(cumwidths, 0, 0, 1, 0, 0, opt);
 
 #pragma omp parallel for num_threads(opt.num_threads)
@@ -179,7 +176,6 @@ public:
             }
         }
         Mat cumheights = cumsum(heights, opt);
-        //cumheights = pad(cumheights, opt);
         cumheights = pad(cumheights, 0, 0, 1, 0, 0, opt);
 #pragma omp parallel for num_threads(opt.num_threads)
         for (int i = 0; i < cumheights.c; i++) {
@@ -291,8 +287,7 @@ class ResidualReverse : public Layer {
 private:
     bool reverse;
 public:
-    ResidualReverse() {
-    }
+    ResidualReverse() = default;
 
     virtual int load_param(const ParamDict &pd) {
         reverse = bool(pd.get(0, 0));
@@ -330,8 +325,7 @@ public:
 
 class Embedding : public Layer {
 public:
-    Embedding() {
-    }
+    Embedding() = default;
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
                         const Option &opt) const {
@@ -346,8 +340,7 @@ public:
 
 class SequenceMask : public Layer {
 public:
-    SequenceMask() {
-    }
+    SequenceMask() = default;
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
                         const Option &opt) const {
@@ -367,8 +360,7 @@ private:
     int k_channels = 96;
     int window_size = 4;
 public:
-    Attention() {
-    }
+    Attention() = default;
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
                         const Option &opt) const {
@@ -411,7 +403,6 @@ public:
 
         Mat p_attn = softmax(scores, opt);
 
-        //dropout(p_attn);
         Mat output = matmul(p_attn, value, opt);
         Mat relative_weights = absolute_position_to_relative_position(p_attn, opt);
         Mat value_relative_embeddings = get_relative_embeddings(emb_rel_v, t_s, window_size, opt);
@@ -423,14 +414,11 @@ public:
         top_blob = output.reshape(t_t, d);
         return 0;
     }
-
-
 };
 
 class ExpandDim : public Layer {
 public:
-    ExpandDim() {
-    }
+    ExpandDim() = default;
 
     virtual int forward(const std::vector<Mat> &bottom_blobs, std::vector<Mat> &top_blobs,
                         const Option &opt) const {
@@ -503,4 +491,3 @@ public:
 };
 
 #endif
-#pragma once

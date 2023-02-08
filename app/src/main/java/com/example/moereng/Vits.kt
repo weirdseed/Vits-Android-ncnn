@@ -21,8 +21,6 @@ object Vits {
         vulkan: Boolean, num_threads: Int
     ): FloatArray
 
-    external fun clear()
-
     init {
         System.loadLibrary("moereng")
     }

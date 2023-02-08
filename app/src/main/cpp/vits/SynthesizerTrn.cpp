@@ -1,6 +1,6 @@
 #include <datareader.h>
 #include "SynthesizerTrn.h"
-#include "custom_layer.h"
+#include "custom_layers.h"
 #include "../mecab_api/api.h"
 
 DEFINE_LAYER_CREATOR(expand_as)
@@ -30,7 +30,7 @@ DEFINE_LAYER_CREATOR(ZerosLike)
 DEFINE_LAYER_CREATOR(RandnLike)
 
 bool SynthesizerTrn::load_model(const std::string &folder, bool multi, Net &net,
-                                const string& name, const Option &opt) {
+                                const string &name, const Option &opt) {
     LOGI("loading %s...\n", name.c_str());
     net.register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
     net.register_custom_layer("modules.Transpose", Transpose_layer_creator);
@@ -48,9 +48,9 @@ bool SynthesizerTrn::load_model(const std::string &folder, bool multi, Net &net,
 
     net.opt = opt;
     std::string bin_path = join_path(folder, name + ".ncnn.bin");
-    std::string param_path = name + ".ncnn.param";
-    if (multi) param_path = "multi/" + param_path;
-    else param_path = "single/" + param_path;
+    std::string param_path;
+    if (multi) param_path = "multi/" + name + ".ncnn.param";
+    else param_path = "single/" + name + ".ncnn.param";
     bool param_success = !net.load_param(assetManager, param_path.c_str());
     bool bin_success = !net.load_model(bin_path.c_str());
     if (param_success && bin_success) {
@@ -62,8 +62,20 @@ bool SynthesizerTrn::load_model(const std::string &folder, bool multi, Net &net,
     return false;
 }
 
-bool SynthesizerTrn::load_weight(const std::string &folder, const std::string &name, const int w,
-                                 Mat &weight, const int n) {
+void SynthesizerTrn::clear_nets(){
+    emb_t.release();
+    emb_g.release();
+    enc_p.clear();
+    enc_q.clear();
+    dec.clear();
+    flow_reverse.clear();
+    flow.clear();
+    dp.clear();
+}
+
+bool SynthesizerTrn::load_weight(const std::string &folder, Mat &weight, const std::string &name,
+                                 const int w,
+                                 const int n) {
     LOGI("loading %s...\n", "text embedding");
     std::string path = join_path(folder, name + ".bin");
     FILE *fp = fopen(path.c_str(), "rb");
@@ -86,42 +98,34 @@ bool SynthesizerTrn::load_weight(const std::string &folder, const std::string &n
 }
 
 bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
-                          const int n_vocab, AssetJNI *assetJni, Nets *nets, Option &opt) {
-
+                          const int n_vocab, AssetJNI *assetJni, Option &opt) {
+    clear_nets();
     assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
 
-    opt.lightmode = true;
-    opt.use_packing_layout = true;
-    opt.use_bf16_storage = true;
-
-    // use vulkan compute
-    if (ncnn::get_gpu_count() != 0)
-        opt.use_vulkan_compute = true;
-
     if (voice_convert) {
-        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
-            load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
-            load_model(model_folder, multi, nets->enc_q, "enc_q", opt) &&
-            load_model(model_folder, multi, nets->dec, "dec", opt) &&
-            load_model(model_folder, multi, nets->flow, "flow", opt) &&
-            load_model(model_folder, multi, nets->flow_reverse, "flow.reverse", opt))
+        if (load_weight(model_folder, emb_t, "emb_t", 192, n_vocab) &&
+            load_weight(model_folder, emb_g, "emb_g", 256, -1) &&
+            load_model(model_folder, multi, enc_q, "enc_q", opt) &&
+            load_model(model_folder, multi, dec, "dec", opt) &&
+            load_model(model_folder, multi, flow, "flow", opt) &&
+            load_model(model_folder, multi, flow_reverse, "flow.reverse", opt))
             return true;
     } else if (multi) {
-        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
-            load_weight(model_folder, "emb_g", 256, nets->emb_g_weight, -1) &&
-            load_model(model_folder, multi, nets->enc_p, "enc_p", opt) &&
-            load_model(model_folder, multi, nets->enc_q, "enc_q", opt) &&
-            load_model(model_folder, multi, nets->dec, "dec", opt) &&
-            load_model(model_folder, multi, nets->flow, "flow", opt) &&
-            load_model(model_folder, multi, nets->flow_reverse, "flow.reverse", opt) &&
-            load_model(model_folder, multi, nets->dp, "dp", opt))
+        if (load_weight(model_folder, emb_t, "emb_t", 192, n_vocab) &&
+            load_weight(model_folder, emb_g, "emb_g", 256, -1) &&
+            load_model(model_folder, multi, enc_p, "enc_p", opt) &&
+            load_model(model_folder, multi, enc_q, "enc_q", opt) &&
+            load_model(model_folder, multi, dec, "dec", opt) &&
+            load_model(model_folder, multi, flow, "flow", opt) &&
+            load_model(model_folder, multi, flow_reverse, "flow.reverse", opt) &&
+            load_model(model_folder, multi, dp, "dp", opt))
             return true;
     } else {
-        if (load_weight(model_folder, "emb_t", 192, nets->emb_t, n_vocab) &&
-            load_model(model_folder, multi, nets->enc_p, "enc_p", opt) &&
-            load_model(model_folder, multi, nets->dec, "dec", opt) &&
-            load_model(model_folder, multi, nets->flow_reverse, "flow.reverse", opt) &&
-            load_model(model_folder, multi, nets->dp, "dp", opt))
+        if (load_weight(model_folder, emb_t, "emb_t", 192, n_vocab) &&
+            load_model(model_folder, multi, enc_p, "enc_p", opt) &&
+            load_model(model_folder, multi, dec, "dec", opt) &&
+            load_model(model_folder, multi, flow_reverse, "flow.reverse", opt) &&
+            load_model(model_folder, multi, dp, "dp", opt))
             return true;
     }
 
@@ -129,8 +133,7 @@ bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, b
 }
 
 std::vector<Mat>
-SynthesizerTrn::enc_p_forward(const Mat &x, const Mat &weight, const Net &enc_p,
-                              bool vulkan, const Option &opt) {
+SynthesizerTrn::enc_p_forward(const Mat &x, bool vulkan, const Option &opt) {
     Mat length(1);
     length[0] = float(x.w);
     Extractor ex = enc_p.create_extractor();
@@ -138,7 +141,7 @@ SynthesizerTrn::enc_p_forward(const Mat &x, const Mat &weight, const Net &enc_p,
     ex.set_vulkan_compute(vulkan);
     ex.input("in0", x);
     ex.input("in1", length);
-    ex.input("in2", weight);
+    ex.input("in2", emb_t);
     Mat out0, out1, out2, out3;
     ex.extract("out0", out0);
     ex.extract("out1", out1);
@@ -151,8 +154,7 @@ SynthesizerTrn::enc_p_forward(const Mat &x, const Mat &weight, const Net &enc_p,
 }
 
 std::vector<Mat>
-SynthesizerTrn::enc_q_forward(const Mat &x, const Mat &g, const Net &enc_q, bool vulkan,
-                              const Option &opt) {
+SynthesizerTrn::enc_q_forward(const Mat &x, const Mat &g, bool vulkan, const Option &opt) {
     Mat length(1);
     length[0] = float(x.w);
     Extractor ex = enc_q.create_extractor();
@@ -167,16 +169,16 @@ SynthesizerTrn::enc_q_forward(const Mat &x, const Mat &g, const Net &enc_q, bool
     return std::vector<Mat>{out0, out1};
 }
 
-Mat SynthesizerTrn::emb_g_forward(int sid, const Mat &weight, const Option &opt) {
+Mat SynthesizerTrn::emb_g_forward(int sid, const Option &opt) {
     Mat sid_mat(1);
     sid_mat[0] = (float) sid;
-    Mat out = embedding(sid_mat, weight, opt);
+    Mat out = embedding(sid_mat, emb_g, opt);
     return out;
 }
 
 Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, const Mat &g,
                                float noise_scale,
-                               const Net &dp, bool vulkan, const Option &opt) {
+                               bool vulkan, const Option &opt) {
     Mat out;
     Extractor ex = dp.create_extractor();
     ex.set_num_threads(opt.num_threads);
@@ -199,9 +201,8 @@ Mat SynthesizerTrn::dp_forward(const Mat &x, const Mat &x_mask, const Mat &z, co
     return out;
 }
 
-Mat SynthesizerTrn::flow_reverse_forward(const Mat &x, const Mat &x_mask, const Mat &g,
-                                         const Net &flow_reverse,
-                                         bool vulkan, const Option &opt) {
+Mat SynthesizerTrn::flow_reverse_forward(const Mat &x, const Mat &x_mask, const Mat &g, bool vulkan,
+                                         const Option &opt) {
     Extractor ex = flow_reverse.create_extractor();
     ex.set_num_threads(opt.num_threads);
     ex.set_vulkan_compute(vulkan);
@@ -213,8 +214,8 @@ Mat SynthesizerTrn::flow_reverse_forward(const Mat &x, const Mat &x_mask, const 
     return out;
 }
 
-Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, const Net &flow,
-                                 bool vulkan, const Option &opt) {
+Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, bool vulkan,
+                                 const Option &opt) {
     Extractor ex = flow.create_extractor();
     ex.set_num_threads(opt.num_threads);
     ex.set_vulkan_compute(vulkan);
@@ -226,8 +227,7 @@ Mat SynthesizerTrn::flow_forward(const Mat &x, const Mat &x_mask, const Mat &g, 
     return out;
 }
 
-Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec, bool vulkan,
-                                const Option &opt) {
+Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, bool vulkan, const Option &opt) {
     Extractor ex = dec.create_extractor();
     ex.set_num_threads(opt.num_threads);
     ex.set_vulkan_compute(vulkan);
@@ -241,24 +241,24 @@ Mat SynthesizerTrn::dec_forward(const Mat &x, const Mat &g, const Net &dec, bool
 SynthesizerTrn::SynthesizerTrn() = default;
 
 // c++ implementation of SynthesizerTrn
-Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, const Option &opt, bool vulkan, bool multi,
+Mat SynthesizerTrn::forward(const Mat &data, const Option &opt, bool vulkan, bool multi,
                             int sid, float noise_scale, float noise_scale_w, float length_scale) {
     LOGI("processing...\n");
     // enc_p
-    auto enc_p_out = enc_p_forward(data, nets->emb_t, nets->enc_p, vulkan, opt);
+    auto enc_p_out = enc_p_forward(data, vulkan, opt);
     Mat x = enc_p_out[0];
     Mat m_p = enc_p_out[1];
     Mat logs_p = enc_p_out[2];
     Mat x_mask = enc_p_out[3];
 
     Mat g;
-    if (multi){
-        g = reducedims(mattranspose(emb_g_forward(sid, nets->emb_g_weight, opt), opt));
+    if (multi) {
+        g = reducedims(mattranspose(emb_g_forward(sid, opt), opt));
     }
 
     Mat z = randn(x.w, 2, opt, 1);
 
-    Mat logw = dp_forward(x, x_mask, z, g, noise_scale_w, nets->dp, vulkan, opt);
+    Mat logw = dp_forward(x, x_mask, z, g, noise_scale_w, vulkan, opt);
 
     Mat w = product(matproduct(matexp(logw, opt), x_mask, opt), length_scale, opt);
 
@@ -291,20 +291,20 @@ Mat SynthesizerTrn::forward(const Mat &data, Nets *nets, const Option &opt, bool
                       opt);
 
     z = flow_reverse_forward(expanddims(z_p), mattranspose(expanddims(y_mask), opt), expanddims(g),
-                             nets->flow_reverse, vulkan, opt);
+                             vulkan, opt);
 
     y_mask = mattranspose(y_mask, opt);
 
     y_mask = expand(y_mask, z.w, z.h, opt);
 
-    Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g), nets->dec,
+    Mat o = dec_forward(reducedims(matproduct(z, y_mask, opt)), expanddims(g),
                         vulkan, opt);
     LOGI("finished!\n");
     return o;
 }
 
 Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
-                                  Nets *net, const Option& opt, bool vulkan) {
+                                  const Option &opt, bool vulkan) {
 
     LOGI("start converting...\n");
     // stft transform
@@ -312,15 +312,15 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
     spec = matsqrt(Plus(matpow(spec, 2, opt), 1e-6, opt), opt);
 
     // voice conversion
-    auto g_src = mattranspose(emb_g_forward(raw_sid, net->emb_g_weight, opt), opt);
-    auto g_tgt = mattranspose(emb_g_forward(target_sid, net->emb_g_weight, opt), opt);
-    auto enc_q_out = enc_q_forward(spec, g_src, net->enc_q, vulkan, opt);
+    auto g_src = mattranspose(emb_g_forward(raw_sid, opt), opt);
+    auto g_tgt = mattranspose(emb_g_forward(target_sid, opt), opt);
+    auto enc_q_out = enc_q_forward(spec, g_src, vulkan, opt);
     auto z = expanddims(enc_q_out[0]);
     auto y_mask = enc_q_out[1];
-    auto z_p = flow_forward(z, y_mask, g_src, net->flow, vulkan, opt);
-    auto z_hat = flow_reverse_forward(z_p, y_mask, g_tgt, net->flow_reverse, vulkan, opt);
+    auto z_p = flow_forward(z, y_mask, g_src, vulkan, opt);
+    auto z_hat = flow_reverse_forward(z_p, y_mask, g_tgt, vulkan, opt);
     y_mask = expand(y_mask, z_hat.w, z_hat.h, opt);
-    auto o_hat = dec_forward(reducedims(matproduct(z_hat, y_mask, opt)), g_tgt, net->dec,
+    auto o_hat = dec_forward(reducedims(matproduct(z_hat, y_mask, opt)), g_tgt,
                              vulkan, opt);
     LOGI("voice converted!\n");
     return o_hat;

@@ -58,7 +58,7 @@ Mat flip(const Mat& x, const Option& opt, int dim = 1);
 
 Mat gather(Mat& blob, Mat& index, const Option& opt);
 
-Mat generate_path(const Mat& duration, const Mat mask, const Option& opt);
+Mat generate_path(const Mat& duration, const Mat& mask, const Option& opt);
 
 Mat hanning_window(const int n, const Option& opt);
 
@@ -98,7 +98,7 @@ Mat reducedims(const Mat& m);
 
 Mat randn(int w, int h, const Option& opt, int c = 0);
 
-std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const size_t size, const Option& opt);
+std::vector<std::complex<fftpack_real>> rfft1d(const fftpack_real* data, const fftpack_int size, const Option& opt);
 
 std::vector<Mat> rfft(const Mat& m, const Option& opt); // rfft for dim 0
 

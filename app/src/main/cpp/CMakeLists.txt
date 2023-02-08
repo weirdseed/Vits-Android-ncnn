@@ -37,7 +37,7 @@ add_library(moereng SHARED ${libassetmanager_source} ${libmecab_source} ${libjpc
                       ${libnjd_set_digit_source} ${libnjd_set_long_vowel_source}
                       ${libnjd_set_pronunciation_source} ${libnjd_set_unvoiced_vowel_source}
                       ${libtext2mecab_source} ${libmecabapi_source} ${fft_pack_source} ${audio_process_source}
-                      ${ncnn_vits_source}  native-lib.cpp )
+                      ${ncnn_vits_source} vitsncnn_jni.cpp)
 
 find_library( # Sets the name of the path variable.
         android-lib
