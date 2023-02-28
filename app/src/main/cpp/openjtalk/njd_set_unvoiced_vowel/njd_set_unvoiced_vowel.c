@@ -229,7 +229,7 @@ void njd_set_unvoiced_vowel(NJD * njd)
             get_mora_information(node, index, &mora1, &nlink1, &flag1, &size1, &midx1, &atype1);
          if (mora1 == NULL) {
             fprintf(stderr,
-                    "WARNING: set_unvoiced_vowel() in njd_set_unvoiced_vowel.c: Wrong pron.");
+                    "WARNING: set_unvoiced_vowel() in openjtalk.njd_set_unvoiced_vowel.c: Wrong pron.");
             return;
          }
          if (mora2 == NULL) {

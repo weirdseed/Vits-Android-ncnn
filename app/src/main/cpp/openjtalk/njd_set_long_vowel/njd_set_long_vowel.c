@@ -108,7 +108,7 @@ static int detect_byte(const char *str)
       }
    }
    if (byte < 0) {
-      fprintf(stderr, "ERROR: detect_byte() in njd_set_long_vowel.c: Wrong character.\n");
+      fprintf(stderr, "ERROR: detect_byte() in openjtalk.njd_set_long_vowel.c: Wrong character.\n");
       exit(1);
    }
    return byte;
@@ -127,7 +127,7 @@ void njd_set_long_vowel(NJD * njd)
    char buff[MAXBUFLEN];
    int byte = -1;
 
-   for (node = njd->head; node != NULL; node = node->next) {
+   for (node = openjtalk.njd->head; node != NULL; node = node->next) {
       /* initialize */
       str = NJDNode_get_pron(node);
       len = strlen(str);

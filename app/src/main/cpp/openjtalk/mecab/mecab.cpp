@@ -90,7 +90,7 @@ BOOL Mecab_load(Mecab *m, const char *dicdir, AssetJNI* asjni)
 
    argv = (char **) malloc(sizeof(char *) * argc);
 
-   argv[0] = strdup("mecab");
+   argv[0] = strdup("openjtalk.mecab");
    argv[1] = strdup("-d");
    argv[2] = strdup(dicdir);
 
@@ -101,14 +101,14 @@ BOOL Mecab_load(Mecab *m, const char *dicdir, AssetJNI* asjni)
    free(argv);
 
    if(model == NULL) {
-      fprintf(stderr, "ERROR: Mecab_load() in mecab.cpp: Cannot open %s.\n", dicdir);
+      fprintf(stderr, "ERROR: Mecab_load() in openjtalk.mecab.cpp: Cannot open %s.\n", dicdir);
       return FALSE;
    }
 
    MeCab::Tagger *tagger = model->createTagger();
    if(tagger == NULL) {
       delete model;
-      fprintf(stderr, "ERROR: Mecab_load() in mecab.cpp: Cannot open %s.\n", dicdir);
+      fprintf(stderr, "ERROR: Mecab_load() in openjtalk.mecab.cpp: Cannot open %s.\n", dicdir);
       return FALSE;
    }
 
@@ -116,7 +116,7 @@ BOOL Mecab_load(Mecab *m, const char *dicdir, AssetJNI* asjni)
    if(lattice == NULL) {
       delete model;
       delete tagger;
-      fprintf(stderr, "ERROR: Mecab_load() in mecab.cpp: Cannot open %s.\n", dicdir);
+      fprintf(stderr, "ERROR: Mecab_load() in openjtalk.mecab.cpp: Cannot open %s.\n", dicdir);
       return FALSE;
    }
 

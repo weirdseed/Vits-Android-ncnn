@@ -1,7 +1,3 @@
-//
-// Created by LZC on 2022/12/18.
-//
-
 #include "manager.h"
 
 unsigned char* asset_loader(const char * fileName, AssetJNI* asjni, int* fd, size_t *length){

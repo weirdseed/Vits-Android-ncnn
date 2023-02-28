@@ -1,7 +1,3 @@
-//
-// Created by LZC on 2022/12/18.
-//
-
 #ifndef MOERENG_MANAGER_H
 #define MOERENG_MANAGER_H
 #include <iostream>

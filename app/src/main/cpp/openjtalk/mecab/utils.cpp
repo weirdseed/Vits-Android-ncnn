@@ -383,7 +383,7 @@ bool load_dictionary_resource(Param *param) {
   DWORD size = v.size() * sizeof(v[0]);
 
   if (rcfile.empty()) {
-    ::RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"software\\mecab", 0, KEY_READ, &hKey);
+    ::RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"software\\openjtalk.mecab", 0, KEY_READ, &hKey);
     ::RegQueryValueExW(hKey, L"mecabrc", 0, &vt,
                        reinterpret_cast<BYTE *>(v.get()), &size);
     ::RegCloseKey(hKey);
@@ -393,7 +393,7 @@ bool load_dictionary_resource(Param *param) {
   }
 
   if (rcfile.empty()) {
-    ::RegOpenKeyExW(HKEY_CURRENT_USER, L"software\\mecab", 0, KEY_READ, &hKey);
+    ::RegOpenKeyExW(HKEY_CURRENT_USER, L"software\\openjtalk.mecab", 0, KEY_READ, &hKey);
     ::RegQueryValueExW(hKey, L"mecabrc", 0, &vt,
                        reinterpret_cast<BYTE *>(v.get()), &size);
     ::RegCloseKey(hKey);

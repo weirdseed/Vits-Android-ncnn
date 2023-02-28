@@ -24,7 +24,6 @@ public class ChineseCleaners {
         return ans;
     }
 
-
     ArrayList<ArrayList<String>> latin_map = new ArrayList<ArrayList<String>>() {{
         add(new ArrayList<>(Arrays.asList("a", "ㄟˉ")));
         add(new ArrayList<>(Arrays.asList("b", "ㄅㄧˋ")));

@@ -2,7 +2,7 @@
 // Created by LZC on 2023/1/17.
 //
 
-#include "audio.h"
+#include "wave.h"
 
 char* PCMToWavFormat(float* audio, size_t length, int sampling_rate) {
     if (length == 0) return {};

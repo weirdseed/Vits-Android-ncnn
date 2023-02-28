@@ -69,7 +69,7 @@ object FileUtils {
                     when (type) {
                         "image" -> externalUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                         "video" -> externalUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                        "audio" -> externalUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                        "wave_utils" -> externalUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                         "document" -> externalUri = MediaStore.Files.getContentUri("external")
                     }
                     val selection = "_id=?"

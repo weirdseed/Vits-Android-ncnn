@@ -6,7 +6,7 @@
 
 2.日语及中文cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
 
-3.日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/mecab)日语分词库
+3.日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/openjtalk.mecab)日语分词库
 
 # 使用说明
 ## 一、确保手机有足够的空间，运行内存不小于1GB
@@ -49,27 +49,27 @@
 2.下载[Vulkan版本ncnn](https://github.com/Tencent/ncnn/releases/download/20221128/ncnn-20221128-android-vulkan.zip)库，或者自行到https://github.com/Tencent/ncnn/releases 下载，解压到项目的\app\src\main\cpp\目录下，（需更改目录名称为ncnn），目录结构如下
 
 ```
-├─asset_manager_api
+├─openjtalk.asset_manager_api
 ├─audio_process
 ├─fftpack
-├─jpcommon
-├─mecab
-├─mecab2njd
-├─mecab_api
+├─openjtalk.jpcommon
+├─openjtalk.mecab
+├─openjtalk.mecab2njd
+├─openjtalk.mecab_api
 ├─ncnn
 │  ├─arm64-v8a
 │  ├─armeabi-v7a
 │  ├─x86
 │  └─x86_64
-├─njd
-├─njd2jpcommon
-├─njd_set_accent_phrase
-├─njd_set_accent_type
-├─njd_set_digit
-├─njd_set_long_vowel
-├─njd_set_pronunciation
-├─njd_set_unvoiced_vowel
-├─text2mecab
+├─openjtalk.njd
+├─openjtalk.njd2jpcommon
+├─openjtalk.njd_set_accent_phrase
+├─openjtalk.njd_set_accent_type
+├─openjtalk.njd_set_digit
+├─openjtalk.njd_set_long_vowel
+├─openjtalk.njd_set_pronunciation
+├─openjtalk.njd_set_unvoiced_vowel
+├─openjtalk.text2mecab
 └─vits
 ```
 

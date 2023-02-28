@@ -10,7 +10,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.moereng.databinding.ActivityMainBinding
 import com.example.moereng.fragments.TTSViewModel
 import com.example.moereng.fragments.VCViewModel
-import com.example.moereng.utils.VitsUtils
 import com.example.moereng.utils.VitsUtils.checkThreadsCpp
 import com.example.moereng.utils.VitsUtils.testGpu
 import com.google.android.material.bottomnavigation.BottomNavigationView

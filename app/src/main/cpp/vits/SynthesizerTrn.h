@@ -2,7 +2,7 @@
 #define SYNTHESIZERTRN_H
 
 #include "utils.h"
-#include "../asset_manager_api/manager.h"
+#include "../openjtalk/asset_manager_api/manager.h"
 
 class SynthesizerTrn {
 private:
@@ -24,7 +24,7 @@ private:
                 const int n);
 
     bool
-    load_model(const std::string &folder, bool multi, Net &net, const string& name, const Option &opt);
+    load_model(const std::string &folder, Net &net, const string& name, bool multi,  const Option &opt);
 
     std::vector<Mat>
     enc_p_forward(const Mat &x, bool vulkan, const Option &opt);

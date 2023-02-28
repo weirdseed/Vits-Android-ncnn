@@ -121,7 +121,7 @@ class VCFragment : Fragment() {
                 vcBinding.configPath.text = "加载失败，请把文件放在Download文件夹"
 
             }
-            "audio" -> {
+            "wave_utils" -> {
                 vcBinding.audioPath.text = "加载失败，请把文件放在Download文件夹"
             }
         }
@@ -398,7 +398,7 @@ class VCFragment : Fragment() {
                     )
                 else {
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                    intent.type = "audio/x-wav"
+                    intent.type = "wave_utils/x-wav"
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
                     startActivityForResult(intent, REQUEST_CODE_LOAD_WAV)
                 }
@@ -574,7 +574,7 @@ class VCFragment : Fragment() {
                             vcBinding.audioPath.text = realPath
                         } else {
                             moerengToast("读取失败！")
-                            showErrorText("audio")
+                            showErrorText("wave_utils")
                         }
                     } catch (e: Exception) {
                         Log.e("LoadAudio", e.message.toString())

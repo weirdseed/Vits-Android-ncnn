@@ -53,6 +53,7 @@ object WaveUtils {
         val file = File(path)
         if (file.length() > Int.MAX_VALUE) throw Exception("音频过长！")
         val fin = FileInputStream(file)
+
         // read header
         val head = ByteArray(44)
         fin.read(head, 0, 44)
@@ -60,11 +61,13 @@ object WaveUtils {
         // parse header
         val wh = parseWavHead(head, sr)
         Log.i("WaveHeader", wh.toString())
+
         // read pcm
         val pcmByteArray = ByteArray((file.length() - 44).toInt())
         fin.read(pcmByteArray, 0, pcmByteArray.size)
 
         val order = ByteOrder.LITTLE_ENDIAN
+
         // encoding format
         if (wh.encoding.toInt() == 3) {
             val tmp = ByteBuffer.wrap(pcmByteArray).order(order).asFloatBuffer()
@@ -80,13 +83,13 @@ object WaveUtils {
 
         // channels
         if (wh.channels.toInt() == 1) return pcm
-        if (wh.channels.toInt() == 2 && pcm != null){
+        if (wh.channels.toInt() == 2 && pcm != null) {
             val leftChannel = pcm.filterIndexed { index, fl -> index % 2 == 0 }.toFloatArray()
             val rightChannel = pcm.filterIndexed { index, fl -> index % 2 != 0 }.toFloatArray()
-            if (leftChannel.size >= rightChannel.size){
-                return FloatArray(rightChannel.size) {(leftChannel[it] + rightChannel[it]).div(2.0f)}
+            if (leftChannel.size >= rightChannel.size) {
+                return FloatArray(rightChannel.size) { (leftChannel[it] + rightChannel[it]).div(2.0f) }
             } else {
-                return FloatArray(leftChannel.size) {(leftChannel[it] + rightChannel[it]).div(2.0f)}
+                return FloatArray(leftChannel.size) { (leftChannel[it] + rightChannel[it]).div(2.0f) }
             }
         }
         return pcm
@@ -119,7 +122,7 @@ object WaveUtils {
         return WavHead(sr, channels, encoding)
     }
 
-    fun audioLenToDuration(length: Int, samplingRate: Int): String{
+    fun audioLenToDuration(length: Int, samplingRate: Int): String {
         val duration = (length.toFloat() / samplingRate.toFloat()).toLong()
         val h = duration.div(3600)
         val m = (duration - h * 3600).div(60)

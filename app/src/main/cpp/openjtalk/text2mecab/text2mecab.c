@@ -136,7 +136,7 @@ void text2mecab(char* output, const char*input)
             }
             else {
                 /* unknown */
-                fprintf(stderr, "WARNING: text2mecab() in text2mecab.c: Wrong character.\n");
+                fprintf(stderr, "WARNING: openjtalk.text2mecab() in openjtalk.text2mecab.c: Wrong character.\n");
                 s++;
             }
         }

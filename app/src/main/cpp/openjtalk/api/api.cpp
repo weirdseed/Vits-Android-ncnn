@@ -1,5 +1,7 @@
 #include "api.h"
 
+#include <utility>
+
 std::string utf8_encode(const std::wstring& source)
 {
     return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(source);
@@ -137,7 +139,7 @@ vector<Feature*> njd2feature(NJD* njd) {
     return features;
 }
 
-void feature2njd(NJD* njd, vector<Feature*> features) {
+void feature2njd(NJD* njd, const vector<Feature*>& features) {
     NJDNode* node;
     for (auto feature : features) {
         node = new NJDNode();
@@ -160,7 +162,7 @@ void feature2njd(NJD* njd, vector<Feature*> features) {
     }
 }
 
-OpenJtalk::OpenJtalk(const char* path, AssetJNI* asjni) {
+bool OpenJtalk::init(const char* path, AssetJNI* assetjni) {
     mecab = new Mecab();
     njd = new NJD();
     jpcommon = new JPCommon();
@@ -169,12 +171,13 @@ OpenJtalk::OpenJtalk(const char* path, AssetJNI* asjni) {
     NJD_initialize(njd);
     JPCommon_initialize(jpcommon);
 
-    int r = Mecab_load(mecab, path, asjni);
+    int r = Mecab_load(mecab, path, assetjni);
     if (r != 1) {
         _clear();
         cerr << path << " not found!" << endl;
-        exit(1);
+        return false;
     }
+    return true;
 }
 
 void OpenJtalk::_clear() {
@@ -183,7 +186,7 @@ void OpenJtalk::_clear() {
     JPCommon_clear(jpcommon);
 }
 
-vector<Feature*> OpenJtalk::run_frontend(wstring text) {
+vector<Feature*> OpenJtalk::run_frontend(const wstring& text) {
     string u8text = utf8_encode(text);
     char buff[8192];
     text2mecab(buff, u8text.c_str());
@@ -201,7 +204,7 @@ vector<Feature*> OpenJtalk::run_frontend(wstring text) {
     return features;
 }
 
-vector<wstring> OpenJtalk::make_label(vector<Feature*> features) {
+vector<wstring> OpenJtalk::make_label(const vector<Feature*>& features) {
     feature2njd(njd, features);
     njd2jpcommon(jpcommon, njd);
     JPCommon_make_label(jpcommon);
@@ -217,12 +220,14 @@ vector<wstring> OpenJtalk::make_label(vector<Feature*> features) {
     return labels;
 }
 
+OpenJtalk::OpenJtalk() = default;
+
 OpenJtalk::~OpenJtalk() {
     _clear();
 }
 
 string OpenJtalk::words_split(const char *inputs) {
-
     auto* tagger = (MeCab::Tagger *)mecab->tagger;
     return tagger->parse(inputs);
 }
+

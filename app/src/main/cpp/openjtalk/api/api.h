@@ -57,14 +57,15 @@ int njd_node_get_chain_flag(NJDNode * node);
 
 class OpenJtalk {
 private:
-    Mecab* mecab;
-    NJD* njd;
-    JPCommon* jpcommon;
+    Mecab* mecab{};
+    NJD* njd{};
+    JPCommon* jpcommon{};
     void _clear();
 public:
-    OpenJtalk(const char* path, AssetJNI* asjni);
-    ~OpenJtalk();
-    vector<Feature*> run_frontend(wstring text);
-    vector<wstring> make_label(vector<Feature*> features);
+    OpenJtalk();
+    bool init(const char* path, AssetJNI* assetjni);
+    vector<Feature*> run_frontend(const wstring& text);
+    vector<wstring> make_label(const vector<Feature*>& features);
     string words_split(const char* inputs);
+    ~OpenJtalk();
 };

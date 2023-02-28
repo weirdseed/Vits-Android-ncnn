@@ -412,7 +412,7 @@ extern "C" {
 #ifndef SWIG
   /* C interface */
 
-  /* old mecab interface */
+  /* old openjtalk.mecab interface */
   /**
    * C wrapper of MeCab::Tagger::create(argc, argv)
    */
@@ -1083,7 +1083,7 @@ public:
 
   /**
    * Set golden parsing results for unittesting.
-   * @param result the parsing result written in the standard mecab output.
+   * @param result the parsing result written in the standard openjtalk.mecab output.
    */
   virtual void set_result(const char *result) = 0;
 
@@ -1184,7 +1184,7 @@ public:
 
   /**
    * Factory method to create a new Model with a string parameter representation, i.e.,
-   * "-d /user/local/mecab/dic/ipadic -Ochasen".
+   * "-d /user/local/openjtalk.mecab/dic/ipadic -Ochasen".
    * Return NULL if new model cannot be initialized. Use MeCab::getLastError() to obtain the
    * cause of the errors.
    * @return new Model object
@@ -1473,7 +1473,7 @@ public:
 
   /**
    * Factory method to create a new Tagger with a string parameter representation, i.e.,
-   * "-d /user/local/mecab/dic/ipadic -Ochasen".
+   * "-d /user/local/openjtalk.mecab/dic/ipadic -Ochasen".
    * Return NULL if new model cannot be initialized. Use MeCab::getLastError() to obtain the
    * cause of the errors.
    * @return new Model object

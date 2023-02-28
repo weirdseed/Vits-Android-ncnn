@@ -1,22 +1,13 @@
 #include <jni.h>
-#include "mecab_api/api.h"
+#include "openjtalk/api/api.h"
 #include "vits/SynthesizerTrn.h"
-#include "audio_process/audio.h"
+#include "wave_utils/wave.h"
 
 static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
 static ncnn::PoolAllocator g_workspace_pool_allocator;
 static SynthesizerTrn net_g;
-static OpenJtalk *openJtalk;
+static OpenJtalk openJtalk;
 static Option opt;
-
-static
-void release_openjtalk(){
-    if (openJtalk != nullptr){
-        delete openJtalk;
-        openJtalk = nullptr;
-        LOGI("openjtalk released");
-    }
-}
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnLoad");
@@ -26,7 +17,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
     LOGD("JNI_OnUnload");
-    release_openjtalk();
     ncnn::destroy_gpu_instance();
 }
 
@@ -35,11 +25,10 @@ extern "C" {
 JNIEXPORT jboolean JNICALL
 Java_com_example_moereng_utils_text_JapaneseTextUtils_initOpenJtalk(JNIEnv *env, jobject thiz,
                                                                     jobject asset_manager) {
-    if (openJtalk == nullptr){
-        AssetJNI assetJni(env, thiz, asset_manager);
-        openJtalk = new OpenJtalk("open_jtalk_dic_utf_8-1.11", &assetJni);
-    }
-    return openJtalk != nullptr;
+    AssetJNI assetJni(env, thiz, asset_manager);
+    bool state = openJtalk.init("open_jtalk_dic_utf_8-1.11", &assetJni);
+    if (state) return JNI_TRUE;
+    else return JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -54,7 +43,7 @@ Java_com_example_moereng_utils_text_JapaneseTextUtils_splitSentenceCpp(JNIEnv *e
                                                                        jstring text) {
     char *ctext = (char *) env->GetStringUTFChars(text, nullptr);
     string stext(ctext);
-    string res = openJtalk->words_split(stext.c_str());
+    string res = openJtalk.words_split(stext.c_str());
     return env->NewStringUTF(res.c_str());
 }
 
@@ -74,8 +63,9 @@ Java_com_example_moereng_utils_text_JapaneseCleaners_extract_1labels(JNIEnv *env
     jmethodID array_list_constructor = env->GetMethodID(array_list_class, "<init>", "()V");
     jobject array_list = env->NewObject(array_list_class, array_list_constructor);
     jmethodID array_list_add = env->GetMethodID(array_list_class, "add", "(Ljava/lang/Object;)Z");
-    auto features = openJtalk->run_frontend(wtext);
-    auto labels = openJtalk->make_label(features);
+
+    auto features = openJtalk.run_frontend(wtext);
+    auto labels = openJtalk.make_label(features);
 
     // vector到列表
     for (const wstring &label: labels) {
@@ -97,6 +87,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
 
     opt.lightmode = true;
     opt.use_packing_layout = true;
+    opt.num_threads = get_big_cpu_count();
     opt.blob_allocator = &g_blob_pool_allocator;
     opt.workspace_allocator = &g_workspace_pool_allocator;
 
@@ -175,7 +166,6 @@ Java_com_example_moereng_Vits_voice_1convert(JNIEnv *env, jobject thiz, jfloatAr
     jfloatArray res = env->NewFloatArray(output.h * output.w);
     env->SetFloatArrayRegion(res, 0, output.w * output.h, output);
     return res;
-
 }
 
 // wave utils

@@ -143,7 +143,7 @@ void NJD_load(NJD * njd, const char *str)
    char chain_flag[MAXBUFLEN];
 
    if (strlen(str) < 1) {
-      fprintf(stderr, "WARNING: NJD_load() in njd.c: Input string should not be empty.");
+      fprintf(stderr, "WARNING: NJD_load() in openjtalk.njd.c: Input string should not be empty.");
       return;
    }
 
@@ -210,7 +210,7 @@ void NJD_load_from_fp(NJD * njd, FILE * fp)
    char chain_flag[MAXBUFLEN];
 
    if (fp == NULL) {
-      fprintf(stderr, "WARNING: NJD_load_from_fp() in njd.c: File pointer should not be null.");
+      fprintf(stderr, "WARNING: NJD_load_from_fp() in openjtalk.njd.c: File pointer should not be null.");
       return;
    }
 
