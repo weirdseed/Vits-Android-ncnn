@@ -17,4 +17,5 @@ class TTSViewModel: ViewModel() {
     val generationFinish = MutableLiveData<Boolean>()
     val maxThreadsLiveData = MutableLiveData<Int>()
     val gpuAvailableLiveData = MutableLiveData<Boolean>()
+
 }

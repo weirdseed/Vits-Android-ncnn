@@ -29,7 +29,7 @@ DEFINE_LAYER_CREATOR(ZerosLike)
 DEFINE_LAYER_CREATOR(RandnLike)
 
 bool SynthesizerTrn::load_model(const std::string &folder, Net &net, const string &name, bool multi,
-                                const Option &opt) {
+                                const Option &opt, AAssetManager *assetManager) {
     LOGI("loading %s...\n", name.c_str());
     net.register_custom_layer("Tensor.expand_as", expand_as_layer_creator);
     net.register_custom_layer("modules.Transpose", Transpose_layer_creator);
@@ -64,6 +64,7 @@ bool SynthesizerTrn::load_model(const std::string &folder, Net &net, const strin
 void SynthesizerTrn::clear_nets() {
     emb_t.release();
     emb_g.release();
+
     enc_p.clear();
     enc_q.clear();
     dec.clear();
@@ -97,34 +98,32 @@ bool SynthesizerTrn::load_weight(const std::string &folder, Mat &weight, const s
 }
 
 bool SynthesizerTrn::init(const std::string &model_folder, bool voice_convert, bool multi,
-                          const int n_vocab, AssetJNI *assetJni, Option &opt) {
-    clear_nets();
-    assetManager = AAssetManager_fromJava(assetJni->env, assetJni->assetManager);
+                          const int n_vocab, AAssetManager *assetManager, Option &opt) {
 
     if (voice_convert) {
         if (load_weight(model_folder, emb_t, "emb_t", 192, n_vocab) &&
             load_weight(model_folder, emb_g, "emb_g", 256, -1) &&
-            load_model(model_folder, enc_q, "enc_q", multi, opt) &&
-            load_model(model_folder, dec, "dec", multi, opt) &&
-            load_model(model_folder, flow, "flow", multi, opt) &&
-            load_model(model_folder, flow_reverse, "flow.reverse", multi, opt))
+            load_model(model_folder, enc_q, "enc_q", multi, opt, assetManager) &&
+            load_model(model_folder, dec, "dec", multi, opt, assetManager) &&
+            load_model(model_folder, flow, "flow", multi, opt, assetManager) &&
+            load_model(model_folder, flow_reverse, "flow.reverse", multi, opt, assetManager))
             return true;
     } else if (multi) {
         if (load_weight(model_folder, emb_t, "emb_t", 192, n_vocab) &&
             load_weight(model_folder, emb_g, "emb_g", 256, -1) &&
-            load_model(model_folder, enc_p, "enc_p", multi, opt) &&
-            load_model(model_folder, enc_q, "enc_q", multi, opt) &&
-            load_model(model_folder, dec, "dec", multi, opt) &&
-            load_model(model_folder, flow, "flow", multi, opt) &&
-            load_model(model_folder, flow_reverse, "flow.reverse", multi, opt) &&
-            load_model(model_folder, dp, "dp", multi, opt))
+            load_model(model_folder, enc_p, "enc_p", multi, opt, assetManager) &&
+            load_model(model_folder, enc_q, "enc_q", multi, opt, assetManager) &&
+            load_model(model_folder, dec, "dec", multi, opt, assetManager) &&
+            load_model(model_folder, flow, "flow", multi, opt, assetManager) &&
+            load_model(model_folder, flow_reverse, "flow.reverse", multi, opt, assetManager) &&
+            load_model(model_folder, dp, "dp", multi, opt, assetManager))
             return true;
     } else {
         if (load_weight(model_folder, emb_t, "emb_t", 192, n_vocab) &&
-            load_model(model_folder, enc_p, "enc_p", multi, opt) &&
-            load_model(model_folder, dec, "dec", multi, opt) &&
-            load_model(model_folder, flow_reverse, "flow.reverse", multi, opt) &&
-            load_model(model_folder, dp, "dp", multi, opt))
+            load_model(model_folder, enc_p, "enc_p", multi, opt, assetManager) &&
+            load_model(model_folder, dec, "dec", multi, opt, assetManager) &&
+            load_model(model_folder, flow_reverse, "flow.reverse", multi, opt, assetManager) &&
+            load_model(model_folder, dp, "dp", multi, opt, assetManager))
             return true;
     }
 
@@ -327,6 +326,7 @@ Mat SynthesizerTrn::voice_convert(const Mat &audio, int raw_sid, int target_sid,
 
 
 SynthesizerTrn::~SynthesizerTrn() {
-    free(assetManager);
+    LOGD("clearing nets...");
     clear_nets();
+    LOGD("nets cleared!");
 }

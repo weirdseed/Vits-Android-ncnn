@@ -30,6 +30,7 @@ import com.example.moereng.utils.ui.UIUtils.moerengToast
 import com.example.moereng.utils.VitsUtils.checkConfig
 import com.example.moereng.utils.audio.WaveUtils.writeWav
 import com.example.moereng.utils.text.ChineseTextUtils
+import com.example.moereng.utils.text.JapaneseCleaners
 import com.example.moereng.utils.text.JapaneseTextUtils
 import kotlin.concurrent.thread
 
@@ -232,15 +233,13 @@ class TTSFragment : Fragment() {
 
     // show/hide speakers' names
     private fun showSid(multi: Boolean) {
-        if (multi) {
-            if (ttsBinding.sidPickLayout.visibility == View.GONE) {
-                ttsBinding.sidPickLayout.visibility = View.VISIBLE
-            }
+        ttsBinding.sidPickLayout.visibility = View.GONE
+        val displayed = config?.speakers?.toTypedArray()
+        if (multi && !displayed.isNullOrEmpty()) {
+            ttsBinding.speakerId.minValue = 0
             ttsBinding.speakerId.maxValue = maxSpeaker - 1
-            ttsBinding.speakerId.displayedValues = config?.speakers?.toTypedArray()
-        } else {
-            if (ttsBinding.sidPickLayout.visibility == View.VISIBLE)
-                ttsBinding.sidPickLayout.visibility = View.GONE
+            ttsBinding.speakerId.displayedValues = displayed
+            ttsBinding.sidPickLayout.visibility = View.VISIBLE
         }
     }
 
@@ -277,11 +276,10 @@ class TTSFragment : Fragment() {
             if (config!!.data!!.n_speakers!! > 1) {
                 multi = true
                 maxSpeaker = config!!.data!!.n_speakers!!
-                showSid(multi)
             } else {
                 multi = false
-                showSid(multi)
             }
+            showSid(multi)
             val cleanerName = config!!.data!!.text_cleaners!![0]
             val symbols = config!!.symbols!!
             val assetManager = requireActivity().assets
@@ -488,6 +486,7 @@ class TTSFragment : Fragment() {
         })
 
         // speakers' id picker's listener
+        ttsBinding.speakerId.wrapSelectorWheel = false
         ttsBinding.speakerId.setOnValueChangedListener { _, _, p2 -> sid = p2 }
 
         // generateButton listener
@@ -590,7 +589,6 @@ class TTSFragment : Fragment() {
         }
     }
 
-
     override fun onStop() {
         super.onStop()
         playerUtils.stop(ttsBinding, "tts")
@@ -598,7 +596,6 @@ class TTSFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        ttsBinding.wordsInput.setText("")
         playerUtils.release(ttsBinding, "tts")
         modelInitState = false
         config = null
@@ -606,4 +603,5 @@ class TTSFragment : Fragment() {
         Log.i("TTSFragment", "cleared!")
         binding = null
     }
+
 }

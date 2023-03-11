@@ -163,6 +163,8 @@ void feature2njd(NJD* njd, const vector<Feature*>& features) {
 }
 
 bool OpenJtalk::init(const char* path, AssetJNI* assetjni) {
+    if (mecab != nullptr && njd != nullptr && jpcommon != nullptr) return true;
+
     mecab = new Mecab();
     njd = new NJD();
     jpcommon = new JPCommon();

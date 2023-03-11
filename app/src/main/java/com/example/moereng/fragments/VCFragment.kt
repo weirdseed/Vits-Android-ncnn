@@ -104,8 +104,11 @@ class VCFragment : Fragment() {
 
     // show/hide speakers' names
     private fun showSids() {
+        vcBinding.srcSidPicker.minValue = 0
         vcBinding.srcSidPicker.maxValue = maxSpeaker - 1
         vcBinding.srcSidPicker.displayedValues = config?.speakers?.toTypedArray()
+
+        vcBinding.tgtSidPicker.minValue = 0
         vcBinding.tgtSidPicker.maxValue = maxSpeaker - 1
         vcBinding.tgtSidPicker.displayedValues = config?.speakers?.toTypedArray()
     }
@@ -444,9 +447,11 @@ class VCFragment : Fragment() {
         }
 
         // select src id
+        vcBinding.srcSidPicker.wrapSelectorWheel = false
         vcBinding.srcSidPicker.setOnValueChangedListener { numberPicker, i, i2 -> srcSid = i2 }
 
         // select target id
+        vcBinding.tgtSidPicker.wrapSelectorWheel = false
         vcBinding.tgtSidPicker.setOnValueChangedListener { numberPicker, i, i2 -> tgtSid = i2 }
 
         // convert
