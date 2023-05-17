@@ -96,6 +96,7 @@ Java_com_example_moereng_Vits_init_1vits(JNIEnv *env, jobject thiz, jobject asse
 
     opt.lightmode = true;
     opt.use_packing_layout = true;
+    opt.use_fp16_storage = true;
     opt.num_threads = get_big_cpu_count();
     opt.blob_allocator = &g_blob_pool_allocator;
     opt.workspace_allocator = &g_workspace_pool_allocator;

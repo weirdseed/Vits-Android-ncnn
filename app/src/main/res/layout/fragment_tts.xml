@@ -251,7 +251,7 @@
             android:layout_centerInParent="true"
             android:max="100"
             android:min="0"
-            android:progress="100" />
+            android:progress="10" />
 
     </RelativeLayout>
 
@@ -331,7 +331,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="5dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.952"
@@ -349,7 +349,7 @@
 
         <NumberPicker
             android:id="@+id/speaker_id"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="70dp"
             android:scaleX="0.8"
             android:scaleY="0.8" />

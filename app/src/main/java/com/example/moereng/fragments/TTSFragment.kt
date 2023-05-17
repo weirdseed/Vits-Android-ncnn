@@ -233,13 +233,14 @@ class TTSFragment : Fragment() {
 
     // show/hide speakers' names
     private fun showSid(multi: Boolean) {
-        ttsBinding.sidPickLayout.visibility = View.GONE
         val displayed = config?.speakers?.toTypedArray()
         if (multi && !displayed.isNullOrEmpty()) {
             ttsBinding.speakerId.minValue = 0
             ttsBinding.speakerId.maxValue = maxSpeaker - 1
             ttsBinding.speakerId.displayedValues = displayed
             ttsBinding.sidPickLayout.visibility = View.VISIBLE
+        } else {
+            ttsBinding.sidPickLayout.visibility = View.INVISIBLE
         }
     }
 
@@ -248,18 +249,10 @@ class TTSFragment : Fragment() {
     private fun showErrorText(type: String) {
         when (type) {
             "model" -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    ttsBinding.modelPath.text = "加载失败，请把文件放在Android/media/model/文件夹"
-                } else {
-                    ttsBinding.modelPath.text = "加载失败，请把文件放在Download文件夹"
-                }
+                ttsBinding.modelPath.text = "加载失败，请把文件放在Download文件夹"
             }
             "config" -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    ttsBinding.configPath.text = "加载失败，请把文件放在Android/media/model/文件夹"
-                } else {
-                    ttsBinding.configPath.text = "加载失败，请把文件放在Download文件夹"
-                }
+                ttsBinding.configPath.text = "加载失败，请把文件放在Download文件夹"
             }
         }
     }
@@ -473,7 +466,7 @@ class TTSFragment : Fragment() {
         // length slider
         ttsBinding.lengthScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                lengthScale = p1.toFloat() / 100f
+                lengthScale = p1.toFloat() / 10f
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -552,7 +545,7 @@ class TTSFragment : Fragment() {
                     } catch (e: Exception) {
                         Log.e("LoadConfig", e.message.toString())
                         showErrorText("config")
-                        moerengToast("配置加载失败！")
+                        moerengToast("配置加载失败！${e.message.toString()}")
                     }
                 }
             }
@@ -576,10 +569,10 @@ class TTSFragment : Fragment() {
                             }
                             ttsBinding.selectModel.isClickable = true
                         } catch (e: Exception) {
-                            Log.e("VCFragment", e.message.toString())
+                            Log.e("TTSFragment", e.message.toString())
                             requireActivity().runOnUiThread {
                                 showErrorText("model")
-                                moerengToast("模型加载失败！")
+                                moerengToast("模型加载失败！${e.message.toString()}")
                             }
                             ttsBinding.selectModel.isClickable = true
                         }

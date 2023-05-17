@@ -582,7 +582,7 @@ class VCFragment : Fragment() {
                             showErrorText("wave_utils")
                         }
                     } catch (e: Exception) {
-                        Log.e("LoadAudio", e.message.toString())
+                        Log.e("VCFragment", e.message.toString())
                         moerengToast("读取失败！")
                         vcBinding.audioPath.text = e.message
                     }
@@ -608,7 +608,7 @@ class VCFragment : Fragment() {
                             showErrorText("config")
                         }
                     } catch (e: Exception) {
-                        Log.e("LoadConfig", e.message.toString())
+                        Log.e("VCFragment", e.message.toString())
                         moerengToast("配置加载失败！")
                         showErrorText("config")
                     }
