@@ -11,6 +11,7 @@
 #include <random>
 #include <cstdio>
 #include <android/log.h>
+#include <chrono>
 
 // ncnn
 #include "layer.h"
