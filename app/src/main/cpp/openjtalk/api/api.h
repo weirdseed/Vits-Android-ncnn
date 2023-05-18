@@ -66,6 +66,5 @@ public:
     bool init(const char* path, AssetJNI* assetjni);
     vector<Feature*> run_frontend(const wstring& text);
     vector<wstring> make_label(const vector<Feature*>& features);
-    string words_split(const char* inputs);
     ~OpenJtalk();
 };

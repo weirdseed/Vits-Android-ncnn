@@ -42,15 +42,6 @@ Java_com_example_moereng_utils_VitsUtils_testGpu(JNIEnv *env, jobject thiz) {
     return JNI_FALSE;
 }
 
-JNIEXPORT jstring JNICALL
-Java_com_example_moereng_utils_text_JapaneseTextUtils_splitSentenceCpp(JNIEnv *env, jobject thiz,
-                                                                       jstring text) {
-    char *ctext = (char *) env->GetStringUTFChars(text, nullptr);
-    string stext(ctext);
-    string res = openJtalk.words_split(stext.c_str());
-    return env->NewStringUTF(res.c_str());
-}
-
 JNIEXPORT jint JNICALL
 Java_com_example_moereng_utils_VitsUtils_checkThreadsCpp(JNIEnv *env, jobject thiz) {
     return ncnn::get_physical_big_cpu_count();

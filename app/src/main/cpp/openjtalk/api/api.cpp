@@ -227,9 +227,3 @@ OpenJtalk::OpenJtalk() = default;
 OpenJtalk::~OpenJtalk() {
     _clear();
 }
-
-string OpenJtalk::words_split(const char *inputs) {
-    auto* tagger = (MeCab::Tagger *)mecab->tagger;
-    return tagger->parse(inputs);
-}
-

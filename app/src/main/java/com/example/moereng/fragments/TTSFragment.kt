@@ -194,6 +194,9 @@ class TTSFragment : Fragment() {
             finishFlag = true
             ttsViewModel.setGenerationFinishValue(finishFlag)
             Log.e("TTSFragment", e.message.toString())
+            activity?.runOnUiThread {
+                moerengToast(e.message.toString())
+            }
         }
         finishFlag = true
         ttsViewModel.setGenerationFinishValue(finishFlag)
@@ -435,8 +438,10 @@ class TTSFragment : Fragment() {
 
         // noise slider
         ttsBinding.noiseScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            @SuppressLint("SetTextI18n")
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 noiseScale = p1.toFloat() / 100f
+                ttsBinding.noiseScaleText.text = "${noiseScale}/1.0"
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -450,8 +455,10 @@ class TTSFragment : Fragment() {
 
         // noise w slider
         ttsBinding.noiseScaleW.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            @SuppressLint("SetTextI18n")
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 noiseScaleW = p1.toFloat() / 100f
+                ttsBinding.noiseScaleWText.text = "${noiseScaleW}/1.0"
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -465,8 +472,10 @@ class TTSFragment : Fragment() {
 
         // length slider
         ttsBinding.lengthScale.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            @SuppressLint("SetTextI18n")
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                lengthScale = p1.toFloat() / 10f
+                lengthScale = p1.toFloat() / 50f
+                ttsBinding.lengthScaleText.text = "${lengthScale}/2.0"
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {

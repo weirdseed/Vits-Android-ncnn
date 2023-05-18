@@ -23,15 +23,11 @@ class JapaneseTextUtils(
 
     override fun cleanInputs(text: String): String {
         return text.replace("\"", "").replace("\'", "")
-            .replace("\t", " ").replace("\n", "、")
-            .replace("”", "")
+            .replace("\t", " ").replace("”", "")
     }
 
     override fun splitSentence(text: String): List<String> {
-        val splittedSentence = splitSentenceCpp(text)
-        var sentences = splittedSentence.replace("EOS\n", "").split("\n")
-        sentences = sentences.subList(0, sentences.size - 1)
-        return sentences
+        return text.split("\n")
     }
 
     override fun wordsToLabels(text: String): IntArray {
@@ -74,30 +70,17 @@ class JapaneseTextUtils(
         text: String
     ): List<IntArray> {
         val sentences = splitSentence(text)
+        val converted = ArrayList<IntArray>()
 
-        val outputs = ArrayList<IntArray>()
-
-        var sentence = ""
-        for (i in sentences.indices) {
-            val s = sentences[i]
-            sentence += s.split("\t")[0]
-            if (s.contains("記号,読点") ||
-                s.contains("記号,句点") ||
-                s.contains("記号,一般") ||
-                s.contains("記号,空白") ||
-                i == sentences.size - 1
-            ) {
-                if (sentence.length > 100) {
-                    throw RuntimeException("句子过长")
-                }
-                val labels = wordsToLabels(sentence)
-                if (labels.isEmpty() || labels.sum() == 0)
-                    continue
-                outputs.add(labels)
-                sentence = ""
+        for (sentence in sentences){
+            if (sentence.length > 200){
+                throw RuntimeException("句子长度不能超过200字！当前${sentence.length}字！")
             }
+            if (sentence.isEmpty()) continue
+            val labels = wordsToLabels(sentence)
+            converted.add(labels)
         }
-        return outputs
+        return converted
     }
 
     override fun convertText(
@@ -114,8 +97,6 @@ class JapaneseTextUtils(
     }
 
     external fun initOpenJtalk(assetManager: AssetManager): Boolean
-
-    external fun splitSentenceCpp(text: String): String
 
     init {
         System.loadLibrary("moereng")
