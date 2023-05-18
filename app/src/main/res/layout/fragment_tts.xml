@@ -14,7 +14,7 @@
         android:layout_width="350dp"
         android:layout_height="160dp"
         android:gravity="top"
-        android:hint="输入想要说的话"
+        android:hint="输入文字（用换行分句，每句话不超过200字！）"
         android:maxLength="1000"
         android:maxLines="50"
         android:textSize="12sp"
@@ -188,6 +188,15 @@
             android:min="0"
             android:progress="60" />
 
+        <TextView
+            android:id="@+id/noise_scale_text"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_toEndOf="@id/noise_scale"
+            android:gravity="center_vertical"
+            android:text="0.6/1.0"
+            android:textSize="12sp" />
+
     </RelativeLayout>
 
     <!-- noise scale w slide bar -->
@@ -221,6 +230,14 @@
             android:min="0"
             android:progress="80" />
 
+        <TextView
+            android:id="@+id/noise_scale_w_text"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_toEndOf="@id/noise_scale_w"
+            android:text="0.8/1.0"
+            android:gravity="center_vertical"
+            android:textSize="12sp"/>
     </RelativeLayout>
 
     <!-- audio length slide bar -->
@@ -251,7 +268,16 @@
             android:layout_centerInParent="true"
             android:max="100"
             android:min="0"
-            android:progress="10" />
+            android:progress="50" />
+
+        <TextView
+            android:id="@+id/length_scale_text"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_toEndOf="@id/length_scale"
+            android:text="1.0/2.0"
+            android:gravity="center_vertical"
+            android:textSize="12sp"/>
 
     </RelativeLayout>
 
