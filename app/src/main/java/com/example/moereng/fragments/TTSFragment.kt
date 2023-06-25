@@ -147,7 +147,7 @@ class TTSFragment : Fragment() {
             // convert inputs
             val inputs = textUtils?.convertText(text)
 
-            if (inputs != null && inputs.isNotEmpty()) {
+            if (!inputs.isNullOrEmpty()) {
                 // progress visibility
                 hideProgressBar(false, inputs.size)
 
@@ -449,7 +449,6 @@ class TTSFragment : Fragment() {
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
-                Toast.makeText(ttsContext, noiseScale.toString(), Toast.LENGTH_SHORT).show()
             }
         })
 
@@ -465,7 +464,6 @@ class TTSFragment : Fragment() {
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
-                Toast.makeText(ttsContext, noiseScaleW.toString(), Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -482,8 +480,6 @@ class TTSFragment : Fragment() {
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
-                Toast.makeText(ttsContext, lengthScale.toString(), Toast.LENGTH_SHORT)
-                    .show()
             }
         })
 

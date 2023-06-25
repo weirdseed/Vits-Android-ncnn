@@ -9,13 +9,13 @@ class ChineseTextUtils(
 ) : TextUtils {
 
     private val splitSymbols = listOf(
-        ".", "。", "…", ",", "，"
+        ".", "。","……","!","！","?","？",";","；"
     )
 
     override fun cleanInputs(text: String): String {
         var tempText = text
         splitSymbols.forEach {
-            tempText = tempText.replace(it, "\n")
+            tempText = tempText.replace(it, "${it}\n")
         }
         return tempText
     }
@@ -37,13 +37,8 @@ class ChineseTextUtils(
         // clean text
         var cleanedText = ""
         val cleaner = ChineseCleaners()
-        when{
-            (cleanerName == "chinese_cleaners" || cleanerName == "chinese_cleaners1")->{
-                cleanedText = cleaner.chinese_clean_text1(text)
-            }
-            cleanerName == "chinese_cleaners2"->{
-                cleanedText = cleaner.chinese_clean_text2(text)
-            }
+        if (cleanerName == "chinese_cleaners" || cleanerName == "chinese_cleaners1"){
+            cleanedText = cleaner.chinese_clean_text(text)
         }
 
         // symbol to label
