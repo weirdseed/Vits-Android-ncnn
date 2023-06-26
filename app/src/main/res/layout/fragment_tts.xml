@@ -14,7 +14,6 @@
         android:layout_width="350dp"
         android:layout_height="160dp"
         android:gravity="top"
-        android:hint="输入文字（用换行分句，每句话不超过200字！）"
         android:maxLength="1000"
         android:maxLines="50"
         android:textSize="12sp"

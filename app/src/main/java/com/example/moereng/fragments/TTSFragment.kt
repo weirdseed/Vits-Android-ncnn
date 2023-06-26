@@ -289,12 +289,18 @@ class TTSFragment : Fragment() {
             when{
                 cleanerName.contains("chinese_cleaners") ->{
                     textUtils = ChineseTextUtils(symbols, cleanerName, assetManager)
+                    ttsBinding.wordsInput.hint = "请输入中文:\n\t1.用换行分句，每句话不超过200字！" +
+                            "\n\t2.当前模型仅支持中文"
                 }
                 cleanerName.contains("japanese_cleaners") -> {
                     textUtils = JapaneseTextUtils(symbols, cleanerName, assetManager)
+                    ttsBinding.wordsInput.hint = "请输入日文:\n\t1.用换行分句，每句话不超过200字！" +
+                            "\n\t2.当前模型仅支持日文"
                 }
                 cleanerName.contains("zh_ja_mixture_cleaners") -> {
                     textUtils = ZHJAMixTextUtils(symbols, cleanerName, assetManager)
+                    ttsBinding.wordsInput.hint = "请输入日文或者中文:\n\t1.用[ZH]和[JA]区分中文和日文，" +
+                            "例如[ZH]你好[ZH]，[JA]こんにちは[JA]\n\t2.用换行分句，每句话不超过200字！"
                 }
             }
 
