@@ -27,7 +27,7 @@ JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
 // vits utils
 extern "C" {
 JNIEXPORT jboolean JNICALL
-Java_com_example_moereng_utils_text_JapaneseTextUtils_initOpenJtalk(JNIEnv *env, jobject thiz,
+Java_com_example_moereng_utils_text_JapaneseCleaners_initOpenJtalk(JNIEnv *env, jobject thiz,
                                                                     jobject asset_manager) {
     AssetJNI assetJni(env, thiz, asset_manager);
     bool state = openJtalk.init("open_jtalk_dic_utf_8-1.11", &assetJni);

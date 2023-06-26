@@ -1,16 +1,33 @@
 package com.example.moereng.utils.text
 
+import android.content.res.AssetManager
+import android.util.Log
 import java.text.Normalizer
 
-class JapaneseCleaners {
+class JapaneseCleaners(assetManager: AssetManager) {
+    private var openJtalkInitialized = false
+
     private val _symbols_to_japanese: Map<String, String> = mapOf(
         "％" to "パーセント",
         "%" to "パーセント"
     )
+
     private val _japanese_marks =
         Regex("[^A-Za-z\\d\\u3005\\u3040-\\u30ff\\u4e00-\\u9fff\\uff11-\\uff19\\uff21-\\uff3a\\uff41-\\uff5a\\uff66-\\uff9d]")
+
     private val _japanese_characters =
         Regex("[A-Za-z\\d\\u3005\\u3040-\\u30ff\\u4e00-\\u9fff\\uff11-\\uff19\\uff21-\\uff3a\\uff41-\\uff5a\\uff66-\\uff9d]")
+
+    private fun initDictionary(assetManager: AssetManager) {
+        // init openjatlk
+        if (!openJtalkInitialized) {
+            openJtalkInitialized = initOpenJtalk(assetManager)
+            if (!openJtalkInitialized) {
+                throw RuntimeException("初始化openjtalk字典失败！")
+            }
+            Log.i("TextUtils", "Openjtalk字典初始化成功！")
+        }
+    }
 
     private fun symbols_to_japanese(text: String): String {
         var result = text
@@ -21,7 +38,7 @@ class JapaneseCleaners {
         return result
     }
 
-    private fun japanese_to_romaji_with_accent(_text: String): String {
+    fun japanese_to_romaji_with_accent(_text: String): String {
         var text = symbols_to_japanese(_text)
         val sentences = text.split(_japanese_marks)
         val marks = ArrayList<String>()
@@ -98,8 +115,10 @@ class JapaneseCleaners {
 
     // 生成labels
     external fun extract_labels(text: String): List<String>
+    external fun initOpenJtalk(assetManager: AssetManager): Boolean
 
     init {
         System.loadLibrary("moereng")
+        initDictionary(assetManager)
     }
 }

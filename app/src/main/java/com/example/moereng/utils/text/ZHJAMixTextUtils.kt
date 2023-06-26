@@ -2,7 +2,7 @@ package com.example.moereng.utils.text
 
 import android.content.res.AssetManager
 
-class ChineseTextUtils(
+class ZHJAMixTextUtils(
     override val symbols: List<String>,
     override val cleanerName: String,
     override val assetManager: AssetManager
@@ -12,7 +12,7 @@ class ChineseTextUtils(
         ".", "。","……","!","！","?","？",";","；"
     )
 
-    private val cleaner = ChineseCleaners()
+    private val cleaner = ZHJAMixCleaners(assetManager)
 
     override fun cleanInputs(text: String): String {
         var tempText = text
@@ -39,17 +39,9 @@ class ChineseTextUtils(
         // clean text
         var cleanedText = ""
 
-        when (cleanerName){
-            "chinese_cleaners" -> {
-                cleanedText = cleaner.chinese_clean_text(text)
-            }
-
-            "chinese_cleaners1" -> {
-                cleanedText = cleaner.chinese_clean_text(text)
-            }
-
-            "chinese_cleaners_moegoe" -> {
-                cleanedText = cleaner.chinese_clean_text_moegoe(text)
+        when(cleanerName){
+            "zh_ja_mixture_cleaners"-> {
+                cleanedText = cleaner.zh_ja_mixture_cleaners(text)
             }
         }
 
@@ -67,9 +59,7 @@ class ChineseTextUtils(
         return labels.toIntArray()
     }
 
-    override fun convertSentenceToLabels(
-        text: String
-    ): List<IntArray> {
+    override fun convertSentenceToLabels(text: String): List<IntArray> {
         val sentences = splitSentence(text)
         val converted = ArrayList<IntArray>()
 
@@ -84,9 +74,7 @@ class ChineseTextUtils(
         return converted
     }
 
-    override fun convertText(
-        text: String
-    ): List<IntArray> {
+    override fun convertText(text: String): List<IntArray> {
         // clean inputs
         val cleanedInputs = cleanInputs(text)
 
@@ -94,4 +82,3 @@ class ChineseTextUtils(
         return convertSentenceToLabels(cleanedInputs)
     }
 }
-

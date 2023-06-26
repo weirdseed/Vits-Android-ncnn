@@ -32,6 +32,7 @@ import com.example.moereng.utils.audio.WaveUtils.writeWav
 import com.example.moereng.utils.text.ChineseTextUtils
 import com.example.moereng.utils.text.JapaneseCleaners
 import com.example.moereng.utils.text.JapaneseTextUtils
+import com.example.moereng.utils.text.ZHJAMixTextUtils
 import kotlin.concurrent.thread
 
 class TTSFragment : Fragment() {
@@ -264,8 +265,11 @@ class TTSFragment : Fragment() {
     private fun loadConfigs(path: String) {
         config = FileUtils.parseConfig(ttsContext, path)
         var type = "single"
-        if (config != null && config!!.speakers != null)
+
+        if (config != null && config!!.speakers != null){
             type = "multi"
+        }
+
         if (checkConfig(config, type)) {
             samplingRate = config!!.data!!.sampling_rate!!
             n_vocab = config!!.symbols!!.size
@@ -275,6 +279,7 @@ class TTSFragment : Fragment() {
             } else {
                 multi = false
             }
+
             showSid(multi)
             val cleanerName = config!!.data!!.text_cleaners!![0]
             val symbols = config!!.symbols!!
@@ -282,11 +287,14 @@ class TTSFragment : Fragment() {
 
             // init textUtils
             when{
-                cleanerName.contains("chinese") ->{
+                cleanerName.contains("chinese_cleaners") ->{
                     textUtils = ChineseTextUtils(symbols, cleanerName, assetManager)
                 }
-                cleanerName.contains("japanese") -> {
+                cleanerName.contains("japanese_cleaners") -> {
                     textUtils = JapaneseTextUtils(symbols, cleanerName, assetManager)
+                }
+                cleanerName.contains("zh_ja_mixture_cleaners") -> {
+                    textUtils = ZHJAMixTextUtils(symbols, cleanerName, assetManager)
                 }
             }
 

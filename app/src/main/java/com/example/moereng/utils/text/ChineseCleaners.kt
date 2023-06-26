@@ -4,6 +4,7 @@ import android.util.Log
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
+import java.lang.Error
 
 class ChineseCleaners {
     private val latin_map = mapOf(
@@ -75,34 +76,71 @@ class ChineseCleaners {
         "([^0-4])$" to "\$g<1>0"
     )
 
-    private val AN2CN = mapOf(
-        "0" to "零",
-        "1" to "一",
-        "2" to "二",
-        "3" to "三",
-        "4" to "四",
-        "5" to "五",
-        "6" to "六",
-        "7" to "七",
-        "8" to "八",
-        "9" to "九"
-    )
-
     private val bopomofo_table = arrayOf(
         "bpmfdtnlgkhjqxZCSrzcsiuvaoeEAIOUMNKGR12340",
         "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˉˊˇˋ˙"
     )
 
-    private val bopomofo_table_len = 42
+    private val bopomofo_romaji = mapOf(
+        Regex("ㄅㄛ") to "p⁼wo",
+        Regex("ㄆㄛ") to "pʰwo",
+        Regex("ㄇㄛ") to "mwo",
+        Regex("ㄈㄛ") to "fwo",
+        Regex("ㄅ") to "p⁼",
+        Regex("ㄆ") to "pʰ",
+        Regex("ㄇ") to "m",
+        Regex("ㄈ") to "f",
+        Regex("ㄉ") to "t⁼",
+        Regex("ㄊ") to "tʰ",
+        Regex("ㄋ") to "n",
+        Regex("ㄌ") to "l",
+        Regex("ㄍ") to "k⁼",
+        Regex("ㄎ") to "kʰ",
+        Regex("ㄏ") to "h",
+        Regex("ㄐ") to "ʧ⁼",
+        Regex("ㄑ") to "ʧʰ",
+        Regex("ㄒ") to "ʃ",
+        Regex("ㄓ") to "ʦ`⁼",
+        Regex("ㄔ") to "ʦ`ʰ",
+        Regex("ㄕ") to "s`",
+        Regex("ㄖ") to "ɹ`",
+        Regex("ㄗ") to "ʦ⁼",
+        Regex("ㄘ") to "ʦʰ",
+        Regex("ㄙ") to "s",
+        Regex("ㄚ") to "a",
+        Regex("ㄛ") to "o",
+        Regex("ㄜ") to "ə",
+        Regex("ㄝ") to "e",
+        Regex("ㄞ") to "ai",
+        Regex("ㄟ") to "ei",
+        Regex("ㄠ") to "au",
+        Regex("ㄡ") to "ou",
+        Regex("ㄧㄢ") to "yeNN",
+        Regex("ㄢ") to "aNN",
+        Regex("ㄧㄣ") to "iNN",
+        Regex("ㄣ") to "əNN",
+        Regex("ㄤ") to "aNg",
+        Regex("ㄧㄥ") to "iNg",
+        Regex("ㄨㄥ") to "uNg",
+        Regex("ㄩㄥ") to "yuNg",
+        Regex("ㄥ") to "əNg",
+        Regex("ㄦ") to "əɻ",
+        Regex("ㄧ") to "i",
+        Regex("ㄨ") to "u",
+        Regex("ㄩ") to "ɥ",
+        Regex("ˉ") to "→",
+        Regex("ˊ") to "↑",
+        Regex("ˇ") to "↓↑",
+        Regex("ˋ") to "↓",
+        Regex("˙") to "",
+        Regex("，") to ",",
+        Regex("。") to ".",
+        Regex("！") to "!",
+        Regex("？") to "?",
+        Regex("—") to "-"
+    )
 
-    private fun no_punctuation(s: String): String {
-        var ans = s
-        val punctuation_list = arrayOf("，", "、", "；", "：", "。", "？", ",", ".", "?", "\"", "'")
-        for (i in punctuation_list) {
-            ans = ans.replace(i, " ")
-        }
-        return ans
-    }
+    private val bopomofo_table_len = 42
 
     private fun latin_to_bopomofo(s: String): String {
         var ans = s
@@ -116,47 +154,55 @@ class ChineseCleaners {
         val format = HanyuPinyinOutputFormat()
         format.toneType = HanyuPinyinToneType.WITH_TONE_NUMBER
         val sb = StringBuilder()
-        var pinyin: String?
+
         for (i in s.indices) {
-            pinyin = null
+            var bopomofo : String
             try {
-                pinyin = PinyinHelper.toHanyuPinyinStringArray(s[i])[0]
-            } catch (ignore: Exception) {
+                bopomofo = PinyinHelper.toHanyuPinyinStringArray(s[i])[0]
+            } catch (e: Exception){
+                bopomofo = ""
             }
-            if (pinyin == null) {  //无法转拼音，直接拷贝
-                sb.append(s[i])
+            if (bopomofo.isEmpty()) {
+                // 遇到不能转换的加上空格
+                sb.append(s[i] + " ")
             } else {
-                var bopomofo: String = pinyin
                 for ((key, value) in pinyin_map) {
                     bopomofo = bopomofo.replace(key.toRegex(), value)
-                    Log.e("tmp", "$bopomofo $key $value")
                 }
-                Log.e("tmp", bopomofo)
-                for (j in 0 until bopomofo_table_len) bopomofo =
-                    bopomofo.replace(bopomofo_table[0][j], bopomofo_table[1][j])
+                for (j in 0 until bopomofo_table_len) {
+                    bopomofo = bopomofo.replace(bopomofo_table[0][j], bopomofo_table[1][j])
+                }
                 sb.append(bopomofo)
             }
-            if (sb.isNotEmpty()) sb.append(' ')
         }
         return sb.toString()
     }
 
-    fun chinese_clean_text(text: String): String {
+    /**
+     * text_cleaners: chinese_cleaners
+     * */
+    fun chinese_clean_text(inputs: String): String {
+        // 数字转中文
+        val text = number2chinese(inputs)
         val format = HanyuPinyinOutputFormat()
         format.toneType = HanyuPinyinToneType.WITH_TONE_NUMBER
-        val sb = StringBuilder()
+        val cleaned_text = StringBuilder()
         for (element in text) {
-            var pinyin = ""
+            var s: String
             try {
-                pinyin = PinyinHelper.toHanyuPinyinStringArray(element)[0]
+                s = PinyinHelper.toHanyuPinyinStringArray(element)[0]
             } catch (ignore: Exception) {
+                s = ""
             }
-            sb.append(pinyin)
-            if (sb.isNotEmpty()) sb.append(' ')
+            cleaned_text.append(s)
+            if (cleaned_text.isNotEmpty()) cleaned_text.append(' ')
         }
-        return sb.toString()
+        return cleaned_text.toString()
     }
 
+    /**
+     * text_cleaners: chinese_cleaners_moegoe
+     * */
     fun chinese_clean_text_moegoe(inputs: String): String {
         var text = number2chinese(inputs)
         text = chinese_to_bopomofo(text)
@@ -166,19 +212,40 @@ class ChineseCleaners {
         return text
     }
 
-    private fun number2chinese(inputs: String): String{
+    private fun number2chinese(inputs: String): String {
         val an2cn = An2Cn()
         val regex = Regex("\\d+(?:\\.?\\d+)?")
         val numbers = regex.findAll(inputs).map { it.value }.toList()
         var converts = inputs
-        for (number in numbers){
+        for (number in numbers) {
             converts = converts.replace(number, an2cn.an2cn(number))
         }
         return converts
     }
 
-    private fun chinese_to_romaji() {
+    private fun bopomofo2romaji(inputs: String): String {
+        var text = inputs
+        for ((k, v) in bopomofo_romaji) {
+            text = k.replace(text, v)
+        }
+        return text
+    }
 
+    fun chinese_to_romaji(inputs: String): String {
+        var text = number2chinese(inputs)
+        text = chinese_to_bopomofo(text)
+        text = latin_to_bopomofo(text)
+        text = bopomofo2romaji(text)
+        text = Regex("i([aoe])").replace(text) { "y" + it.groupValues[1] }
+        text = Regex("u([aoəe])").replace(text) { "w" + it.groupValues[1] }
+        text = Regex("([ʦsɹ]`[⁼ʰ]?)([→↓↑ ]+|$)").replace(text) {
+            it.groupValues[1] + "ɹ`" + it.groupValues[2]
+        }
+        text = text.replace("ɻ", "ɹ`")
+        text = Regex("([ʦs][⁼ʰ]?)([→↓↑ ]+|\$)").replace(text) {
+            it.groupValues[1] + "ɹ" + it.groupValues[2]
+        }
+        return text
     }
 
 }

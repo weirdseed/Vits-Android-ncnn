@@ -132,15 +132,12 @@ object FileUtils {
             val configBuffer = configStream.bufferedReader().use { it.readText() }
             configStream.close()
             val config = Gson().fromJson(configBuffer, Config::class.java)
-            for (cleaner in config.data!!.text_cleaners!!) {
-                if (cleaner !in listOf("japanese_cleaners", "japanese_cleaners2","chinese_cleaners")) {
-                    Toast.makeText(context, "抱歉，目前还不支持此模型！", Toast.LENGTH_SHORT).show()
-                    return null
-                }
-                if (config.symbols!!.isEmpty()) {
-                    Toast.makeText(context, "配置文件必须包含symbols！", Toast.LENGTH_SHORT).show()
-                    return null
-                }
+            if (config.data?.text_cleaners.isNullOrEmpty()){
+                return null
+            }
+            if (config.symbols!!.isEmpty()) {
+                Toast.makeText(context, "配置文件必须包含symbols！", Toast.LENGTH_SHORT).show()
+                return null
             }
             return config
         } catch (e: Exception) {

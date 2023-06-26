@@ -1,33 +1,27 @@
 package com.example.moereng.utils.text
 
 import android.content.res.AssetManager
-import android.util.Log
 
 class JapaneseTextUtils(
     override val symbols: List<String>,
     override val cleanerName: String,
     override val assetManager: AssetManager
 ) : TextUtils {
-    private var openJtalkInitialized = false
 
-    private fun initDictionary(assetManager: AssetManager) {
-        // init openjatlk
-        if (!openJtalkInitialized) {
-            openJtalkInitialized = initOpenJtalk(assetManager)
-            if (!openJtalkInitialized) {
-                throw RuntimeException("初始化openjtalk字典失败！")
-            }
-            Log.i("TextUtils", "Openjtalk字典初始化成功！")
-        }
-    }
-
+    private val cleaner = JapaneseCleaners(assetManager)
+    private val splitSymbols = listOf(
+        ".", "。","……","!","！","?","？",";","；"
+    )
     override fun cleanInputs(text: String): String {
-        return text.replace("\"", "").replace("\'", "")
-            .replace("\t", " ").replace("”", "")
+        var tempText = text
+        splitSymbols.forEach {
+            tempText = tempText.replace(it, "${it}\n")
+        }
+        return tempText
     }
 
     override fun splitSentence(text: String): List<String> {
-        return text.split("\n")
+        return text.split("\n").filter { it.isNotEmpty() }
     }
 
     override fun wordsToLabels(text: String): IntArray {
@@ -42,12 +36,15 @@ class JapaneseTextUtils(
 
         // clean text
         var cleanedText = ""
-        val cleaner = JapaneseCleaners()
-        when{
-            (cleanerName == "japanese_cleaners" || cleanerName == "japanese_cleaners1")-> {
+
+        when(cleanerName){
+            "japanese_cleaners"-> {
                 cleanedText = cleaner.japanese_clean_text1(text)
             }
-            cleanerName == "japanese_cleaners2" -> {
+            "japanese_cleaners1" -> {
+                cleanedText = cleaner.japanese_clean_text1(text)
+            }
+            "japanese_cleaners2" -> {
                 cleanedText = cleaner.japanese_clean_text2(text)
             }
         }
@@ -86,9 +83,6 @@ class JapaneseTextUtils(
     override fun convertText(
         text: String
     ): List<IntArray> {
-        // init dict
-        initDictionary(assetManager)
-
         // clean inputs
         val cleanedInputs = cleanInputs(text)
 
@@ -96,9 +90,4 @@ class JapaneseTextUtils(
         return convertSentenceToLabels(cleanedInputs)
     }
 
-    external fun initOpenJtalk(assetManager: AssetManager): Boolean
-
-    init {
-        System.loadLibrary("moereng")
-    }
 }
