@@ -1,6 +1,7 @@
 package com.example.moereng.utils.text
 
 import android.content.res.AssetManager
+import java.lang.StringBuilder
 
 class JapaneseTextUtils(
     override val symbols: List<String>,
@@ -13,11 +14,13 @@ class JapaneseTextUtils(
         ".", "。","……","!","！","?","？",";","；"
     )
     override fun cleanInputs(text: String): String {
-        var tempText = text
-        splitSymbols.forEach {
-            tempText = tempText.replace(it, "${it}\n")
+        val cleaned = StringBuilder()
+        for (s in text.split("\n")){
+            if (s.isNotEmpty() && splitSymbols.contains(s.last().toString())){
+                cleaned.append(s + "\n")
+            }
         }
-        return tempText
+        return cleaned.toString()
     }
 
     override fun splitSentence(text: String): List<String> {
@@ -47,6 +50,10 @@ class JapaneseTextUtils(
             "japanese_cleaners2" -> {
                 cleanedText = cleaner.japanese_clean_text2(text)
             }
+        }
+
+        if (cleanedText.isEmpty()){
+            throw RuntimeException("转换失败，请检查输入！")
         }
 
         // symbol to label

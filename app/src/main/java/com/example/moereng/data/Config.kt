@@ -5,5 +5,6 @@ data class Config(val data: MData?, val symbols: List<String>?, val speakers: Li
         val text_cleaners: List<String>?,
         val sampling_rate: Int?,
         val n_speakers: Int?,
+        val n_vocabs: Int?
     )
 }

@@ -14,25 +14,23 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.moereng.Vits
 import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentTtsBinding
+import com.example.moereng.utils.VitsUtils.checkConfig
+import com.example.moereng.utils.audio.PlayerUtils
+import com.example.moereng.utils.audio.WaveUtils.writeWav
 import com.example.moereng.utils.file.FileUtils
 import com.example.moereng.utils.permission.PermissionUtils.checkStoragePermission
 import com.example.moereng.utils.permission.PermissionUtils.requestStoragePermission
-import com.example.moereng.utils.audio.PlayerUtils
-import com.example.moereng.utils.text.TextUtils
-import com.example.moereng.utils.ui.UIUtils.moerengToast
-import com.example.moereng.utils.VitsUtils.checkConfig
-import com.example.moereng.utils.audio.WaveUtils.writeWav
 import com.example.moereng.utils.text.ChineseTextUtils
-import com.example.moereng.utils.text.JapaneseCleaners
 import com.example.moereng.utils.text.JapaneseTextUtils
+import com.example.moereng.utils.text.TextUtils
 import com.example.moereng.utils.text.ZHJAMixTextUtils
+import com.example.moereng.utils.ui.UIUtils.moerengToast
 import kotlin.concurrent.thread
 
 class TTSFragment : Fragment() {
@@ -272,7 +270,21 @@ class TTSFragment : Fragment() {
 
         if (checkConfig(config, type)) {
             samplingRate = config!!.data!!.sampling_rate!!
-            n_vocab = config!!.symbols!!.size
+
+            /**
+             * n_vocabs在config文件中存在的话直接使用，
+             * 针对https://github.com/JOETtheIV/VITS-Paimon
+             * 这种symbols和权重文件shape不匹配的情况
+             */
+
+            if (config?.data?.n_vocabs != null){
+                n_vocab = config!!.data!!.n_vocabs!!
+            } else if (config?.symbols != null){
+                n_vocab = config!!.symbols!!.size
+            } else {
+                throw RuntimeException("symbols或n_vocabs不能为空，请检查配置文件！")
+            }
+
             if (config!!.data!!.n_speakers!! > 1) {
                 multi = true
                 maxSpeaker = config!!.data!!.n_speakers!!
@@ -281,8 +293,9 @@ class TTSFragment : Fragment() {
             }
 
             showSid(multi)
+
             val cleanerName = config!!.data!!.text_cleaners!![0]
-            val symbols = config!!.symbols!!
+            val symbols: List<String> = config?.symbols!!
             val assetManager = requireActivity().assets
 
             // init textUtils

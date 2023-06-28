@@ -1,10 +1,8 @@
 package com.example.moereng.utils.text
 
-import android.util.Log
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
-import java.lang.Error
 
 class ChineseCleaners {
     private val latin_map = mapOf(
@@ -192,7 +190,7 @@ class ChineseCleaners {
             try {
                 s = PinyinHelper.toHanyuPinyinStringArray(element)[0]
             } catch (ignore: Exception) {
-                s = ""
+                s = element.toString()
             }
             cleaned_text.append(s)
             if (cleaned_text.isNotEmpty()) cleaned_text.append(' ')

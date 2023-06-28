@@ -1,6 +1,7 @@
 package com.example.moereng.utils.text
 
 import android.content.res.AssetManager
+import java.lang.StringBuilder
 
 class ChineseTextUtils(
     override val symbols: List<String>,
@@ -15,11 +16,13 @@ class ChineseTextUtils(
     private val cleaner = ChineseCleaners()
 
     override fun cleanInputs(text: String): String {
-        var tempText = text
-        splitSymbols.forEach {
-            tempText = tempText.replace(it, "${it}\n")
+        val cleaned = StringBuilder()
+        for (s in text.split("\n")){
+            if (s.isNotEmpty() && splitSymbols.contains(s.last().toString())){
+                cleaned.append(s + "\n")
+            }
         }
-        return tempText
+        return cleaned.toString()
     }
 
     override fun splitSentence(text: String): List<String> {
@@ -51,6 +54,10 @@ class ChineseTextUtils(
             "chinese_cleaners_moegoe" -> {
                 cleanedText = cleaner.chinese_clean_text_moegoe(text)
             }
+        }
+
+        if (cleanedText.isEmpty()){
+            throw RuntimeException("转换失败，请检查输入！")
         }
 
         // symbol to label
