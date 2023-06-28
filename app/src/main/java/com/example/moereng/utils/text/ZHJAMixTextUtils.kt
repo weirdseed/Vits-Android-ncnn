@@ -1,6 +1,7 @@
 package com.example.moereng.utils.text
 
 import android.content.res.AssetManager
+import java.lang.StringBuilder
 
 class ZHJAMixTextUtils(
     override val symbols: List<String>,
@@ -15,11 +16,13 @@ class ZHJAMixTextUtils(
     private val cleaner = ZHJAMixCleaners(assetManager)
 
     override fun cleanInputs(text: String): String {
-        var tempText = text
-        splitSymbols.forEach {
-            tempText = tempText.replace(it, "${it}\n")
+        val cleaned = StringBuilder()
+        for (s in text.split("\n")){
+            if (s.isNotEmpty() && splitSymbols.contains(s.last().toString())){
+                cleaned.append(s + "\n")
+            }
         }
-        return tempText
+        return cleaned.toString()
     }
 
     override fun splitSentence(text: String): List<String> {
@@ -43,6 +46,10 @@ class ZHJAMixTextUtils(
             "zh_ja_mixture_cleaners"-> {
                 cleanedText = cleaner.zh_ja_mixture_cleaners(text)
             }
+        }
+
+        if (cleanedText.isEmpty()){
+            throw RuntimeException("转换失败，请检查输入！")
         }
 
         // symbol to label
