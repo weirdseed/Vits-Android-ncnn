@@ -18,7 +18,6 @@ object VitsUtils {
             else -> false
         }
 
-
     external fun testGpu(): Boolean
 
     external fun checkThreadsCpp(): Int

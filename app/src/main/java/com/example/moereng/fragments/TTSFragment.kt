@@ -1,6 +1,7 @@
 package com.example.moereng.fragments
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.moereng.Vits
@@ -75,10 +77,6 @@ class TTSFragment : Fragment() {
     private var maxSpeaker = 1
 
     private var vulkanState = false
-
-    private val REQUEST_CODE_SELECT_MODEL = 1
-
-    private val REQUEST_CODE_SELECT_CONFIG = 2
 
     private val ttsContext = MoeRengApplication.context
 
@@ -251,10 +249,10 @@ class TTSFragment : Fragment() {
     private fun showErrorText(type: String) {
         when (type) {
             "model" -> {
-                ttsBinding.modelPath.text = "加载失败，请把文件放在Download文件夹"
+                ttsBinding.modelPath.text = "加载失败!"
             }
             "config" -> {
-                ttsBinding.configPath.text = "加载失败，请把文件放在Download文件夹"
+                ttsBinding.configPath.text = "加载失败!"
             }
         }
     }
@@ -410,6 +408,7 @@ class TTSFragment : Fragment() {
         return ttsBinding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.i("TTSFragment", "onViewCreated")
@@ -431,6 +430,36 @@ class TTSFragment : Fragment() {
                 }
             }
 
+        // Replacement of StartActivityForResult
+        val selectConfigActivityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()) { result ->
+            val data: Intent? = result.data
+            if (result.resultCode == Activity.RESULT_OK && data != null){
+                val uri = data.data
+                ttsBinding.loadModelLayout.visibility = View.GONE
+                initPath()
+                ttsBinding.playBtn.visibility = View.GONE
+                ttsBinding.progressLayout.visibility = View.GONE
+                ttsBinding.exportBtn.visibility = View.GONE
+                modelInitState = false
+                if (uri != null) {
+                    try {
+                        val realPath = FileUtils.getPathFromUri(ttsContext, uri)
+                        if (realPath != null && realPath.endsWith("json")) {
+                            loadConfigs(realPath)
+                        } else {
+                            moerengToast("请选择正确的配置文件，以.json结尾")
+                            ttsBinding.configPath.text = "加载失败！"
+                        }
+                    } catch (e: Exception) {
+                        Log.e("LoadConfig", e.message.toString())
+                        showErrorText("config")
+                        moerengToast("配置加载失败！${e.message.toString()}")
+                    }
+                }
+            }
+        }
+
         // select config button
         ttsBinding.selectConfig.setOnClickListener {
             if (!finishFlag){
@@ -445,7 +474,44 @@ class TTSFragment : Fragment() {
                     intent.type = "*/*"
                 }
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
-                startActivityForResult(intent, REQUEST_CODE_SELECT_CONFIG)
+                selectConfigActivityResultLauncher.launch(intent)
+            }
+        }
+
+        // Replacement of StartActivityForResult
+        val selectModelActivityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()) { result ->
+            val data: Intent? = result.data
+            if (result.resultCode == Activity.RESULT_OK && data != null){
+                val uri = data.data
+                thread {
+                    if (uri != null) {
+                        try {
+                            val realPath = FileUtils.getPathFromUri(ttsContext, uri)
+                            if (realPath != null && realPath.endsWith(".bin")) {
+                                loadModel(realPath)
+                            }
+                            requireActivity().runOnUiThread {
+                                if (realPath != null && !realPath.endsWith(".bin")) {
+                                    moerengToast("请选择正确的模型文件,以.bin结尾")
+                                    ttsBinding.modelPath.text = "请选择.bin后缀的配置文件"
+                                }
+                                if (realPath == null) {
+                                    moerengToast("模型加载失败！")
+                                    showErrorText("model")
+                                }
+                            }
+                            ttsBinding.selectModel.isClickable = true
+                        } catch (e: Exception) {
+                            Log.e("TTSFragment", e.message.toString())
+                            requireActivity().runOnUiThread {
+                                showErrorText("model")
+                                moerengToast("模型加载失败！${e.message.toString()}")
+                            }
+                            ttsBinding.selectModel.isClickable = true
+                        }
+                    }
+                }
             }
         }
 
@@ -459,7 +525,7 @@ class TTSFragment : Fragment() {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.type = "application/octet-stream"
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
-                startActivityForResult(intent, REQUEST_CODE_SELECT_MODEL)
+                selectModelActivityResultLauncher.launch(intent)
             }
         }
 
@@ -548,69 +614,6 @@ class TTSFragment : Fragment() {
         // export button listener
         ttsBinding.exportBtn.setOnClickListener {
             export()
-        }
-    }
-
-    // getting result for selecting config or model
-    @SuppressLint("SetTextI18n")
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        val uri = data?.data
-        when (requestCode) {
-            REQUEST_CODE_SELECT_CONFIG -> {
-                ttsBinding.loadModelLayout.visibility = View.GONE
-                initPath()
-                ttsBinding.playBtn.visibility = View.GONE
-                ttsBinding.progressLayout.visibility = View.GONE
-                ttsBinding.exportBtn.visibility = View.GONE
-                modelInitState = false
-                if (uri != null) {
-                    try {
-                        val realPath = FileUtils.getPathFromUri(ttsContext, uri)
-                        if (realPath != null && realPath.endsWith("json")) {
-                            loadConfigs(realPath)
-                        } else {
-                            moerengToast("请选择正确的配置文件，以.json结尾")
-                            ttsBinding.configPath.text = "加载失败！"
-                        }
-                    } catch (e: Exception) {
-                        Log.e("LoadConfig", e.message.toString())
-                        showErrorText("config")
-                        moerengToast("配置加载失败！${e.message.toString()}")
-                    }
-                }
-            }
-            REQUEST_CODE_SELECT_MODEL -> {
-                thread {
-                    if (uri != null) {
-                        try {
-                            val realPath = FileUtils.getPathFromUri(ttsContext, uri)
-                            if (realPath != null && realPath.endsWith(".bin")) {
-                                loadModel(realPath)
-                            }
-                            requireActivity().runOnUiThread {
-                                if (realPath != null && !realPath.endsWith(".bin")) {
-                                    moerengToast("请选择正确的模型文件,以.bin结尾")
-                                    ttsBinding.modelPath.text = "请选择.bin后缀的配置文件"
-                                }
-                                if (realPath == null) {
-                                    moerengToast("模型加载失败！")
-                                    showErrorText("model")
-                                }
-                            }
-                            ttsBinding.selectModel.isClickable = true
-                        } catch (e: Exception) {
-                            Log.e("TTSFragment", e.message.toString())
-                            requireActivity().runOnUiThread {
-                                showErrorText("model")
-                                moerengToast("模型加载失败！${e.message.toString()}")
-                            }
-                            ttsBinding.selectModel.isClickable = true
-                        }
-                    }
-                }
-            }
         }
     }
 
