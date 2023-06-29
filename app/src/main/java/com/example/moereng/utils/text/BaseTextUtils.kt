@@ -24,15 +24,11 @@ abstract class BaseTextUtils(
     )
 
     override fun cleanInputs(text: String): String {
-        val cleaned = StringBuilder()
-        for (s in text.split("\n")){
-            if (s.isNotEmpty() && splitSymbols.contains(s.last().toString())){
-                cleaned.append(s + "\n")
-            } else {
-                cleaned.append(s)
-            }
+        var cleaned = ""
+        if (text.isNotEmpty() && splitSymbols.contains(text.last().toString())){
+            cleaned = text + "\n"
         }
-        return cleaned.toString()
+        return cleaned
     }
 
     override fun splitSentence(text: String): List<String> {
@@ -65,7 +61,7 @@ abstract class BaseTextUtils(
         return convertSentenceToLabels(cleanedInputs, context)
     }
 
-    private fun getAvailMemory(context: Context): String{
+    fun getAvailMemory(context: Context): String{
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val mi = ActivityManager.MemoryInfo()
         am.getMemoryInfo(mi)
@@ -80,11 +76,16 @@ abstract class BaseTextUtils(
         if (unit == "MB"){
             level = "low"
         } else if (unit == "GB"){
-            if (memSize in 1.0..2.0){
-                level = "medium"
-            }
-            if (memSize > 2.0){
-                level = "high"
+            when{
+                (memSize in 1.0..2.0) -> {
+                    level = "low"
+                }
+                (memSize in 2.0..4.0)->{
+                    level = "medium"
+                }
+                (memSize > 4.0) -> {
+                    level = "high"
+                }
             }
         }
         return memSizeLevel[level]!!
