@@ -275,16 +275,17 @@ class TTSFragment : Fragment() {
              * 这种symbols和权重文件shape不匹配的情况
              */
 
-            if (config?.data?.n_vocabs != null){
+            if (config!!.data?.n_vocabs != null){
                 n_vocab = config!!.data!!.n_vocabs!!
-            } else if (config?.symbols != null){
-                n_vocab = config!!.symbols!!.size
             } else {
-                throw RuntimeException("symbols或n_vocabs不能为空，请检查配置文件！")
+                n_vocab = config!!.symbols!!.size
             }
 
             if (config!!.data!!.n_speakers!! > 1) {
                 multi = true
+                if (config!!.speakers!!.size != config!!.data!!.n_speakers){
+                    throw RuntimeException("speakers与n_speakers不匹配，请检查配置文件！")
+                }
                 maxSpeaker = config!!.data!!.n_speakers!!
             } else {
                 multi = false

@@ -1,6 +1,7 @@
 package com.example.moereng.fragments
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Build
@@ -11,23 +12,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.moereng.Vits
 import com.example.moereng.application.MoeRengApplication
 import com.example.moereng.data.Config
 import com.example.moereng.databinding.FragmentVcBinding
-import com.example.moereng.utils.file.FileUtils
-import com.example.moereng.utils.permission.PermissionUtils.checkStoragePermission
-import com.example.moereng.utils.permission.PermissionUtils.checkRecordPermission
-import com.example.moereng.utils.permission.PermissionUtils.requestStoragePermission
-import com.example.moereng.utils.permission.PermissionUtils.requestRecordPermission
+import com.example.moereng.utils.VitsUtils.checkConfig
 import com.example.moereng.utils.audio.PlayerUtils
 import com.example.moereng.utils.audio.RecordingUtils
-import com.example.moereng.utils.ui.UIUtils.moerengToast
-import com.example.moereng.utils.VitsUtils.checkConfig
 import com.example.moereng.utils.audio.WaveUtils
 import com.example.moereng.utils.audio.WaveUtils.audioLenToDuration
+import com.example.moereng.utils.file.FileUtils
+import com.example.moereng.utils.permission.PermissionUtils.checkRecordPermission
+import com.example.moereng.utils.permission.PermissionUtils.checkStoragePermission
+import com.example.moereng.utils.permission.PermissionUtils.requestRecordPermission
+import com.example.moereng.utils.permission.PermissionUtils.requestStoragePermission
+import com.example.moereng.utils.ui.UIUtils.moerengToast
 import java.lang.Integer.min
 import kotlin.concurrent.thread
 
@@ -73,12 +75,6 @@ class VCFragment : Fragment() {
 
     private var convertFinish = true
 
-    private val REQUEST_CODE_SELECT_MODEL = 1
-
-    private val REQUEST_CODE_SELECT_CONFIG = 2
-
-    private val REQUEST_CODE_LOAD_WAV = 3
-
     private var audioInputs: FloatArray? = null
 
     private var recordData = ArrayList<Float>()
@@ -118,14 +114,16 @@ class VCFragment : Fragment() {
     private fun showErrorText(type: String) {
         when (type) {
             "model" -> {
-                vcBinding.modelPath.text = "加载失败，请把文件放在Download文件夹"
+                vcBinding.modelPath.text = "加载失败！"
             }
+
             "config" -> {
-                vcBinding.configPath.text = "加载失败，请把文件放在Download文件夹"
+                vcBinding.configPath.text = "加载失败！"
 
             }
+
             "wave_utils" -> {
-                vcBinding.audioPath.text = "加载失败，请把文件放在Download文件夹"
+                vcBinding.audioPath.text = "加载失败！"
             }
         }
     }
@@ -134,13 +132,23 @@ class VCFragment : Fragment() {
     private fun loadConfig(path: String) {
         initPath()
         config = FileUtils.parseConfig(vcContext, path)
+
         if (checkConfig(config, "vc")) {
             samplingRate = config!!.data!!.sampling_rate!!
-            n_vocab = config!!.symbols!!.size
+
+            if (config!!.data!!.n_vocabs != null){
+                n_vocab = config!!.data!!.n_vocabs!!
+            } else {
+                n_vocab = config!!.symbols!!.size
+            }
+
             if (config!!.data!!.n_speakers!! <= 1) {
                 vcBinding.configPath.text = "仅支持多人模型！"
                 moerengToast("配置加载失败！")
             } else {
+                if (config!!.data!!.n_speakers != config!!.speakers!!.size){
+                    throw RuntimeException("speakers与n_speakers不匹配，请检查配置文件！")
+                }
                 maxSpeaker = config!!.data!!.n_speakers!!
                 vcBinding.configPath.text = path
                 vcBinding.loadModelLayout.visibility = View.VISIBLE
@@ -160,18 +168,25 @@ class VCFragment : Fragment() {
         when {
             path.endsWith("dec.ncnn.bin") ->
                 folder = path.replace("dec.ncnn.bin", "")
+
             path.endsWith("dp.ncnn.bin") ->
                 folder = path.replace("dp.ncnn.bin", "")
+
             path.endsWith("flow.ncnn.bin") ->
                 folder = path.replace("flow.ncnn.bin", "")
+
             path.endsWith("flow.reverse.ncnn.bin") ->
                 folder = path.replace("flow.ncnn.bin", "")
+
             path.endsWith("emb_g.bin") ->
                 folder = path.replace("emb_g.bin", "")
+
             path.endsWith("emb_t.bin") ->
                 folder = path.replace("emb_t.bin", "")
+
             path.endsWith("enc_p.ncnn.bin") ->
                 folder = path.replace("enc_p.ncnn.bin", "")
+
             path.endsWith("enc_q.ncnn.bin") ->
                 folder = path.replace("enc_q.ncnn.bin", "")
         }
@@ -387,6 +402,50 @@ class VCFragment : Fragment() {
             }
         }
 
+        // Replacement of StartActivityForResult
+        val loadAudioActivityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val data: Intent? = result.data
+            if (result.resultCode == Activity.RESULT_OK && data != null) {
+                val uri = data.data
+
+                loadingFinish = false
+                // hide progress bar
+                if (vcBinding.progressLayout.visibility == View.VISIBLE) {
+                    vcBinding.currentProgress.progress = 0
+                    vcBinding.progressText.text = "0/100"
+                    vcBinding.progressLayout.visibility = View.GONE
+                }
+
+                // hide buttons
+                if (vcBinding.playBtn.visibility == View.VISIBLE)
+                    vcBinding.playBtn.visibility = View.GONE
+                if (vcBinding.exportBtn.visibility == View.VISIBLE)
+                    vcBinding.exportBtn.visibility = View.GONE
+
+                if (uri != null) {
+                    try {
+                        val realPath = FileUtils.getPathFromUri(vcContext, uri)
+                        if (realPath != null) {
+                            audioInputs =
+                                WaveUtils.loadWav(realPath, config!!.data!!.sampling_rate!!)
+                            moerengToast("读取成功！")
+                            vcBinding.audioPath.text = realPath
+                        } else {
+                            moerengToast("读取失败！")
+                            showErrorText("wave_utils")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("VCFragment", e.message.toString())
+                        moerengToast("读取失败！")
+                        vcBinding.audioPath.text = e.message
+                    }
+                }
+                loadingFinish = true
+            }
+        }
+
         // load wave file
         vcBinding.loadAudioBtn.setOnClickListener {
             if (config == null) moerengToast("请加载配置文件！")
@@ -401,12 +460,46 @@ class VCFragment : Fragment() {
                     )
                 else {
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                    intent.type = "wave_utils/x-wav"
+                    intent.type = "audio/x-wav"
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
-                    startActivityForResult(intent, REQUEST_CODE_LOAD_WAV)
+                    loadAudioActivityResultLauncher.launch(intent)
                 }
             } else {
                 moerengToast("正在读取音频，请稍后...")
+            }
+        }
+
+        // Replacement of StartActivityForResult
+        val selectConfigActivityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val data: Intent? = result.data
+            if (result.resultCode == Activity.RESULT_OK && data != null) {
+                val uri = data.data
+                if (vcBinding.exportBtn.visibility == View.VISIBLE) {
+                    vcBinding.exportBtn.visibility = View.GONE
+                }
+                modelInitState = false
+                if (uri != null) {
+                    try {
+                        val realPath = FileUtils.getPathFromUri(vcContext, uri)
+                        if (realPath != null && realPath.endsWith("json")) {
+                            loadConfig(realPath)
+                        }
+                        if (realPath != null && !realPath.endsWith("json")) {
+                            moerengToast("配置加载失败！")
+                            vcBinding.configPath.text = "请选择.json后缀的配置文件"
+                        }
+                        if (realPath == null) {
+                            moerengToast("加载失败！")
+                            showErrorText("config")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("VCFragment", e.message.toString())
+                        moerengToast("配置加载失败！")
+                        showErrorText("config")
+                    }
+                }
             }
         }
 
@@ -426,7 +519,45 @@ class VCFragment : Fragment() {
                     intent.type = "*/*"
                 }
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
-                startActivityForResult(intent, REQUEST_CODE_SELECT_CONFIG)
+                selectConfigActivityResultLauncher.launch(intent)
+            }
+        }
+
+        // Replacement of StartActivityForResult
+        val selectModelActivityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val data: Intent? = result.data
+            if (result.resultCode == Activity.RESULT_OK && data != null) {
+                val uri = data.data
+                thread {
+                    if (uri != null) {
+                        try {
+                            val realPath = FileUtils.getPathFromUri(vcContext, uri)
+                            if (realPath != null && realPath.endsWith(".bin")) {
+                                loadModel(realPath)
+                            }
+                            requireActivity().runOnUiThread {
+                                if (realPath != null && !realPath.endsWith(".bin")) {
+                                    moerengToast("请选择正确的模型文件,以.bin结尾")
+                                    vcBinding.modelPath.text = "请选择.bin后缀的配置文件"
+                                }
+                                if (realPath == null) {
+                                    moerengToast("模型加载失败！")
+                                    showErrorText("model")
+                                }
+                            }
+                            vcBinding.selectModel.isClickable = true
+                        } catch (e: Exception) {
+                            Log.e("VCFragment", e.message.toString())
+                            requireActivity().runOnUiThread {
+                                showErrorText("model")
+                                moerengToast("模型加载失败！")
+                            }
+                            vcBinding.selectModel.isClickable = true
+                        }
+                    }
+                }
             }
         }
 
@@ -442,17 +573,17 @@ class VCFragment : Fragment() {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.type = "application/octet-stream"
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
-                startActivityForResult(intent, REQUEST_CODE_SELECT_MODEL)
+                selectModelActivityResultLauncher.launch(intent)
             }
         }
 
         // select src id
         vcBinding.srcSidPicker.wrapSelectorWheel = false
-        vcBinding.srcSidPicker.setOnValueChangedListener { numberPicker, i, i2 -> srcSid = i2 }
+        vcBinding.srcSidPicker.setOnValueChangedListener { _, i, i2 -> srcSid = i2 }
 
         // select target id
         vcBinding.tgtSidPicker.wrapSelectorWheel = false
-        vcBinding.tgtSidPicker.setOnValueChangedListener { numberPicker, i, i2 -> tgtSid = i2 }
+        vcBinding.tgtSidPicker.setOnValueChangedListener { _, i, i2 -> tgtSid = i2 }
 
         // convert
         vcBinding.convertBtn.setOnClickListener {
@@ -543,106 +674,6 @@ class VCFragment : Fragment() {
         vcBinding.exportBtn.setOnClickListener {
             thread {
                 export()
-            }
-        }
-    }
-
-    // getting result for selecting config or model
-    @SuppressLint("SetTextI18n")
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        val uri = data?.data
-        when (requestCode) {
-            REQUEST_CODE_LOAD_WAV -> {
-                loadingFinish = false
-                // hide progress bar
-                if (vcBinding.progressLayout.visibility == View.VISIBLE) {
-                    vcBinding.currentProgress.progress = 0
-                    vcBinding.progressText.text = "0/100"
-                    vcBinding.progressLayout.visibility = View.GONE
-                }
-
-                // hide buttons
-                if (vcBinding.playBtn.visibility == View.VISIBLE)
-                    vcBinding.playBtn.visibility = View.GONE
-                if (vcBinding.exportBtn.visibility == View.VISIBLE)
-                    vcBinding.exportBtn.visibility = View.GONE
-
-                if (uri != null) {
-                    try {
-                        val realPath = FileUtils.getPathFromUri(vcContext, uri)
-                        if (realPath != null) {
-                            audioInputs =
-                                WaveUtils.loadWav(realPath, config!!.data!!.sampling_rate!!)
-                            moerengToast("读取成功！")
-                            vcBinding.audioPath.text = realPath
-                        } else {
-                            moerengToast("读取失败！")
-                            showErrorText("wave_utils")
-                        }
-                    } catch (e: Exception) {
-                        Log.e("VCFragment", e.message.toString())
-                        moerengToast("读取失败！")
-                        vcBinding.audioPath.text = e.message
-                    }
-                }
-                loadingFinish = true
-            }
-            REQUEST_CODE_SELECT_CONFIG -> {
-                if (vcBinding.exportBtn.visibility == View.VISIBLE)
-                    vcBinding.exportBtn.visibility = View.GONE
-                modelInitState = false
-                if (uri != null) {
-                    try {
-                        val realPath = FileUtils.getPathFromUri(vcContext, uri)
-                        if (realPath != null && realPath.endsWith("json")) {
-                            loadConfig(realPath)
-                        }
-                        if (realPath != null && !realPath.endsWith("json")) {
-                            moerengToast("配置加载失败！")
-                            vcBinding.configPath.text = "请选择.json后缀的配置文件"
-                        }
-                        if (realPath == null) {
-                            moerengToast("加载失败！")
-                            showErrorText("config")
-                        }
-                    } catch (e: Exception) {
-                        Log.e("VCFragment", e.message.toString())
-                        moerengToast("配置加载失败！")
-                        showErrorText("config")
-                    }
-                }
-            }
-            REQUEST_CODE_SELECT_MODEL -> {
-                thread {
-                    if (uri != null) {
-                        try {
-                            val realPath = FileUtils.getPathFromUri(vcContext, uri)
-                            if (realPath != null && realPath.endsWith(".bin")) {
-                                loadModel(realPath)
-                            }
-                            requireActivity().runOnUiThread {
-                                if (realPath != null && !realPath.endsWith(".bin")) {
-                                    moerengToast("请选择正确的模型文件,以.bin结尾")
-                                    vcBinding.modelPath.text = "请选择.bin后缀的配置文件"
-                                }
-                                if (realPath == null) {
-                                    moerengToast("模型加载失败！")
-                                    showErrorText("model")
-                                }
-                            }
-                            vcBinding.selectModel.isClickable = true
-                        } catch (e: Exception) {
-                            Log.e("VCFragment", e.message.toString())
-                            requireActivity().runOnUiThread {
-                                showErrorText("model")
-                                moerengToast("模型加载失败！")
-                            }
-                            vcBinding.selectModel.isClickable = true
-                        }
-                    }
-                }
             }
         }
     }
