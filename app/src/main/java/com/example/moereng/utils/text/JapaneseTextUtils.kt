@@ -18,6 +18,8 @@ class JapaneseTextUtils(
         for (s in text.split("\n")){
             if (s.isNotEmpty() && splitSymbols.contains(s.last().toString())){
                 cleaned.append(s + "\n")
+            } else {
+                cleaned.append(s)
             }
         }
         return cleaned.toString()
