@@ -74,16 +74,16 @@ abstract class BaseTextUtils(
 
     private fun dynamicSentenceLength(validMemSize: String): Int{
         val sizeAndUnit = validMemSize.split(" ")
-        val memSize = sizeAndUnit[0].toInt()
+        val memSize = sizeAndUnit[0].toFloat()
         val unit = sizeAndUnit[1]
         var level = "low"
         if (unit == "MB"){
             level = "low"
         } else if (unit == "GB"){
-            if (memSize in 1..2){
+            if (memSize in 1.0..2.0){
                 level = "medium"
             }
-            if (memSize > 2){
+            if (memSize > 2.0){
                 level = "high"
             }
         }
