@@ -24,7 +24,7 @@ abstract class BaseTextUtils(
     )
 
     override fun cleanInputs(text: String): String {
-        var cleaned = ""
+        var cleaned = text
         if (text.isNotEmpty() && splitSymbols.contains(text.last().toString())){
             cleaned = text + "\n"
         }
