@@ -1,16 +1,26 @@
 package com.example.moereng.utils.text
 
+import android.app.ActivityManager
+import android.content.Context
 import android.content.res.AssetManager
-import java.lang.StringBuilder
+import android.text.format.Formatter
+import android.util.Log
+
 
 abstract class BaseTextUtils(
     override val symbols: List<String>,
     override val cleanerName: String,
-    override val assetManager: AssetManager
+    override val assetManager: AssetManager,
 ) : TextUtils {
 
     private val splitSymbols = listOf(
         ".", "。","……","!","！","?","？",";","；"
+    )
+
+    private val memSizeLevel = mapOf(
+        "low" to 50,
+        "medium" to 100,
+        "high" to 200
     )
 
     override fun cleanInputs(text: String): String {
@@ -29,26 +39,54 @@ abstract class BaseTextUtils(
         return text.split("\n").filter { it.isNotEmpty() }
     }
 
-    override fun convertSentenceToLabels(text: String): List<IntArray> {
+    override fun convertSentenceToLabels(text: String, context: Context): List<IntArray> {
         val sentences = splitSentence(text)
         val converted = ArrayList<IntArray>()
-
-        for (sentence in sentences){
-            if (sentence.length > 200){
-                throw RuntimeException("句子长度不能超过200字！当前${sentence.length}字！")
+        val validMemSize = getAvailMemory(context)
+        Log.i("BaseTextUtils", "valid memory size is $validMemSize")
+        val maxSentenceLen = dynamicSentenceLength(validMemSize)
+        for (i in sentences.indices){
+            if (sentences[i].length > maxSentenceLen){
+                throw RuntimeException("句子长度不能超过${maxSentenceLen}字！" +
+                        "当前第${i+1}句有${sentences[i].length}字！")
             }
-            if (sentence.isEmpty()) continue
-            val labels = wordsToLabels(sentence)
+            if (sentences[i].isEmpty()) continue
+            val labels = wordsToLabels(sentences[i])
             converted.add(labels)
         }
         return converted
     }
 
-    override fun convertText(text: String): List<IntArray> {
+    override fun convertText(text: String, context: Context): List<IntArray> {
         // clean inputs
         val cleanedInputs = cleanInputs(text)
 
         // convert inputs
-        return convertSentenceToLabels(cleanedInputs)
+        return convertSentenceToLabels(cleanedInputs, context)
+    }
+
+    private fun getAvailMemory(context: Context): String{
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val mi = ActivityManager.MemoryInfo()
+        am.getMemoryInfo(mi)
+        return Formatter.formatFileSize(context, mi.availMem)
+    }
+
+    private fun dynamicSentenceLength(validMemSize: String): Int{
+        val sizeAndUnit = validMemSize.split(" ")
+        val memSize = sizeAndUnit[0].toInt()
+        val unit = sizeAndUnit[1]
+        var level = "low"
+        if (unit == "MB"){
+            level = "low"
+        } else if (unit == "GB"){
+            if (memSize in 1..2){
+                level = "medium"
+            }
+            if (memSize > 2){
+                level = "high"
+            }
+        }
+        return memSizeLevel[level]!!
     }
 }

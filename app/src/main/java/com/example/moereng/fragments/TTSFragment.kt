@@ -142,7 +142,7 @@ class TTSFragment : Fragment() {
         }
         try {
             // convert inputs
-            val inputs = textUtils?.convertText(text)
+            val inputs = textUtils?.convertText(text, ttsContext)
 
             if (!inputs.isNullOrEmpty()) {
                 // progress visibility
@@ -216,18 +216,20 @@ class TTSFragment : Fragment() {
             samplingRate,
             name
         )
-        if (audioArray.isNotEmpty() && path != "") {
-            // dialog
-            AlertDialog.Builder(context).apply {
-                setTitle("导出成功！")
-                setMessage("成功导出到$path")
-                setCancelable(false)
-                setPositiveButton("好的") { _, _ ->
+        activity?.runOnUiThread {
+            if (audioArray.isNotEmpty() && path != "") {
+                // dialog
+                AlertDialog.Builder(context).apply {
+                    setTitle("导出成功！")
+                    setMessage("成功导出到$path")
+                    setCancelable(false)
+                    setPositiveButton("好的") { _, _ ->
+                    }
+                    show()
                 }
-                show()
+            } else {
+                moerengToast("导出失败！")
             }
-        } else {
-            moerengToast("导出失败！")
         }
     }
 
@@ -614,7 +616,9 @@ class TTSFragment : Fragment() {
 
         // export button listener
         ttsBinding.exportBtn.setOnClickListener {
-            export()
+            thread {
+                export()
+            }
         }
     }
 

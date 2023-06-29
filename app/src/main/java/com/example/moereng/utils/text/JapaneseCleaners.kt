@@ -55,18 +55,18 @@ class JapaneseCleaners(assetManager: AssetManager) {
                 val labels = extract_labels(sentence)
                 for (n in labels.indices) {
                     val label = labels[n]
-                    val phoneme = Regex("\\-([^\\+]*)\\+").find(label)!!.groups[1]!!.value
+                    val phoneme = Regex("-([^+]*)\\+").find(label)!!.groups[1]!!.value
                     if (phoneme != "sil" && phoneme != "pau") {
                         text += phoneme.replace("ch", "ʧ")
                             .replace("sh", "ʃ").replace("cl", "Q")
                     } else {
                         continue
                     }
-                    val a1 = Regex("/A:(\\-?[0-9]+)\\+").find(label)!!.groups[1]!!.value.toInt()
+                    val a1 = Regex("/A:(-?[0-9]+)\\+").find(label)!!.groups[1]!!.value.toInt()
                     val a2 = Regex("\\+(\\d+)\\+").find(label)!!.groups[1]!!.value.toInt()
                     val a3 = Regex("\\+(\\d+)/").find(label)!!.groups[1]!!.value.toInt()
-                    var a2_next = 0
-                    val t = Regex("\\-([^\\+]*)\\+").find(labels[n + 1])!!.groups[1]!!.value
+                    var a2_next: Int
+                    val t = Regex("-([^+]*)\\+").find(labels[n + 1])!!.groups[1]!!.value
                     if (t == "sil" || t == "pau") {
                         a2_next = -1
                     } else {

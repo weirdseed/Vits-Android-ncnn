@@ -1,5 +1,6 @@
 package com.example.moereng.utils.text
 
+import android.content.Context
 import android.content.res.AssetManager
 
 interface TextUtils {
@@ -16,10 +17,12 @@ interface TextUtils {
 
     fun convertSentenceToLabels(
         text: String,
+        context: Context
     ): List<IntArray>
 
     fun convertText(
         text: String,
+        context: Context
     ): List<IntArray>
 
 }
