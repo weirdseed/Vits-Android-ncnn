@@ -114,16 +114,16 @@ class VCFragment : Fragment() {
     private fun showErrorText(type: String) {
         when (type) {
             "model" -> {
-                vcBinding.modelPath.text = "加载失败！"
+                vcBinding.modelPath.text = "模型加载失败！"
             }
 
             "config" -> {
-                vcBinding.configPath.text = "加载失败！"
+                vcBinding.configPath.text = "配置加载失败！"
 
             }
 
-            "wave_utils" -> {
-                vcBinding.audioPath.text = "加载失败！"
+            "wave" -> {
+                vcBinding.audioPath.text = "音频加载失败！"
             }
         }
     }
@@ -434,7 +434,7 @@ class VCFragment : Fragment() {
                             vcBinding.audioPath.text = realPath
                         } else {
                             moerengToast("读取失败！")
-                            showErrorText("wave_utils")
+                            showErrorText("wave")
                         }
                     } catch (e: Exception) {
                         Log.e("VCFragment", e.message.toString())
