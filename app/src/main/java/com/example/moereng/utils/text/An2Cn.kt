@@ -79,7 +79,7 @@ class An2Cn {
             .replace("亿万", "亿")
             .replace("^零|零$".toRegex(), "")
 
-        if (output.substring(0,2) == "一十"){
+        if (output.length > 2 && output.substring(0,2) == "一十"){
             output = output.substring(1, output.length)
         }
 
