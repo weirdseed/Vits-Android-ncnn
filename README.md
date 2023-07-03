@@ -2,11 +2,11 @@
 
 # 介绍
 
-1.本项目基于[vits](https://github.com/jaywalnut310/vits)训练的日语模型（采用游戏语音，在3221组数据从头训练了1000个epoch）
+1.中日英cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
 
-2.日语及中文cleaners基于[MoeGoe](https://github.com/CjangCjengh/MoeGoe)项目二次开发
+2.日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/openjtalk.mecab)日语分词库
 
-3.日语分词和声调基于[OpenJtalk](https://github.com/r9y9/open_jtalk)和[Mecab](https://github.com/taku910/openjtalk.mecab)日语分词库
+3.英文g2p工具参考了[eng_to_ipa](https://github.com/mphilli/English-to-IPA)
 
 # 使用说明
 ## 一、确保手机有足够的空间，运行内存不小于1GB
@@ -18,9 +18,9 @@
 ### 文字转语音（tts）
 - 将模型文件下载之后解压放在手机/sdcard/Download文件夹下。
 
-- 点击加载配置（批准权限后），选择/sdcard/Download/[你的模型目录]/config.json加载配置文件。（示例：/sdcard/Download/模型/莲华/config.json）
+- 点击加载配置（批准权限后），选择/sdcard/Download/[你的模型目录]/config.json加载配置文件。（示例：/sdcard/Download/模型/365_epochs/config.json）
 
-- 点击加载模型（批准权限后），选择/sdcard/Download/[你的模型目录]/*.bin加载模型文件。（示例：/sdcard/Download/模型/莲华/dec.ncnn.bin）
+- 点击加载模型（批准权限后），选择/sdcard/Download/[你的模型目录]/*.bin加载模型文件。（示例：/sdcard/Download/模型/365_epochs/dec.ncnn.bin）
 
 - 输入文本，点击生成
 
@@ -38,7 +38,7 @@
 ### 注意：
   **1、推理速度慢的话请手动增加线程数（默认为1），gpu选项可以选择不开启，由于Vulkan部分代码没有写，所以开启后反而更慢**
   
-  **2、本项目目前仅支持日语和中文，所以确保输入支持的文本**
+  **2、本项目目前仅支持日语、中文和英文，所以确保输入支持的文本**
 
 ## 四、（可选）自行编译教程
 
@@ -73,7 +73,7 @@
 └─vits
 ```
 
-2.1 自行编译ncnn，请注意，ncnn默认的编译选项中rtti为关闭状态，需要的话自己手动打开，编译教程见[链接](https://github.com/Tencent/ncnn/wiki/how-to-build)，推荐在linux环境下编译
+2.1 自行编译ncnn，请注意，ncnn默认的编译选项中rtti为关闭状态，需要的话自己手动打开，编译教程见[链接](https://github.com/Tencent/ncnn/wiki/how-to-build)
 
 3、下载openjtalk[字典文件](https://sourceforge.net/projects/open-jtalk/files/Dictionary/open_jtalk_dic-1.11/open_jtalk_dic_utf_8-1.11.tar.gz/download)解压到\src\main\assets文件夹，目录结构为
 
