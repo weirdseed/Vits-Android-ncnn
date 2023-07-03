@@ -61,14 +61,14 @@ abstract class BaseTextUtils(
         return convertSentenceToLabels(cleanedInputs, context)
     }
 
-    protected fun getAvailMemory(context: Context): String{
+    private fun getAvailMemory(context: Context): String{
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val mi = ActivityManager.MemoryInfo()
         am.getMemoryInfo(mi)
         return Formatter.formatFileSize(context, mi.availMem)
     }
 
-    protected fun dynamicSentenceLength(validMemSize: String): Int{
+    private fun dynamicSentenceLength(validMemSize: String): Int{
         val sizeAndUnit = validMemSize.split(" ")
         val memSize = sizeAndUnit[0].toFloat()
         val unit = sizeAndUnit[1]

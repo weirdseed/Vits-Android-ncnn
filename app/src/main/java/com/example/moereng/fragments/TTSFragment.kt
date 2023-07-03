@@ -315,7 +315,7 @@ class TTSFragment : Fragment() {
                 }
                 cleanerName.contains("english_cleaners") -> {
                     textUtils = EnglishTextUtils(symbols, cleanerName, assetManager)
-                    ttsBinding.wordsInput.hint = "请输入英文:\n\t1.用换行分句，每句话最多不超过200个单词！" +
+                    ttsBinding.wordsInput.hint = "请输入英文:\n\t1.用换行分句，每句话最多不超过200个字！" +
                             "\n\t2.当前模型仅支持英文"
                 }
                 cleanerName.contains("zh_ja_mixture_cleaners") -> {
@@ -326,7 +326,7 @@ class TTSFragment : Fragment() {
                 cleanerName.contains("zh_ja_en_mixture_cleaners") -> {
                     textUtils = ZHJAENMixTextUtils(symbols, cleanerName, assetManager)
                     ttsBinding.wordsInput.hint = "请输入日文、中文或英文:\n\t1.用[ZH]、[JA]或[EN]区分中文和日文，" +
-                            "例如[ZH]你好[ZH]，[JA]こんにちは[JA]，[EN]hello[EN]\n\t2.用换行分句，每句话最多不超过200字或单词！"
+                            "例如[ZH]你好[ZH]，[JA]こんにちは[JA]，[EN]hello[EN]\n\t2.用换行分句，每句话最多不超过200字！"
                 }
             }
 
