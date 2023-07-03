@@ -10,14 +10,14 @@ static def getDate(){
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.moereng"
         minSdk 24
-        targetSdk 29
+        targetSdk 33
         versionCode 3
-        versionName "1.2.1"
+        versionName "1.2.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
