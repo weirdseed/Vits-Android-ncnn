@@ -29,8 +29,10 @@ import com.example.moereng.utils.file.FileUtils
 import com.example.moereng.utils.permission.PermissionUtils.checkStoragePermission
 import com.example.moereng.utils.permission.PermissionUtils.requestStoragePermission
 import com.example.moereng.utils.text.ChineseTextUtils
+import com.example.moereng.utils.text.EnglishTextUtils
 import com.example.moereng.utils.text.JapaneseTextUtils
 import com.example.moereng.utils.text.TextUtils
+import com.example.moereng.utils.text.ZHJAENMixTextUtils
 import com.example.moereng.utils.text.ZHJAMixTextUtils
 import com.example.moereng.utils.ui.UIUtils.moerengToast
 import kotlin.concurrent.thread
@@ -303,18 +305,28 @@ class TTSFragment : Fragment() {
             when{
                 cleanerName.contains("chinese_cleaners") ->{
                     textUtils = ChineseTextUtils(symbols, cleanerName, assetManager)
-                    ttsBinding.wordsInput.hint = "请输入中文:\n\t1.用换行分句，每句话不超过200字！" +
+                    ttsBinding.wordsInput.hint = "请输入中文:\n\t1.用换行分句，每句话最多不超过200字！" +
                             "\n\t2.当前模型仅支持中文"
                 }
                 cleanerName.contains("japanese_cleaners") -> {
                     textUtils = JapaneseTextUtils(symbols, cleanerName, assetManager)
-                    ttsBinding.wordsInput.hint = "请输入日文:\n\t1.用换行分句，每句话不超过200字！" +
+                    ttsBinding.wordsInput.hint = "请输入日文:\n\t1.用换行分句，每句话最多不超过200字！" +
                             "\n\t2.当前模型仅支持日文"
+                }
+                cleanerName.contains("english_cleaners") -> {
+                    textUtils = EnglishTextUtils(symbols, cleanerName, assetManager)
+                    ttsBinding.wordsInput.hint = "请输入英文:\n\t1.用换行分句，每句话最多不超过200个单词！" +
+                            "\n\t2.当前模型仅支持英文"
                 }
                 cleanerName.contains("zh_ja_mixture_cleaners") -> {
                     textUtils = ZHJAMixTextUtils(symbols, cleanerName, assetManager)
                     ttsBinding.wordsInput.hint = "请输入日文或者中文:\n\t1.用[ZH]和[JA]区分中文和日文，" +
-                            "例如[ZH]你好[ZH]，[JA]こんにちは[JA]\n\t2.用换行分句，每句话不超过200字！"
+                            "例如[ZH]你好[ZH]，[JA]こんにちは[JA]\n\t2.用换行分句，每句话最多不超过200字！"
+                }
+                cleanerName.contains("zh_ja_en_mixture_cleaners") -> {
+                    textUtils = ZHJAENMixTextUtils(symbols, cleanerName, assetManager)
+                    ttsBinding.wordsInput.hint = "请输入日文、中文或英文:\n\t1.用[ZH]、[JA]或[EN]区分中文和日文，" +
+                            "例如[ZH]你好[ZH]，[JA]こんにちは[JA]，[EN]hello[EN]\n\t2.用换行分句，每句话最多不超过200字或单词！"
                 }
             }
 

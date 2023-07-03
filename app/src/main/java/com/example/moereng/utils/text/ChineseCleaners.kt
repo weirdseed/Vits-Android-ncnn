@@ -1,5 +1,6 @@
 package com.example.moereng.utils.text
 
+import android.util.Log
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
@@ -45,33 +46,33 @@ class ChineseCleaners {
     )
 
     private val pinyin_map = mapOf(
-        "^m(\\d)$" to "mu$1",
-        "^n(\\d)$" to "N$1",
-        "^r5$" to "er5",
-        "iu" to "iou",
-        "ui" to "uei",
-        "ong" to "ung",
-        "^yi?" to "i",
-        "^wu?" to "u",
-        "iu" to "v",
-        "^([jqx])u" to "$1v",
-        "([iuv])n" to "$1en",
-        "^zhi?" to "Z",
-        "^chi?" to "C",
-        "^shi?" to "S",
-        "^([zcsr])i" to "$1",
-        "ai" to "A",
-        "ei" to "I",
-        "ao" to "O",
-        "ou" to "U",
-        "ang" to "K",
-        "eng" to "G",
-        "an" to "M",
-        "en" to "N",
-        "er" to "R",
-        "eh" to "E",
-        "([iv])e" to "$1E",
-        "([^0-4])$" to "\$g<1>0"
+        Regex("^m(\\d)$") to "mu$1",
+        Regex("^n(\\d)$") to "N$1",
+        Regex("^r5$") to "er5",
+        Regex("iu") to "iou",
+        Regex("ui") to "uei",
+        Regex("ong") to "ung",
+        Regex("^yi?") to "i",
+        Regex("^wu?") to "u",
+        Regex("iu") to "v",
+        Regex("^([jqx])u") to "$1v",
+        Regex("([iuv])n") to "$1en",
+        Regex("^zhi?") to "Z",
+        Regex("^chi?") to "C",
+        Regex("^shi?") to "S",
+        Regex("^([zcsr])i") to "$1",
+        Regex("ai") to "A",
+        Regex("ei") to "I",
+        Regex("ao") to "O",
+        Regex("ou") to "U",
+        Regex("ang") to "K",
+        Regex("eng") to "G",
+        Regex("an") to "M",
+        Regex("en") to "N",
+        Regex("er") to "R",
+        Regex("eh") to "E",
+        Regex("([iv])e") to "$1E",
+        Regex("([^0-4])$") to "\$g<1>0"
     )
 
     private val bopomofo_table = arrayOf(
@@ -165,7 +166,7 @@ class ChineseCleaners {
                 sb.append(s[i] + " ")
             } else {
                 for ((key, value) in pinyin_map) {
-                    bopomofo = bopomofo.replace(key.toRegex(), value)
+                    bopomofo = bopomofo.replace(key, value)
                 }
                 for (j in 0 until bopomofo_table_len) {
                     bopomofo = bopomofo.replace(bopomofo_table[0][j], bopomofo_table[1][j])
@@ -215,8 +216,12 @@ class ChineseCleaners {
         val regex = Regex("\\d+(?:\\.?\\d+)?")
         val numbers = regex.findAll(inputs).map { it.value }.toList()
         var converts = inputs
-        for (number in numbers) {
-            converts = converts.replace(number, an2cn.an2cn(number))
+        try {
+            for (number in numbers) {
+                converts = converts.replace(number, an2cn.an2cn(number))
+            }
+        } catch (e: NumberFormatException){
+            Log.e("ChineseCleaners", "${e.message}")
         }
         return converts
     }
@@ -245,5 +250,4 @@ class ChineseCleaners {
         }
         return text
     }
-
 }

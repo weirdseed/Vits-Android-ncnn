@@ -14,7 +14,7 @@ abstract class BaseTextUtils(
 ) : TextUtils {
 
     private val splitSymbols = listOf(
-        ".", "。","……","!","！","?","？",";","；"
+        ".", "。","……","!","！","?","？",";","；","~","—"
     )
 
     private val memSizeLevel = mapOf(
@@ -43,7 +43,7 @@ abstract class BaseTextUtils(
         val maxSentenceLen = dynamicSentenceLength(validMemSize)
         for (i in sentences.indices){
             if (sentences[i].length > maxSentenceLen){
-                throw RuntimeException("句子长度不能超过${maxSentenceLen}字！" +
+                throw RuntimeException("每句话不能超过${maxSentenceLen}字！" +
                         "当前第${i+1}句有${sentences[i].length}字！")
             }
             if (sentences[i].isEmpty()) continue
@@ -61,14 +61,14 @@ abstract class BaseTextUtils(
         return convertSentenceToLabels(cleanedInputs, context)
     }
 
-    fun getAvailMemory(context: Context): String{
+    protected fun getAvailMemory(context: Context): String{
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val mi = ActivityManager.MemoryInfo()
         am.getMemoryInfo(mi)
         return Formatter.formatFileSize(context, mi.availMem)
     }
 
-    private fun dynamicSentenceLength(validMemSize: String): Int{
+    protected fun dynamicSentenceLength(validMemSize: String): Int{
         val sizeAndUnit = validMemSize.split(" ")
         val memSize = sizeAndUnit[0].toFloat()
         val unit = sizeAndUnit[1]

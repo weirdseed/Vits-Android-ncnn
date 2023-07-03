@@ -3,6 +3,7 @@ package com.example.moereng.utils.text
 import android.util.Log
 import java.lang.StringBuilder
 
+// Reference from https://github.com/Ailln/cn2an
 class An2Cn {
     private val TAG = "An2Cn"
     private val numList = listOf("零", "一", "二", "三", "四", "五", "六", "七", "八", "九")
@@ -28,7 +29,7 @@ class An2Cn {
 
         // 处理小数
         val inputsSplit = inputs.split(".")
-        var output = ""
+        val output: String
 
         if (inputsSplit.size == 1) {
             val integerData = inputsSplit[0]
