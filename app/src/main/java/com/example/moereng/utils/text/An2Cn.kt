@@ -54,7 +54,7 @@ class An2Cn {
     }
 
     private fun integerConvert(data: String): String {
-        val integerData = data.toInt().toString()
+        val integerData = data
         if (integerData.length > unitList.size) {
             throw RuntimeException("最大支持${unitList.size}位数字")
         }
@@ -69,7 +69,7 @@ class An2Cn {
                     outputT.append("${numList[integerData[i].toString().toInt()]}${unitList[integerData.length - i - 1]}")
                 }
                 if (i > 0 && outputT.toString().last().toString() == "零") {
-                    outputT.append(numList[integerData[i].code])
+                    outputT.append(numList[integerData[i].toString().toInt()])
                 }
             }
         }
