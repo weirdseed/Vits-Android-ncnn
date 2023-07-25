@@ -190,11 +190,10 @@ class TTSFragment : Fragment() {
             }
         } catch (e: Exception) {
             hideProgressBar(true)
-            finishFlag = true
             ttsViewModel.setGenerationFinishValue(finishFlag)
             Log.e("TTSFragment", e.message.toString())
             activity?.runOnUiThread {
-                moerengToast(e.message.toString())
+                moerengToast("Error: ${e.message.toString()}")
             }
         }
         finishFlag = true
@@ -463,14 +462,15 @@ class TTSFragment : Fragment() {
                         if (realPath != null && realPath.endsWith("json")) {
                             loadConfigs(realPath)
                         } else {
-                            moerengToast("请选择正确的配置文件，以.json结尾")
+                            moerengToast("Error: 请选择正确的配置文件，以.json结尾")
                             ttsBinding.configPath.text = "加载失败！"
                         }
                     } catch (e: Exception) {
                         Log.e("LoadConfig", e.message.toString())
                         showErrorText("config")
-                        moerengToast("配置加载失败！${e.message.toString()}")
+                        moerengToast("Error: 配置加载失败！${e.message.toString()}")
                     }
+                    finishFlag = true
                 }
             }
         }
@@ -478,10 +478,11 @@ class TTSFragment : Fragment() {
         // select config button
         ttsBinding.selectConfig.setOnClickListener {
             if (!finishFlag){
-                moerengToast("生成中，请稍等...")
+                moerengToast("加载中，请稍等...")
             } else if (!checkStoragePermission(requireActivity()))
                 requestStoragePermission(requireActivity())
             else {
+                finishFlag = false
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
                     intent.type = "application/json"
@@ -512,7 +513,7 @@ class TTSFragment : Fragment() {
                                     ttsBinding.modelPath.text = "请选择.bin后缀的配置文件"
                                 }
                                 if (realPath == null) {
-                                    moerengToast("模型加载失败！")
+                                    moerengToast("Error: 模型加载失败！")
                                     showErrorText("model")
                                 }
                             }
@@ -521,10 +522,11 @@ class TTSFragment : Fragment() {
                             Log.e("TTSFragment", e.message.toString())
                             requireActivity().runOnUiThread {
                                 showErrorText("model")
-                                moerengToast("模型加载失败！${e.message.toString()}")
+                                moerengToast("Error: 模型加载失败！${e.message.toString()}")
                             }
                             ttsBinding.selectModel.isClickable = true
                         }
+                        finishFlag = true
                     }
                 }
             }
@@ -533,10 +535,11 @@ class TTSFragment : Fragment() {
         // select model button
         ttsBinding.selectModel.setOnClickListener {
             if (!finishFlag){
-                moerengToast("生成中，请稍等...")
+                moerengToast("加载中，请稍等...")
             }else if (!checkStoragePermission(requireActivity()))
                 requestStoragePermission(requireActivity())
             else {
+                finishFlag = false
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.type = "application/octet-stream"
                 intent.addCategory(Intent.CATEGORY_OPENABLE)

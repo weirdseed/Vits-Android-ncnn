@@ -69,15 +69,17 @@ abstract class BaseTextUtils(
     }
 
     private fun dynamicSentenceLength(validMemSize: String): Int{
-        val sizeAndUnit = validMemSize.split(" ")
+        val pattern = "(\\d+\\.\\d+|\\d+)(?=\\s*[a-zA-Z]+)".toRegex()
+        val matched = pattern.find(validMemSize) ?: throw RuntimeException("invalid memType!")
+        val sizeAndUnit = matched.destructured.toList()
         val memSize = sizeAndUnit[0].toFloat()
-        val unit = sizeAndUnit[1]
+        val unit = validMemSize.replace(memSize.toString(), "").replace(" ", "")
         var level = "low"
         if (unit == "MB"){
             level = "low"
         } else if (unit == "GB"){
             when{
-                (memSize in 1.0..2.0) -> {
+                (memSize in 0.0..2.0) -> {
                     level = "low"
                 }
                 (memSize in 2.0..4.0)->{
