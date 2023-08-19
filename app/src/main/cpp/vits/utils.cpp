@@ -566,15 +566,15 @@ Mat randn(int w, int h, const Option &opt, int c) {
     if (c == 0) res.create(w, h);
     else res.create(w, h, c);
 
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::normal_distribution<float> distribution(0.0, 1.0);
+    std::default_random_engine engine;
+    std::normal_distribution<float> uniform(0,1);
+    engine.seed(time(0));
 
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < res.c; i++) {
         float *ptr = res.channel(i);
         for (int j = 0; j < res.w * res.h; j++) {
-            float rand_float = distribution(generator);
+            float rand_float = uniform(engine);
             ptr[j] = rand_float;
         }
     }
