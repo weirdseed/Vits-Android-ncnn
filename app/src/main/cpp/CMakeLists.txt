@@ -20,3 +20,4 @@ find_library(
 )
 
 target_link_libraries(moereng ncnn ${android-lib} ${log-lib} libopenjtalk libfftpack libwaveutils)
+target_compile_options(moereng PRIVATE -openmp:experimental)
