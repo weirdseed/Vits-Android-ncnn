@@ -23,6 +23,11 @@
 #include "../fftpack/fftpack.h"
 #include <complex>
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #define PI 3.14159265358979323846
 #define MAX_MEM_BLOCK 262144
 
@@ -34,6 +39,8 @@
 #define LOGF(...) __android_log_print(ANDROID_LOG_FATAL,TAG ,__VA_ARGS__) // 定义LOGF类型
 
 using namespace ncnn;
+
+
 
 Mat as_strides(const Mat& x, const int h, const int w, const Option& opt); // dummy array
 

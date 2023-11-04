@@ -78,20 +78,25 @@ bool SynthesizerTrn::load_weight(const std::string &folder, Mat &weight, const s
                                  const int n) {
     LOGI("loading %s...\n", "text embedding");
     std::string path = join_path(folder, name + ".bin");
-    FILE *fp = fopen(path.c_str(), "rb");
-    if (fp != nullptr) {
-        fseek(fp, 0, SEEK_END);
-        auto file_size = ftell(fp);
+    int fd = open(path.c_str(), O_RDONLY); // 打开文件
+    if (fd != -1) {
+        struct stat st;
+        fstat(fd, &st); // 获取文件的大小
+        auto file_size = st.st_size;
         auto emb_length = file_size / sizeof(float);
         if (emb_length % w != 0) return false;
         int h = int(emb_length / w);
         if (n != -1 && h != n) return false;
-        fseek(fp, 0, SEEK_SET);
-        weight.create(w, h);
-        fread(weight, sizeof(float), emb_length, fp);
-        fclose(fp);
-        LOGI("text embedding loaded!");
-        return true;
+        void *map = mmap(NULL, file_size, PROT_READ, MAP_SHARED, fd, 0);
+        if (map != MAP_FAILED) {
+            weight.create(w, h);
+            memcpy(weight, map, file_size);
+            munmap(map, file_size);
+            close(fd);
+            LOGI("text embedding loaded!");
+            return true;
+        }
+        close(fd);
     }
     LOGE("text embedding load fail");
     return false;
