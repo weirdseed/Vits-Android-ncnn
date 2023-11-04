@@ -262,6 +262,7 @@ class TTSFragment : Fragment() {
 
     // load config file
     private fun loadConfigs(path: String) {
+        finishFlag = false
         config = FileUtils.parseConfig(ttsContext, path)
         var type = "single"
 
@@ -341,10 +342,12 @@ class TTSFragment : Fragment() {
             showErrorText("config")
             moerengToast("配置加载失败！")
         }
+        finishFlag = true
     }
 
     // load model files
     private fun loadModel(path: String) {
+        finishFlag = false
         var folder = ""
         when {
             path.endsWith("dec.ncnn.bin") ->
@@ -372,7 +375,6 @@ class TTSFragment : Fragment() {
         }
         if (targetFolder == "") targetFolder = folder
         ttsViewModel.setGenerationFinishValue(false)
-
         modelInitState = Vits.init_vits(
             requireActivity().assets,
             folder,
@@ -380,7 +382,6 @@ class TTSFragment : Fragment() {
             multi,
             n_vocab
         )
-        ttsViewModel.setGenerationFinishValue(true)
         if (modelInitState) {
             requireActivity().runOnUiThread {
                 moerengToast("模型加载成功！")
@@ -392,7 +393,8 @@ class TTSFragment : Fragment() {
                 ttsBinding.modelPath.text = "模型初始化失败！"
             }
         }
-
+        ttsViewModel.setGenerationFinishValue(true)
+        finishFlag = true
     }
 
     override fun onCreateView(
@@ -470,7 +472,6 @@ class TTSFragment : Fragment() {
                         showErrorText("config")
                         moerengToast("Error: 配置加载失败！${e.message.toString()}")
                     }
-                    finishFlag = true
                 }
             }
         }
@@ -482,7 +483,6 @@ class TTSFragment : Fragment() {
             } else if (!checkStoragePermission(requireActivity()))
                 requestStoragePermission(requireActivity())
             else {
-                finishFlag = false
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
                     intent.type = "application/json"
@@ -526,7 +526,6 @@ class TTSFragment : Fragment() {
                             }
                             ttsBinding.selectModel.isClickable = true
                         }
-                        finishFlag = true
                     }
                 }
             }
@@ -539,7 +538,6 @@ class TTSFragment : Fragment() {
             }else if (!checkStoragePermission(requireActivity()))
                 requestStoragePermission(requireActivity())
             else {
-                finishFlag = false
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.type = "application/octet-stream"
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
