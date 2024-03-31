@@ -1,11 +1,5 @@
 #include "utils.h"
 
-#define BLOCK_SIZE 128
-alignas(64) float localA[BLOCK_SIZE][BLOCK_SIZE];
-alignas(64) float localB[BLOCK_SIZE][BLOCK_SIZE];
-alignas(64) float localC[BLOCK_SIZE][BLOCK_SIZE];
-#pragma omp threadprivate(localA, localB, localC)
-
 void pretty_print(const ncnn::Mat &m, const char *name) {
     std::stringstream ss;
     ss << std::setiosflags(std::ios::fixed);
@@ -574,7 +568,7 @@ Mat randn(int w, int h, const Option &opt, int c) {
 
     std::random_device device;
     std::default_random_engine engine(device());
-    std::normal_distribution<float> uniform(0,1);
+    std::normal_distribution<float> uniform(0, 1);
 
 #pragma omp parallel for num_threads(opt.num_threads)
     for (int i = 0; i < res.c; i++) {
@@ -663,78 +657,15 @@ Mat matmul(const Mat &m1, const Mat &m2, const Option &opt) {
     res.fill(0);
     // 转置m2
     auto m2_t = mattranspose(m2, opt);
-
-    if (ceil(m1.h / m1.w) > 3) {
-        #pragma omp parallel for num_threads(opt.num_threads)
-        for (int c = 0; c < m1.c; c++){
-            const float *p1 = m1.channel(c);
-            const float *p2 = m2_t.channel(c);
-            float *p = res.channel(c);
-            for (int i = 0; i < m1.h; i++){
-                for (int j = 0; j < m2_t.h; j++){
-                    for (int k = 0; k < m2_t.w; k++){
-                        p[i * res.w + j] += p1[i * m1.w + k] * p2[j * m2_t.w + k];
-                    }
-                }
-            }
-        }
-    } else {
-        // 分块矩阵优化
-        int block_size = std::min(m2_t.w, std::min(m2_t.h, std::min(m1.h, BLOCK_SIZE)));
-        int block_num_row_m1 = ceil(float(m1.h) / float(block_size));
-        int block_num_row_m2 = ceil(float(m2_t.h) / float(block_size));
-        int block_num_col_m2 = ceil(float(m2_t.w) / float(block_size));
-
-        #pragma omp parallel for num_threads(opt.num_threads)
-        for (int c = 0; c < m1.c; c++) {
-            const float *p1 = m1.channel(c);
-            const float *p2 = m2_t.channel(c);
-            float *p = res.channel(c);
-            for (int m1_b_r = 0; m1_b_r < block_num_row_m1; m1_b_r++) {
-                for (int m2_b_r = 0; m2_b_r < block_num_row_m2; m2_b_r++) {
-                    for (int m2_b_c = 0; m2_b_c < block_num_col_m2; m2_b_c++) {
-                        // 清空localC
-                        for (auto &i: localC) {
-                            for (float &j: i) {
-                                j = 0;
-                            }
-                        }
-
-                        // 将block数据拷贝到对齐的缓存中
-                        for (int i = 0; i < block_size; i++) {
-                            for (int j = 0; j < block_size; j++) {
-                                int m1_b_r_idx = m1_b_r * block_size + i;
-                                int m1_b_c_idx = m2_b_c * block_size + j;
-                                int m2_b_r_idx = m2_b_r * block_size + i;
-                                int m2_b_c_idx = m2_b_c * block_size + j;
-                                localA[i][j] = (m1_b_r_idx < m1.h && m1_b_c_idx < m1.w) ?
-                                               p1[m1_b_r_idx * m1.w + m1_b_c_idx]: 0.0f;
-                                localB[i][j] = (m2_b_r_idx < m2_t.h && m2_b_c_idx < m2_t.w) ?
-                                               p2[m2_b_r_idx * m2_t.w + m2_b_c_idx] : 0.0f;
-                            }
-                        }
-
-                        // 计算block
-                        for (int i = 0; i < block_size; i++) {
-                            for (int j = 0; j < block_size; j++) {
-                                float partial = 0;
-                                #pragma omp simd reduction(+:partial)
-                                for (int k = 0; k < block_size; k++) {
-                                    partial += localA[i][k] * localB[j][k];
-                                }
-                                localC[i][j] += partial;
-                            }
-                        }
-
-                        // 将localC的计算结果拷贝回res中
-                        for (int i = 0; i < block_size; i++) {
-                            for (int j = 0; j < block_size; j++) {
-                                int res_b_r_idx = std::min(res.h - 1, m1_b_r * block_size + i);
-                                int res_b_c_idx = std::min(res.w - 1, m2_b_r * block_size + j);
-                                p[res_b_r_idx * res.w + res_b_c_idx] += localC[i][j];
-                            }
-                        }
-                    }
+    for (int c = 0; c < m1.c; c++) {
+        const float *p1 = m1.channel(c);
+        const float *p2 = m2_t.channel(c);
+        float *p = res.channel(c);
+#pragma omp parallel for num_threads(opt.num_threads)
+        for (int i = 0; i < m1.h; i++) {
+            for (int j = 0; j < m2_t.h; j++) {
+                for (int k = 0; k < m2_t.w; k++) {
+                    p[i * res.w + j] += p1[i * m1.w + k] * p2[j * m2_t.w + k];
                 }
             }
         }
@@ -1067,9 +998,8 @@ Mat embedding(const Mat &x, const Mat &weight, const Option &opt) {
     if (x.empty() || weight.empty()) return {};
     Mat output(weight.w, x.w * x.h);
     if (output.empty()) return {};
-
 #pragma omp parallel for num_threads(opt.num_threads)
-    for (int i = 0; i < x.c; i++){
+    for (int i = 0; i < x.c; i++) {
         const float *x_p = x.channel(i);
         const float *w_p = weight.channel(i);
         float *ptr = output.channel(i);

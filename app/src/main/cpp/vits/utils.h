@@ -40,8 +40,6 @@
 
 using namespace ncnn;
 
-
-
 Mat as_strides(const Mat& x, const int h, const int w, const Option& opt); // dummy array
 
 Mat cumsum(const Mat& blob, const Option& opt);
